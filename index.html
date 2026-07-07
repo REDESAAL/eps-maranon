@@ -193,6 +193,11 @@
   .login-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
   .login-field input { width: 100%; border: 1.5px solid #d0dce8; border-radius: 7px; padding: 10px 12px; font-family: "DM Sans", sans-serif; font-size: 0.95rem; color: var(--texto); background: #f8fbff; transition: border-color 0.2s; }
   .login-field input:focus { outline: none; border-color: var(--azul-claro); background: #eef5ff; }
+  .campo-clave { position: relative; }
+  .campo-clave input { padding-right: 38px !important; }
+  .btn-ver-clave { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #7a8fa6; display: flex; align-items: center; }
+  .btn-ver-clave:hover { color: var(--azul); }
+  .os-field .campo-clave { position: relative; }
   .login-error { display: none; color: var(--rojo); font-size: 0.82rem; margin-bottom: 14px; text-align: left; }
   .btn-login { width: 100%; background: var(--azul); color: white; border: none; border-radius: 8px; padding: 12px; font-family: "DM Sans", sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.18s; }
   .btn-login:hover { background: var(--azul-claro); }
@@ -200,6 +205,9 @@
   .btn-logout { background: none; border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 10px; padding: 3px 10px; font-size: 0.7rem; cursor: pointer; }
   .btn-logout:hover { background: rgba(255,255,255,0.15); }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -215,7 +223,10 @@
     </div>
     <div class="login-field">
       <label>Contrasena</label>
-      <input type="password" id="loginClave" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion()">
+      <div class="campo-clave">
+        <input type="password" id="loginClave" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion()">
+        <button type="button" class="btn-ver-clave" onclick="alternarClave('loginClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
+      </div>
     </div>
     <div class="login-error" id="loginError">Usuario o contrasena incorrectos.</div>
     <button class="btn-login" onclick="iniciarSesion()">Ingresar</button>
@@ -233,6 +244,7 @@
   <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
     <div style="display:flex;align-items:center;gap:8px;">
       <div class="user-badge" id="usuarioActualBadge"></div>
+      <button class="btn-logout" onclick="abrirCuenta()">Mi cuenta</button>
       <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesion</button>
     </div>
     <div class="header-badge">Vigente 2026</div>
@@ -523,6 +535,45 @@
   </div>
 </div>
 
+<!-- MODAL MI CUENTA -->
+<div class="modal-overlay" id="modalCuenta">
+  <div class="modal" style="width:400px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,var(--azul),var(--azul-claro));">
+      <h3>Mi Cuenta</h3>
+      <button class="modal-close" onclick="cerrarCuenta()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.82rem;color:#7a8fa6;margin-bottom:16px;">
+        Usuario actual: <strong id="cuentaUsuarioActual" style="color:var(--azul);"></strong>
+      </div>
+      <div class="os-field">
+        <label>Nombre de usuario</label>
+        <input type="text" id="cuentaNuevoUsuario">
+      </div>
+      <div class="os-field">
+        <label>Nueva contrasena (dejar en blanco para no cambiarla)</label>
+        <div class="campo-clave">
+          <input type="password" id="cuentaNuevaClave" autocomplete="new-password">
+          <button type="button" class="btn-ver-clave" onclick="alternarClave('cuentaNuevaClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
+        </div>
+      </div>
+      <div class="os-field">
+        <label>Confirmar nueva contrasena</label>
+        <div class="campo-clave">
+          <input type="password" id="cuentaConfirmarClave" autocomplete="new-password">
+          <button type="button" class="btn-ver-clave" onclick="alternarClave('cuentaConfirmarClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
+        </div>
+      </div>
+      <div id="cuentaError" style="display:none;color:var(--rojo);font-size:0.82rem;margin-top:6px;"></div>
+      <div id="cuentaOk" style="display:none;color:#1a7a4a;font-size:0.82rem;margin-top:6px;font-weight:600;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarCuenta()">Cerrar</button>
+      <button class="btn-save" onclick="guardarCuenta()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- AREA DE IMPRESION -->
 <div id="printArea"></div>
 
@@ -563,7 +614,38 @@
     { usuario: 'victor',    clave: '1008', rol: 'tecnico', nombre: 'Op. Victor Carranza Cabrera' }
   ];
   var SESSION_KEY = 'eps_maranon_sesion';
+  var USUARIOS_KEY = 'eps_maranon_usuarios';
   var currentUser = null;
+
+  // Carga usuarios guardados (si el coordinador/tecnico ya cambio su clave antes);
+  // si no hay nada guardado, se queda con la lista de ejemplo definida arriba.
+  function cargarUsuariosGuardados() {
+    try {
+      var guardado = localStorage.getItem(USUARIOS_KEY);
+      if (guardado) {
+        var lista = JSON.parse(guardado);
+        if (Array.isArray(lista) && lista.length > 0) { USUARIOS = lista; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarUsuarios() {
+    try { localStorage.setItem(USUARIOS_KEY, JSON.stringify(USUARIOS)); } catch(e) {}
+    firebaseGuardarUsuarios();
+  }
+
+  function alternarClave(idCampo, btn) {
+    var input = document.getElementById(idCampo);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.innerHTML = '&#128584;';
+      btn.setAttribute('aria-label', 'Ocultar contrasena');
+    } else {
+      input.type = 'password';
+      btn.innerHTML = '&#128065;';
+      btn.setAttribute('aria-label', 'Mostrar contrasena');
+    }
+  }
 
   function iniciarSesion() {
     var u = (document.getElementById('loginUsuario').value || '').trim();
@@ -617,11 +699,167 @@
     document.querySelector('.container').style.display = 'block';
     aplicarPermisos();
     cargarHistorial();
+    firebaseCargarHistorialInicial(function() {
+      renderHistorial();
+      firebaseEscucharCambios();
+    });
     verificarURLTarea();
     detectarRed();
   }
 
+  // MI CUENTA - cambiar usuario y/o contrasena propios
+  function abrirCuenta() {
+    if (!currentUser) return;
+    document.getElementById('cuentaUsuarioActual').textContent = currentUser.usuario;
+    document.getElementById('cuentaNuevoUsuario').value = currentUser.usuario;
+    document.getElementById('cuentaNuevaClave').value = '';
+    document.getElementById('cuentaConfirmarClave').value = '';
+    document.getElementById('cuentaError').style.display = 'none';
+    document.getElementById('cuentaOk').style.display = 'none';
+    document.getElementById('modalCuenta').classList.add('active');
+  }
+
+  function cerrarCuenta() {
+    document.getElementById('modalCuenta').classList.remove('active');
+  }
+
+  function guardarCuenta() {
+    var nuevoUsuario = (document.getElementById('cuentaNuevoUsuario').value || '').trim();
+    var nuevaClave = (document.getElementById('cuentaNuevaClave').value || '').trim();
+    var confirmarClave = (document.getElementById('cuentaConfirmarClave').value || '').trim();
+    var errEl = document.getElementById('cuentaError');
+    var okEl = document.getElementById('cuentaOk');
+    okEl.style.display = 'none';
+
+    if (!nuevoUsuario) {
+      errEl.textContent = 'El usuario no puede estar vacio.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (nuevaClave && nuevaClave !== confirmarClave) {
+      errEl.textContent = 'Las contrasenas no coinciden.';
+      errEl.style.display = 'block';
+      return;
+    }
+    // Verificar que el nuevo usuario no este tomado por otra persona
+    var enUsoPorOtro = USUARIOS.some(function(u) {
+      return u.usuario.toLowerCase() === nuevoUsuario.toLowerCase() && u.usuario !== currentUser.usuario;
+    });
+    if (enUsoPorOtro) {
+      errEl.textContent = 'Ese nombre de usuario ya esta en uso. Elija otro.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    var idx = USUARIOS.findIndex(function(u) { return u.usuario === currentUser.usuario; });
+    if (idx === -1) { errEl.textContent = 'No se encontro su usuario.'; errEl.style.display = 'block'; return; }
+
+    USUARIOS[idx].usuario = nuevoUsuario;
+    if (nuevaClave) { USUARIOS[idx].clave = nuevaClave; }
+    guardarUsuarios();
+
+    currentUser = USUARIOS[idx];
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
+
+    errEl.style.display = 'none';
+    okEl.textContent = 'Datos actualizados correctamente.';
+    okEl.style.display = 'block';
+    aplicarPermisos();
+  }
+
   var STORE_KEY = 'eps_maranon_historial';
+
+  // ============================================================
+  // SINCRONIZACION EN TIEMPO REAL CON FIREBASE (con autenticacion)
+  // ============================================================
+  // Con esto activo, y las reglas de seguridad puestas en "auth != null",
+  // solo dispositivos que pasen por esta app (autenticados de forma anonima
+  // por Firebase) pueden leer o escribir en la base de datos. Alguien que
+  // solo tenga la URL, sin abrir la app, ya no puede acceder.
+  var firebaseConfig = {
+    apiKey: "AIzaSyDgwtI64yS9PkMvzNP81s13i1d3HSbvwmo",
+    authDomain: "eps-maranon-mantenimiento.firebaseapp.com",
+    databaseURL: "https://eps-maranon-mantenimiento-default-rtdb.firebaseio.com",
+    projectId: "eps-maranon-mantenimiento",
+    storageBucket: "eps-maranon-mantenimiento.firebasestorage.app",
+    messagingSenderId: "1079760096497",
+    appId: "1:1079760096497:web:dc38ca96072921050c6d50"
+  };
+  var _fbApp = null, _fbDb = null, _syncActivo = true, _fbListo = false;
+
+  function firebaseIniciar(callback) {
+    try {
+      _fbApp = firebase.initializeApp(firebaseConfig);
+      firebase.auth().signInAnonymously().catch(function(err) {
+        console.warn('No se pudo autenticar con Firebase, se seguira solo en modo local.', err);
+      });
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user && !_fbListo) {
+          _fbListo = true;
+          _fbDb = firebase.database();
+          callback();
+        } else if (!user) {
+          callback();
+        }
+      });
+    } catch(e) {
+      _syncActivo = false;
+      callback();
+    }
+  }
+
+  function firebaseGuardarHistorial() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('historial').set(historial).catch(function() { /* sin conexion: se queda con la copia local */ });
+  }
+
+  function firebaseGuardarUsuarios() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('usuarios').set(USUARIOS).catch(function() {});
+  }
+
+  function firebaseCargarHistorialInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('historial').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (Array.isArray(data)) { historial = data; }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  function firebaseCargarUsuariosInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('usuarios').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (Array.isArray(data) && data.length > 0) { USUARIOS = data; }
+        else { firebaseGuardarUsuarios(); }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  function firebaseEscucharCambios() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('historial').on('value', function(snap) {
+      var data = snap.val();
+      if (Array.isArray(data)) {
+        historial = data;
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(historial)); } catch(err) {}
+        renderHistorial();
+      }
+    });
+    _fbDb.ref('usuarios').on('value', function(snap) {
+      var data = snap.val();
+      if (Array.isArray(data) && data.length > 0) {
+        USUARIOS = data;
+        try { localStorage.setItem(USUARIOS_KEY, JSON.stringify(USUARIOS)); } catch(err) {}
+      }
+    });
+  }
+
   var historial = [];
   var osCounter = 1;
   var editIndex = -1;
@@ -644,6 +882,7 @@
 
   function guardarStorage() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(historial)); } catch(e) {}
+    firebaseGuardarHistorial();
   }
 
   function abrirOS(componente, frecuencia) {
@@ -1494,30 +1733,37 @@
   // INIT
   document.getElementById('modalOS').addEventListener('click', function(e) { if (e.target === this) cerrarOS(); });
   document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
+  document.getElementById('modalCuenta').addEventListener('click', function(e) { if (e.target === this) cerrarCuenta(); });
   document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 
   // Verificar si ya hay una sesion activa en este navegador (misma pestana/sesion)
   (function iniciarVerificacionSesion() {
     document.querySelector('.header').style.display = 'none';
     document.querySelector('.container').style.display = 'none';
-    try {
-      var guardado = sessionStorage.getItem(SESSION_KEY);
-      if (guardado) {
-        var u = JSON.parse(guardado);
-        var valido = USUARIOS.some(function(x) { return x.usuario === u.usuario && x.clave === u.clave; });
-        if (valido) { currentUser = u; }
-      }
-    } catch(e) {}
+    cargarUsuariosGuardados();
 
-    if (currentUser) {
-      mostrarApp();
-    } else {
-      document.getElementById('loginOverlay').style.display = 'flex';
-      setTimeout(function() {
-        var el = document.getElementById('loginUsuario');
-        if (el) el.focus();
-      }, 100);
-    }
+    firebaseIniciar(function() {
+      firebaseCargarUsuariosInicial(function() {
+        try {
+          var guardado = sessionStorage.getItem(SESSION_KEY);
+          if (guardado) {
+            var u = JSON.parse(guardado);
+            var valido = USUARIOS.some(function(x) { return x.usuario === u.usuario && x.clave === u.clave; });
+            if (valido) { currentUser = u; }
+          }
+        } catch(e) {}
+
+        if (currentUser) {
+          mostrarApp();
+        } else {
+          document.getElementById('loginOverlay').style.display = 'flex';
+          setTimeout(function() {
+            var el = document.getElementById('loginUsuario');
+            if (el) el.focus();
+          }, 100);
+        }
+      });
+    });
   })();
 </script>
 
