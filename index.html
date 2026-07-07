@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Plan de Mantenimiento Preventivo - EPS Maranon S.A.</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #0b4f8a; --azul-claro: #1a6fc4; --azul-borde: #dbe9f8;
+    --gris-fondo: #f0f4f9; --texto: #1e2a3a; --acento: #e8a000;
+    --verde: #1a8a4a; --rojo: #c0392b; --sombra: 0 4px 16px rgba(11,79,138,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "DM Sans", sans-serif; background: var(--gris-fondo); color: var(--texto); min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(135deg, var(--azul) 60%, var(--azul-claro) 100%);
+    color: white; padding: 36px 48px 28px;
+    display: flex; align-items: center; gap: 24px;
+    border-bottom: 5px solid var(--acento);
+  }
+  .header-logo {
+    width: 68px; height: 68px; background: white; padding: 4px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; overflow: hidden;
+  }
+  .header-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+  .header-text h1 { font-family: "Bebas Neue", sans-serif; font-size: 2rem; letter-spacing: 3px; }
+  .header-text p { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; }
+  .header-badge {
+    margin-left: auto; background: var(--acento); color: #fff;
+    font-weight: 600; font-size: 0.78rem; padding: 6px 14px;
+    border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+
+  .objetivo {
+    background: white; border-left: 5px solid var(--azul-claro);
+    border-radius: 0 10px 10px 0; padding: 18px 24px; margin-bottom: 36px;
+    box-shadow: var(--sombra); font-size: 0.97rem; color: #2c3e56;
+  }
+  .objetivo strong { color: var(--azul); font-size: 1rem; display: block; margin-bottom: 6px; }
+
+  .section-title {
+    font-family: "Bebas Neue", sans-serif; font-size: 1.35rem; letter-spacing: 2px;
+    color: var(--azul); border-bottom: 2px solid var(--azul-borde);
+    padding-bottom: 8px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title span.num { background: var(--azul); color: white; font-size: 0.85rem; padding: 2px 10px; border-radius: 4px; }
+
+  .table-wrap { background: white; border-radius: 12px; overflow-x: auto; box-shadow: var(--sombra); margin-bottom: 36px; }
+  #tablaHistorial { min-width: 1300px; }
+  #tablaHistorial thead th { white-space: nowrap; font-size: 0.76rem; padding: 11px 10px; }
+  #tablaHistorial tbody td { font-size: 0.82rem; padding: 10px 10px; white-space: nowrap; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--azul); color: white; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; padding: 13px 16px; text-align: left; }
+  tbody tr { border-bottom: 1px solid #eaf0f8; transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f5f9ff; }
+  tbody td { padding: 13px 16px; font-size: 0.92rem; vertical-align: middle; }
+
+  .badge-freq { display: inline-block; background: #e8f2ff; color: var(--azul-claro); border: 1px solid var(--azul-borde); font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+
+  .coord-select {
+    width: 100%; border: 1.5px solid var(--azul-borde); border-radius: 7px;
+    padding: 8px 32px 8px 10px; font-family: "DM Sans", sans-serif; font-size: 0.88rem; color: var(--texto);
+    background: #f5f9ff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%230b4f8a'/%3E%3C/svg%3E") no-repeat right 10px center;
+    appearance: none; cursor: pointer; transition: border-color 0.2s;
+  }
+  .coord-select:focus { outline: none; border-color: var(--azul-claro); background-color: #eaf2ff; }
+
+  .os-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--azul); color: white; border: none; border-radius: 7px; padding: 8px 14px; font-family: "DM Sans", sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.18s, transform 0.1s; white-space: nowrap; }
+  .os-btn:hover { background: var(--azul-claro); transform: scale(1.03); }
+
+  /* HISTORIAL BUTTONS */
+  .historial-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .historial-header .section-title { margin-bottom: 0; border: none; padding: 0; }
+  .hist-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-export { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 7px; padding: 8px 16px; font-family: "DM Sans", sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.18s; white-space: nowrap; }
+  .btn-csv { background: var(--verde); color: white; }
+  .btn-clear { background: var(--rojo); color: white; }
+  .btn-export:hover { opacity: 0.85; }
+
+  .historial-empty { text-align: center; padding: 40px; color: #9aafca; font-size: 0.95rem; }
+  .historial-empty svg { display: block; margin: 0 auto 12px; opacity: 0.3; }
+
+  .badge-estado { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-Pendiente { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+  .badge-EnProceso { background: #cff4fc; color: #055160; border: 1px solid #0dcaf0; }
+  .badge-Completado { background: #d1e7dd; color: #0a3622; border: 1px solid #198754; }
+
+  .btn-print-row { background: none; border: 1px solid var(--azul-borde); color: var(--azul-claro); border-radius: 5px; padding: 4px 9px; font-size: 0.78rem; cursor: pointer; transition: background 0.15s; }
+  .btn-print-row:hover { background: #eaf2ff; }
+  .btn-tarea-row { background: none; border: 1px solid #b8e0c8; color: #1a7a4a; border-radius: 5px; padding: 4px 9px; font-size: 0.78rem; cursor: pointer; font-weight: 600; transition: background 0.15s; }
+  .btn-tarea-row:hover { background: #e8f8ef; }
+  .btn-edit-row { background: none; border: 1px solid #b8d4f0; color: var(--azul); border-radius: 5px; padding: 4px 9px; font-size: 0.78rem; cursor: pointer; font-weight: 600; transition: background 0.15s; }
+  .btn-edit-row:hover { background: #dbeeff; }
+  .btn-delete-row { background: none; border: 1px solid #f5c6cb; color: var(--rojo); border-radius: 5px; padding: 4px 9px; font-size: 0.78rem; cursor: pointer; transition: background 0.15s; }
+  .btn-delete-row:hover { background: #fdf0f0; }
+  .btn-wa-row { background: #25d366; color: white; border: none; border-radius: 5px; padding: 4px 9px; font-size: 0.78rem; cursor: pointer; font-weight: 700; transition: opacity 0.15s; display:inline-flex;align-items:center;gap:4px; }
+  .btn-wa-row:hover { opacity: 0.82; }
+
+  /* SHARE PANEL */
+  .share-panel { display: none; background: #f0f9f4; border: 1.5px solid #b8e0c8; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .share-panel.visible { display: block; }
+  .share-panel-title { font-size: 0.78rem; font-weight: 700; color: #1a7a4a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .share-link-box { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .share-link-input { flex: 1; min-width: 160px; border: 1.5px solid #b8e0c8; border-radius: 6px; padding: 7px 10px; font-size: 0.78rem; color: #1e2a3a; background: #fff; font-family: "DM Sans", sans-serif; }
+  .btn-copy { background: #1a7a4a; color: white; border: none; border-radius: 6px; padding: 7px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-copy:hover { opacity: 0.85; }
+  .btn-whatsapp { background: #25d366; color: white; border: none; border-radius: 6px; padding: 7px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: opacity 0.15s; }
+  .btn-whatsapp:hover { opacity: 0.85; }
+  .btn-generar-link { background: none; border: 1.5px solid #1a7a4a; color: #1a7a4a; border-radius: 6px; padding: 6px 14px; font-size: 0.80rem; font-weight: 700; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 5px; }
+  .btn-generar-link:hover { background: #e8f8ef; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,30,60,0.45); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: white; border-radius: 14px; width: 580px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(11,79,138,0.25); animation: slideUp 0.25s ease; }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header { background: linear-gradient(135deg, var(--azul), var(--azul-claro)); color: white; padding: 18px 24px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 1; }
+  .modal-header.edit-mode { background: linear-gradient(135deg, #0b6b3a, #1a9e5a); }
+  .modal-header h3 { font-family: "Bebas Neue", sans-serif; font-size: 1.2rem; letter-spacing: 2px; }
+  .modal-header .os-num { background: var(--acento); border-radius: 5px; padding: 3px 12px; font-size: 0.85rem; font-weight: 700; }
+  .modal-close { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; line-height: 1; margin-left: auto; }
+  .modal-body { padding: 24px; }
+  .os-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .os-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .os-field input, .os-field select, .os-field textarea { width: 100%; border: 1.5px solid #d0dce8; border-radius: 7px; padding: 8px 11px; font-family: "DM Sans", sans-serif; font-size: 0.9rem; color: var(--texto); background: #f8fbff; transition: border-color 0.2s; }
+  .os-field input:focus, .os-field select:focus, .os-field textarea:focus { outline: none; border-color: var(--azul-claro); background: #eef5ff; }
+  .os-field.full { grid-column: 1 / -1; }
+  .os-field textarea { resize: vertical; min-height: 70px; }
+  .os-field input[readonly] { background: #eef5ff; font-weight: 700; color: var(--azul); }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid #eaf0f8; display: flex; justify-content: flex-end; gap: 10px; position: sticky; bottom: 0; background: white; flex-wrap: wrap; }
+  .btn-cancel { background: none; border: 1.5px solid #ccd8e6; color: #6a7d93; border-radius: 7px; padding: 8px 18px; font-family: "DM Sans", sans-serif; font-size: 0.88rem; cursor: pointer; transition: background 0.15s; }
+  .btn-cancel:hover { background: #f0f4f8; }
+  .btn-save { background: var(--azul); color: white; border: none; border-radius: 7px; padding: 9px 22px; font-family: "DM Sans", sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background 0.18s; }
+  .btn-save:hover { background: var(--azul-claro); }
+
+  /* PRINT */
+  #printArea { display: none; }
+  .upload-area {
+    border: 2px dashed #7ac99a; border-radius: 10px; padding: 22px 16px;
+    text-align: center; cursor: pointer; background: #f5fdf8;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .upload-area:hover { background: #e8f8ef; border-color: #1a7a4a; }
+  .upload-area.has-file { border-style: solid; border-color: #1a7a4a; background: #e8f8ef; }
+  .file-preview { display: flex; align-items: center; gap: 12px; background: #fff; border: 1.5px solid #b8e0c8; border-radius: 8px; padding: 10px 14px; }
+  .file-preview-icon { font-size: 2rem; flex-shrink: 0; }
+  .file-preview-info { flex: 1; min-width: 0; }
+  .file-preview-name { font-weight: 600; font-size: 0.85rem; color: #1a7a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-preview-size { font-size: 0.72rem; color: #7a9a8a; margin-top: 2px; }
+  .file-preview img { max-width: 100%; max-height: 180px; border-radius: 6px; object-fit: contain; display: block; margin-top: 8px; }
+  .btn-remove-file { background: none; border: 1px solid #f5c6cb; color: #c0392b; border-radius: 5px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; white-space: nowrap; }
+  .btn-remove-file:hover { background: #fdf0f0; }
+  .badge-evidencia { display: inline-block; background: #d1e7dd; color: #0a3622; border: 1px solid #198754; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 8px; }
+  @media print {
+    body * { display: none !important; }
+    #printArea { display: block !important; position: fixed; inset: 0; padding: 30px; background: white; z-index: 9999; }
+    #printArea * { display: revert !important; }
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.5; transform:scale(1.3); }
+  }
+
+  @media(max-width:700px) {
+    .header { flex-direction: column; padding: 24px 16px; text-align: center; }
+    .header-badge { margin: 0 auto; }
+    .os-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <img src="data:image/png;base64,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" alt="EPS Maranon Logo">
+  </div>
+  <div class="header-text">
+    <h1>EPS Maranon S.A.</h1>
+    <p>Plan de Mantenimiento Preventivo - Sistema de Agua Potable y Alcantarillado</p>
+  </div>
+  <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+    <div class="header-badge">Vigente 2026</div>
+    <div id="serverStatusBadge" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:4px 10px;font-size:0.70rem;color:white;cursor:pointer;" onclick="mostrarInfoRed()" title="Ver informacion de red">
+      <span id="serverDot" style="width:7px;height:7px;border-radius:50%;background:#ffcc00;display:inline-block;animation:pulse 1.5s infinite;"></span>
+      <span id="serverStatusText">Detectando...</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="objetivo">
+    <strong>I. OBJETIVO</strong>
+    Garantizar la operatividad y vida util de los componentes del sistema de agua potable y alcantarillado mediante actividades preventivas programadas, asignacion de coordinadores responsables y emision de ordenes de servicio.
+  </div>
+
+  <!-- AGUA POTABLE -->
+  <div class="section-title"><span class="num">III</span> Mantenimiento - Sistema de Agua Potable</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Componente</th><th>Frecuencia</th><th>Actividad</th><th>Coordinador Responsable</th><th>Orden de Servicio</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Valvulas Reductoras de Presion</strong></td>
+          <td><span class="badge-freq">Trimestral</span></td>
+          <td>Inspeccion, limpieza, calibracion y verificacion</td>
+          <td><select class="coord-select"><option>Tec. Grimaniel Estela Guevara</option><option>Op. Jorge Vasquez Ocana</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Valvulas Reductoras de Presion','Trimestral')">&#128196; Crear O/S</button></td>
+        </tr>
+        <tr>
+          <td><strong>Manometros</strong></td>
+          <td><span class="badge-freq">Quincenal</span></td>
+          <td>Control y verificacion de presion</td>
+          <td><select class="coord-select"><option>Tec. Grimaniel Estela Guevara</option><option>Op. Jorge Vasquez Ocana</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Manometros','Quincenal')">&#128196; Crear O/S</button></td>
+        </tr>
+        <tr>
+          <td><strong>Dataloggers</strong></td>
+          <td><span class="badge-freq">Cada 03 dias</span></td>
+          <td>Inspeccion, retirar, instalar y activar</td>
+          <td><select class="coord-select"><option>Tec. Grimaniel Estela Guevara</option><option>Op. Jairo Herrera Ramirez</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Dataloggers','Cada 03 dias')">&#128196; Crear O/S</button></td>
+        </tr>
+        <tr>
+          <td><strong>Grifo Contra Incendio</strong></td>
+          <td><span class="badge-freq">Semestral</span></td>
+          <td>Inspeccion y mantenimiento preventivo</td>
+          <td><select class="coord-select"><option>Op. Elver Davila Bustamante</option><option>Op. Gilmer Alarcon Torres</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Grifo Contra Incendio','Semestral')">&#128196; Crear O/S</button></td>
+        </tr>
+        <tr>
+          <td><strong>Valvulas de Aire</strong></td>
+          <td><span class="badge-freq">Semestral</span></td>
+          <td>Inspeccion y mantenimiento preventivo y/o correctivo</td>
+          <td><select class="coord-select"><option>Op. Gilmer Alarcon Torres</option><option>Op. Oscar Mijahuanca Huaman</option><option>Op. Angel Alejandria Estela</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Valvulas de Aire','Semestral')">&#128196; Crear O/S</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ALCANTARILLADO -->
+  <div class="section-title"><span class="num">IV</span> Mantenimiento - Sistema de Alcantarillado</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Componente</th><th>Frecuencia</th><th>Actividad</th><th>Coordinador Responsable</th><th>Orden de Servicio</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Buzones</strong></td>
+          <td><span class="badge-freq">Semestral</span></td>
+          <td>Inspeccion y limpieza</td>
+          <td><select class="coord-select"><option>Op. Elver Davila Bustamante</option><option>Op. Angel Alejandria Estela</option><option>Op. Oscar Mijahuanca Huaman</option><option>Op. Gilmer Alarcon Torres</option><option>Op. Victor Carranza Cabrera</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Buzones','Semestral')">&#128196; Crear O/S</button></td>
+        </tr>
+        <tr>
+          <td><strong>Red de Alcantarillado</strong></td>
+          <td><span class="badge-freq">Programado</span></td>
+          <td>Limpieza con hidrojet e inspeccion</td>
+          <td><select class="coord-select"><option>Op. Angel Alejandria Estela</option><option>Op. Oscar Mijahuanca Huaman</option><option>Op. Victor Carranza Cabrera</option></select></td>
+          <td><button class="os-btn" onclick="abrirOS('Red de Alcantarillado','Programado')">&#128196; Crear O/S</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="historial-header">
+    <div class="section-title" style="border:none;padding:0;margin:0"><span class="num">V</span> Historial de Ordenes de Servicio</div>
+    <div class="hist-actions">
+      <button class="btn-export btn-csv" onclick="exportarCSV()">&#128196; Exportar Excel/CSV</button>
+      <button class="btn-export btn-clear" onclick="limpiarHistorial()">&#128465; Limpiar Todo</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="tablaHistorial">
+      <thead>
+        <tr>
+          <th>N Orden</th><th>Codigo</th><th>Fecha Emision</th><th>Componente</th>
+          <th>Actividad del Trabajo</th><th>Direccion</th><th>Tecnico</th>
+          <th>Prioridad</th><th>Estado</th>
+          <th style="text-align:center">Tarea</th>
+          <th style="text-align:center;background:#1a9944;">&#128232; WhatsApp</th>
+          <th style="text-align:center">Editar</th>
+          <th style="text-align:center">PDF</th>
+          <th style="text-align:center">Eliminar</th>
+        </tr>
+      </thead>
+      <tbody id="historialBody">
+        <tr><td colspan="14">
+          <div class="historial-empty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/></svg>
+            No hay ordenes de servicio registradas aun.
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL ORDEN DE SERVICIO -->
+<div class="modal-overlay" id="modalOS">
+  <div class="modal">
+    <div class="modal-header" id="modalOSHeader">
+      <h3 id="modalOSTitulo">Orden de Servicio</h3>
+      <span class="os-num" id="osNumero">OS-001</span>
+      <button class="modal-close" onclick="cerrarOS()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- PASO 1: FORMULARIO -->
+      <div id="panelFormOS">
+        <div class="os-grid">
+          <div class="os-field"><label>N Orden</label><input type="text" id="osId" readonly></div>
+          <div class="os-field"><label>Fecha de Emision</label><input type="date" id="osFecha"></div>
+          <div class="os-field"><label>N Codigo</label><input type="text" id="osCodigo" placeholder="Ej: DL-2025-001"></div>
+          <div class="os-field"><label>Direccion / Ubicacion</label><input type="text" id="osDireccion" placeholder="Ej: Jr. Amazonas 245"></div>
+          <div class="os-field full"><label>Componente</label><input type="text" id="osComponente" readonly></div>
+          <div class="os-field"><label>Frecuencia</label><input type="text" id="osFrecuencia" readonly></div>
+          <div class="os-field"><label>Prioridad</label>
+            <select id="osPrioridad"><option>Normal</option><option>Alta</option><option>Urgente</option></select>
+          </div>
+          <div class="os-field"><label>Tecnico Asignado</label>
+            <select id="osTecnico">
+              <option>-- Seleccionar --</option>
+              <option>Tec. Grimaniel Estela Guevara</option>
+              <option>Op. Jorge Vasquez Ocana</option>
+              <option>Op. Jairo Herrera Ramirez</option>
+              <option>Op. Elver Davila Bustamante</option>
+              <option>Op. Gilmer Alarcon Torres</option>
+              <option>Op. Angel Alejandria Estela</option>
+              <option>Op. Oscar Mijahuanca Huaman</option>
+              <option>Op. Victor Carranza Cabrera</option>
+            </select>
+          </div>
+          <div class="os-field"><label>Fecha Programada</label><input type="date" id="osFechaProg"></div>
+          <div class="os-field"><label>Estado</label>
+            <select id="osEstado"><option>Pendiente</option><option>En Proceso</option><option>Completado</option></select>
+          </div>
+          <div class="os-field full"><label>Actividad del Trabajo</label>
+            <textarea id="osActividad" placeholder="Describa la actividad del trabajo a realizar..." style="min-height:60px;"></textarea>
+          </div>
+          <div class="os-field full"><label>Observaciones / Instrucciones</label>
+            <textarea id="osObs" placeholder="Ingrese observaciones o instrucciones adicionales..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: CONFIRMACION + WHATSAPP (se muestra tras guardar) -->
+      <div id="panelWAPost" style="display:none;">
+
+        <!-- Checkmark + titulo -->
+        <div style="text-align:center;padding:10px 0 14px;">
+          <div style="display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#d1e7dd,#a8d5ba);margin-bottom:8px;box-shadow:0 4px 12px rgba(26,138,74,0.25);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#1a8a4a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:#0b4f8a;" id="waPostTitulo">OS-001 GUARDADA</div>
+          <div style="font-size:0.80rem;color:#5a7a9a;margin-top:2px;">Envie la orden al tecnico para que complete el formulario de tarea</div>
+        </div>
+
+        <!-- Resumen visual de la O/S -->
+        <div id="osResumenCard" style="background:linear-gradient(135deg,#f0f5fb,#e8f2ff);border:1.5px solid #c8ddf0;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:0.82rem;"></div>
+
+        <!-- Tecnico detectado + numero WhatsApp -->
+        <div style="background:linear-gradient(135deg,#f0f9f4,#e6f7ed);border:1.5px solid #7ac99a;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+          <div style="font-size:0.72rem;font-weight:700;color:#1a7a4a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a7a4a"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.934 1.395 5.608L0 24l6.562-1.371A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+            &#128100; Tecnico: <span id="waTecnicoNombre" style="color:#0b5e30;font-weight:800;font-size:0.78rem;">-</span>
+          </div>
+          <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;">
+            <span style="background:#25d366;color:white;border-radius:6px;padding:7px 10px;font-weight:800;font-size:0.8rem;white-space:nowrap;display:flex;align-items:center;gap:4px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.934 1.395 5.608L0 24l6.562-1.371A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+              +51
+            </span>
+            <input type="tel" id="waTelefono" placeholder="987 654 321 (opcional)" style="border:1.5px solid #7ac99a;border-radius:7px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#1e2a3a;background:#fff;outline:none;width:100%;transition:border-color 0.2s;" oninput="this.value=this.value.replace(/[^0-9]/g,'');validarTelefono(this)" onfocus="this.style.borderColor='#1a7a4a'" onblur="this.style.borderColor='#7ac99a'">
+            <span id="telStatus" style="font-size:1.1rem;min-width:20px;text-align:center;"></span>
+          </div>
+          <div style="font-size:0.68rem;color:#5a9a6a;margin-top:6px;display:flex;align-items:center;gap:4px;">
+            <span>&#9432;</span> 9 digitos Peru (ej: 987654321) &bull; Dejar vacio = abrir WhatsApp Web
+          </div>
+        </div>
+
+        <!-- Enlace generado -->
+        <div style="background:#fff;border:1.5px solid #c8ddf0;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+          <div style="font-size:0.68rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+            &#128279; Enlace al Formulario de Tarea
+            <span style="background:#e8f2ff;color:#0b4f8a;border-radius:4px;padding:1px 6px;font-size:0.62rem;">REDESAAL.github.io/eps-maranon/formulario_tarea</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="text" id="shareLinkInput" readonly style="flex:1;border:1.5px solid #dbe9f8;border-radius:6px;padding:7px 10px;font-size:0.72rem;color:#4a6a8a;background:#f8fbff;font-family:'DM Sans',sans-serif;min-width:0;cursor:pointer;" onclick="this.select()">
+            <button onclick="copiarEnlace()" style="background:#0b4f8a;color:white;border:none;border-radius:6px;padding:7px 13px;font-size:0.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;" id="btnCopiarEnlace" onmouseover="this.style.background='#1a6fc4'" onmouseout="this.style.background='#0b4f8a'">&#128203; Copiar</button>
+          </div>
+        </div>
+
+        <!-- Botones de envio -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <!-- WhatsApp directo -->
+          <button onclick="enviarWhatsApp()" id="btnEnviarWA" style="background:linear-gradient(135deg,#25d366,#1aaa52);color:white;border:none;border-radius:10px;padding:13px 10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s;box-shadow:0 4px 12px rgba(37,211,102,0.35);" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.934 1.395 5.608L0 24l6.562-1.371A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.85 0-3.573-.5-5.055-1.367l-.363-.215-3.754.984.999-3.659-.236-.376A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+            Enviar WhatsApp
+          </button>
+          <!-- Solo enlace / copiar -->
+          <button onclick="soloCopiarEnlace()" style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);color:white;border:none;border-radius:10px;padding:13px 10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s;box-shadow:0 4px 12px rgba(11,79,138,0.25);" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+            &#128203; Copiar Enlace
+          </button>
+        </div>
+        <div style="font-size:0.68rem;color:#9aafca;text-align:center;">
+          &#9888; El tecnico debe tener acceso a internet para abrir el formulario
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer" id="modalOSFooter">
+      <button class="btn-cancel" id="btnCancelarOS" onclick="cerrarOS()">Cancelar</button>
+      <button class="btn-generar-link" id="btnGenerarLink" style="display:none;" onclick="mostrarPanelWA()">&#128232; Enviar por WhatsApp</button>
+      <button class="btn-save" id="btnGuardar" onclick="guardarOS()">Guardar O/S</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAREA TRABAJADOR -->
+<div class="modal-overlay" id="modalTarea">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a7a4a,#27ae60);">
+      <h3>Formulario de Tarea</h3>
+      <span class="os-num" id="tareaNumero">OS-001</span>
+      <button class="modal-close" onclick="cerrarTarea()">x</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f0f9f4;border:1px solid #b8e0c8;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#1a7a4a;font-weight:700;">Componente:</span> <span id="tareaComponente"></span></div>
+          <div><span style="color:#1a7a4a;font-weight:700;">Tecnico:</span> <span id="tareaTecnico"></span></div>
+          <div><span style="color:#1a7a4a;font-weight:700;">Direccion:</span> <span id="tareaDireccion"></span></div>
+          <div><span style="color:#1a7a4a;font-weight:700;">Fecha Prog.:</span> <span id="tareaFechaProg"></span></div>
+        </div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field full"><label>Observaciones del Trabajo</label>
+          <textarea id="tareaObs" placeholder="Describa las observaciones del trabajo realizado..." style="min-height:80px;"></textarea>
+        </div>
+        <div class="os-field"><label>N Codigo</label><input type="text" id="tareaCodigo" placeholder="Ej: DL-2025-001"></div>
+        <div class="os-field"><label>Estado</label>
+          <select id="tareaEstado"><option>Pendiente</option><option>En Proceso</option><option>Completado</option></select>
+        </div>
+        <div class="os-field full">
+          <label>Evidencia del Trabajo (hasta 4 archivos)</label>
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('tareaArchivo').click()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir archivos</div>
+            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 4 archivos &bull; Se comprimen automaticamente</div>
+            <input type="file" id="tareaArchivo" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivos(this)">
+          </div>
+          <div id="previewArea" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+          <div id="contadorArchivos" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarTarea()">Cancelar</button>
+      <button class="btn-save" style="background:#1a7a4a;" onclick="guardarTarea()">Guardar Tarea</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PIN DE VERIFICACION DE TECNICO -->
+<div class="modal-overlay" id="modalPIN">
+  <div class="modal" style="width:380px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a7a4a,#27ae60);">
+      <h3>Verificar Identidad</h3>
+      <button class="modal-close" onclick="cerrarPIN()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.88rem;color:#2c3e56;margin-bottom:16px;line-height:1.5;">
+        Esta orden esta asignada a:<br>
+        <strong id="pinTecnicoNombre" style="color:#1a7a4a;font-size:0.98rem;"></strong>
+      </div>
+      <div class="os-field">
+        <label>Ingrese su PIN de 4 digitos</label>
+        <input type="password" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*"
+               placeholder="&#8226;&#8226;&#8226;&#8226;"
+               style="letter-spacing:10px;font-size:1.3rem;text-align:center;"
+               onkeydown="if(event.key==='Enter') validarPIN(); this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);"
+               oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+      </div>
+      <div id="pinError" style="display:none;color:#c0392b;font-size:0.8rem;margin-top:10px;">
+        &#9888; PIN incorrecto. Intente nuevamente, o contacte al coordinador si olvido su PIN.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarPIN()">Cancelar</button>
+      <button class="btn-save" style="background:#1a7a4a;" onclick="validarPIN()">Validar</button>
+    </div>
+  </div>
+</div>
+
+<!-- AREA DE IMPRESION -->
+<div id="printArea"></div>
+
+<!-- MODAL INFO RED -->
+<div class="modal-overlay" id="modalRed">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);">
+      <h3>&#127760; Acceso a la Aplicacion</h3>
+      <button class="modal-close" onclick="document.getElementById('modalRed').classList.remove('active')">&#10005;</button>
+    </div>
+    <div class="modal-body" style="padding:20px;">
+      <div id="redInfo"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('modalRed').classList.remove('active')">Cerrar</button>
+      <button class="btn-save" onclick="copiarURLRed()">&#128203; Copiar URL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // PIN de acceso por tecnico/operador. Solo quien conozca el PIN puede llenar
+  // el formulario de tarea de las ordenes asignadas a ese tecnico.
+  // Puede cambiar estos numeros por los que prefiera.
+  var TECNICO_PINS = {
+    'Tec. Grimaniel Estela Guevara': '1001',
+    'Op. Jorge Vasquez Ocana':       '1002',
+    'Op. Jairo Herrera Ramirez':     '1003',
+    'Op. Elver Davila Bustamante':   '1004',
+    'Op. Gilmer Alarcon Torres':     '1005',
+    'Op. Angel Alejandria Estela':   '1006',
+    'Op. Oscar Mijahuanca Huaman':   '1007',
+    'Op. Victor Carranza Cabrera':   '1008'
+  };
+  var _pinPendingIdx = null;
+
+  var STORE_KEY = 'eps_maranon_historial';
+  var historial = [];
+  var osCounter = 1;
+  var editIndex = -1;
+  var tareaIdx = -1;
+  window._archivosData = [];
+
+  function cargarHistorial() {
+    try {
+      var data = localStorage.getItem(STORE_KEY);
+      if (data) {
+        historial = JSON.parse(data);
+        if (historial.length > 0) {
+          var nums = historial.map(function(h) { return parseInt(h.id.replace('OS-','')) || 0; });
+          osCounter = Math.max.apply(null, nums) + 1;
+        }
+        renderHistorial();
+      }
+    } catch(e) { historial = []; }
+  }
+
+  function guardarStorage() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(historial)); } catch(e) {}
+  }
+
+  function abrirOS(componente, frecuencia) {
+    var num = String(osCounter).padStart(3, '0');
+    document.getElementById('osId').value = 'OS-' + num;
+    document.getElementById('osNumero').textContent = 'OS-' + num;
+    document.getElementById('osComponente').value = componente;
+    document.getElementById('osFrecuencia').value = frecuencia;
+    var hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('osFecha').value = hoy;
+    document.getElementById('osFechaProg').value = '';
+    document.getElementById('osObs').value = '';
+    document.getElementById('osCodigo').value = '';
+    document.getElementById('osDireccion').value = '';
+    document.getElementById('osActividad').value = '';
+    document.getElementById('osTecnico').selectedIndex = 0;
+    document.getElementById('osPrioridad').selectedIndex = 0;
+    document.getElementById('osEstado').selectedIndex = 0;
+    editIndex = -1;
+    document.getElementById('modalOSHeader').classList.remove('edit-mode');
+    document.getElementById('modalOSTitulo').textContent = 'Orden de Servicio';
+    document.getElementById('osId').removeAttribute('readonly');
+    document.getElementById('btnGenerarLink').style.display = 'none';
+    document.getElementById('panelFormOS').style.display = 'block';
+    document.getElementById('panelWAPost').style.display = 'none';
+    document.getElementById('btnGuardar').style.display = '';
+    document.getElementById('btnCancelarOS').textContent = 'Cancelar';
+    document.getElementById('shareLinkInput').value = '';
+    if(document.getElementById('waTelefono')) document.getElementById('waTelefono').value = '';
+    document.getElementById('modalOS').classList.add('active');
+  }
+
+  function editarOS(idx) {
+    var os = historial[idx];
+    editIndex = idx;
+    document.getElementById('osId').value = os.id;
+    document.getElementById('osNumero').textContent = os.id;
+    document.getElementById('osCodigo').value = os.codigo === '-' ? '' : os.codigo;
+    document.getElementById('osDireccion').value = os.direccion === '-' ? '' : os.direccion;
+    document.getElementById('osComponente').value = os.componente;
+    document.getElementById('osFrecuencia').value = os.frecuencia;
+    document.getElementById('osFecha').value = os.fecha;
+    document.getElementById('osFechaProg').value = os.fechaProg === '-' ? '' : os.fechaProg;
+    document.getElementById('osActividad').value = os.actividad && os.actividad !== '-' ? os.actividad : '';
+    document.getElementById('osObs').value = os.obs === '-' ? '' : os.obs;
+    setSelectValue('osTecnico', os.tecnico);
+    setSelectValue('osPrioridad', os.prioridad);
+    setSelectValue('osEstado', os.estado);
+    document.getElementById('modalOSHeader').classList.add('edit-mode');
+    document.getElementById('modalOSTitulo').textContent = 'Editar Orden';
+    document.getElementById('osId').setAttribute('readonly', true);
+    document.getElementById('panelFormOS').style.display = 'block';
+    document.getElementById('panelWAPost').style.display = 'none';
+    document.getElementById('btnGuardar').style.display = '';
+    document.getElementById('btnGenerarLink').style.display = 'flex';
+    document.getElementById('btnGenerarLink').textContent = '\u{1F4F2} Enviar por WhatsApp';
+    document.getElementById('btnGenerarLink').onclick = mostrarPanelWA;
+    document.getElementById('shareLinkInput').value = '';
+    document.getElementById('modalOS').classList.add('active');
+  }
+
+  function setSelectValue(id, val) {
+    var sel = document.getElementById(id);
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === val) { sel.selectedIndex = i; return; }
+    }
+  }
+
+  function cerrarOS() {
+    document.getElementById('modalOS').classList.remove('active');
+    setTimeout(function() {
+      document.getElementById('panelFormOS').style.display = 'block';
+      document.getElementById('panelWAPost').style.display = 'none';
+      document.getElementById('modalOSTitulo').textContent = 'Orden de Servicio';
+      document.getElementById('modalOSHeader').classList.remove('edit-mode');
+      document.getElementById('btnGuardar').textContent = 'Guardar O/S';
+      document.getElementById('btnGuardar').style.display = '';
+      document.getElementById('btnGenerarLink').style.display = 'none';
+      document.getElementById('btnCancelarOS').textContent = 'Cancelar';
+      if(document.getElementById('shareLinkInput')) document.getElementById('shareLinkInput').value = '';
+      if(document.getElementById('waTelefono')) document.getElementById('waTelefono').value = '';
+    }, 300);
+  }
+
+  function guardarOS() {
+    var tecnico = document.getElementById('osTecnico').value;
+    if (tecnico === '-- Seleccionar --') { alert('Por favor seleccione un tecnico asignado.'); return; }
+    var os = {
+      id:        document.getElementById('osId').value,
+      codigo:    document.getElementById('osCodigo').value || '-',
+      fecha:     document.getElementById('osFecha').value,
+      fechaProg: document.getElementById('osFechaProg').value || '-',
+      componente:document.getElementById('osComponente').value,
+      frecuencia:document.getElementById('osFrecuencia').value,
+      direccion: document.getElementById('osDireccion').value || '-',
+      tecnico:   tecnico,
+      prioridad: document.getElementById('osPrioridad').value,
+      estado:    document.getElementById('osEstado').value,
+      actividad: document.getElementById('osActividad').value || '-',
+      obs:       document.getElementById('osObs').value || '-'
+    };
+    if (editIndex >= 0) {
+      historial[editIndex] = os;
+      guardarStorage();
+      renderHistorial();
+      cerrarOS();
+    } else {
+      historial.push(os);
+      osCounter++;
+      editIndex = historial.length - 1;
+      guardarStorage();
+      renderHistorial();
+      mostrarPanelWA();
+    }
+  }
+
+  function renderHistorial() {
+    var tbody = document.getElementById('historialBody');
+    tbody.innerHTML = '';
+    if (historial.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="14"><div class="historial-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/></svg>No hay ordenes registradas.</div></td></tr>';
+      return;
+    }
+    historial.forEach(function(os, idx) {
+      var estadoKey = os.estado.replace(/\s/g,'');
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><strong>' + os.id + '</strong></td>' +
+        '<td>' + os.codigo + '</td>' +
+        '<td>' + formatFecha(os.fecha) + '</td>' +
+        '<td>' + os.componente + '</td>' +
+        '<td>' + (os.actividad || '-') + '</td>' +
+        '<td>' + os.direccion + '</td>' +
+        '<td>' + os.tecnico + '</td>' +
+        '<td>' + os.prioridad + '</td>' +
+        '<td><span class="badge-estado badge-' + estadoKey + '">' + os.estado + '</span></td>' +
+        '<td style="text-align:center"><button class="btn-tarea-row" onclick="abrirTarea(' + idx + ')">Llenar</button></td>' +
+        '<td style="text-align:center"><button class="btn-wa-row" onclick="enviarWhatsAppDirecto(' + idx + ')">&#128232; WhatsApp</button></td>' +
+        '<td style="text-align:center"><button class="btn-edit-row" onclick="editarOS(' + idx + ')">Editar</button></td>' +
+        '<td style="text-align:center"><button class="btn-print-row" onclick="imprimirOS(' + idx + ')">PDF</button></td>' +
+        '<td style="text-align:center"><button class="btn-delete-row" onclick="eliminarOS(' + idx + ')">Eliminar</button></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function formatFecha(f) {
+    if (!f || f === '-') return '-';
+    var p = f.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function eliminarOS(idx) {
+    if (!confirm('Eliminar la orden ' + historial[idx].id + '?')) return;
+    historial.splice(idx, 1);
+    guardarStorage();
+    renderHistorial();
+  }
+
+  function limpiarHistorial() {
+    if (!confirm('Eliminar todo el historial?')) return;
+    historial = []; osCounter = 1;
+    guardarStorage(); renderHistorial();
+  }
+
+  function exportarCSV() {
+    if (historial.length === 0) { alert('No hay ordenes para exportar.'); return; }
+    var cols = ['N Orden','N Codigo','Fecha Emision','Fecha Programada','Componente','Frecuencia','Actividad del Trabajo','Direccion','Tecnico Asignado','Prioridad','Estado','Observaciones'];
+    var rows = historial.map(function(o) {
+      return [o.id, o.codigo, formatFecha(o.fecha), formatFecha(o.fechaProg),
+              o.componente, o.frecuencia, o.actividad || '-', o.direccion,
+              o.tecnico, o.prioridad, o.estado, o.obs
+      ].map(function(v) { var q = String.fromCharCode(34); return q + String(v).replace(new RegExp(q,'g'), q+q) + q; }).join(';');
+    });
+    var csv = 'sep=;\n\uFEFF' + cols.map(function(c) { var q = String.fromCharCode(34); return q + c + q; }).join(';') + '\n' + rows.join('\n');
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'Historial_OS_EPS_Maranon.csv';
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  function imprimirOS(idx) {
+    var os = historial[idx];
+    var pa = document.getElementById('printArea');
+    pa.innerHTML =
+      '<div style="font-family:Arial,sans-serif;max-width:750px;margin:0 auto;background:#fff;">' +
+      '<div style="background:#0b4f8a;color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;">' +
+      '<div><div style="font-size:1.5rem;font-weight:800;letter-spacing:3px;">EPS Maranon S.A.</div>' +
+      '<div style="font-size:0.82rem;opacity:0.85;margin-top:4px;">Sistema de Agua Potable y Alcantarillado</div></div>' +
+      '<div style="text-align:right"><div style="background:#e8a000;color:#fff;font-weight:800;font-size:1.05rem;padding:7px 18px;border-radius:6px;">' + os.id + '</div>' +
+      '<div style="font-size:0.75rem;opacity:0.75;margin-top:5px;">ORDEN DE SERVICIO</div></div></div>' +
+      '<div style="height:5px;background:linear-gradient(90deg,#e8a000,#f5c842);"></div>' +
+      '<div style="border:1px solid #c8d8ec;border-top:none;border-radius:0 0 8px 8px;padding:28px;">' +
+      '<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-bottom:6px;"><tr>' +
+      '<td style="width:50%;padding:0 8px 0 0;vertical-align:top;">' +
+      '<table style="width:100%;border-collapse:collapse;">' +
+      filaP('N Orden', os.id) + filaP('N Codigo', os.codigo) +
+      filaP('Fecha Emision', formatFecha(os.fecha)) + filaP('Fecha Programada', formatFecha(os.fechaProg)) +
+      filaP('Prioridad', os.prioridad) + filaP('Estado', os.estado) +
+      '</table></td>' +
+      '<td style="width:50%;padding:0 0 0 8px;vertical-align:top;">' +
+      '<table style="width:100%;border-collapse:collapse;">' +
+      filaP('Componente', os.componente) + filaP('Frecuencia', os.frecuencia) +
+      filaP('Direccion', os.direccion) + filaP('Tecnico', os.tecnico) +
+      filaP('Actividad', os.actividad || '-') +
+      '<tr><td colspan="2" style="background:#eaf2fb;font-weight:700;color:#0b4f8a;padding:7px 12px;border:1px solid #d0e3f5;font-size:0.75rem;text-transform:uppercase;">Observaciones</td></tr>' +
+      '<tr><td colspan="2" style="padding:7px 12px;border:1px solid #d0e3f5;">' + os.obs + '</td></tr>' +
+      '</table></td></tr></table>' +
+      '<div style="border-top:2px dashed #c8d8ec;margin:28px 0 24px;"></div>' +
+      '<table style="width:100%;border-collapse:collapse;margin-top:28px;">' +
+      '<tr><td colspan="3" style="padding-bottom:10px;"><div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;">Firmas de Conformidad</div></td></tr>' +
+      '<tr style="vertical-align:bottom;">' +
+      '<td style="width:33%;text-align:center;padding:0 12px 0 0;border-right:1px dashed #c8d8ec;">' +
+      '<div style="height:60px;"></div><div style="border-top:2px solid #0b4f8a;margin:0 10px;"></div>' +
+      '<div style="background:#0b4f8a;color:white;font-weight:700;font-size:0.73rem;padding:5px 6px;text-transform:uppercase;">V B JEFE DE AREA</div>' +
+      '<div style="margin-top:7px;font-size:0.72rem;color:#555;">Nombre: ______________________</div>' +
+      '<div style="margin-top:4px;font-size:0.72rem;color:#555;">Firma: &nbsp; ______________________</div></td>' +
+      '<td style="width:34%;text-align:center;padding:0 12px;border-right:1px dashed #c8d8ec;">' +
+      '<div style="height:60px;"></div><div style="border-top:2px solid #1a6fc4;margin:0 10px;"></div>' +
+      '<div style="background:#1a6fc4;color:white;font-weight:700;font-size:0.73rem;padding:5px 6px;text-transform:uppercase;">FIRMA COORDINADOR</div>' +
+      '<div style="margin-top:7px;font-size:0.72rem;color:#555;">Nombre: ______________________</div>' +
+      '<div style="margin-top:4px;font-size:0.72rem;color:#555;">Firma: &nbsp; ______________________</div></td>' +
+      '<td style="width:33%;text-align:center;padding:0 0 0 12px;">' +
+      '<div style="height:60px;"></div><div style="border-top:2px solid #0b4f8a;margin:0 10px;"></div>' +
+      '<div style="background:#0b4f8a;color:white;font-weight:700;font-size:0.73rem;padding:5px 6px;text-transform:uppercase;">FIRMA RESPONSABLE</div>' +
+      '<div style="margin-top:7px;font-size:0.72rem;color:#222;font-weight:700;">' + os.tecnico + '</div>' +
+      '<div style="margin-top:4px;font-size:0.72rem;color:#555;">Firma: &nbsp; ______________________</div></td>' +
+      '</tr></table>' +
+      '<div style="margin-top:22px;text-align:center;font-size:0.70rem;color:#aaa;border-top:1px solid #eaf0f8;padding-top:10px;">Documento generado por EPS Maranon S.A. - ' + new Date().toLocaleDateString('es-PE') + '</div>' +
+      '</div></div>';
+    pa.style.display = 'block';
+    setTimeout(function() { window.print(); pa.style.display = 'none'; }, 200);
+  }
+
+  function filaP(label, val) {
+    return '<tr><td style="background:#eaf2fb;font-weight:700;color:#0b4f8a;padding:7px 12px;border:1px solid #d0e3f5;font-size:0.75rem;text-transform:uppercase;white-space:nowrap;width:130px">' + label + '</td><td style="padding:7px 12px;border:1px solid #d0e3f5;">' + val + '</td></tr>';
+  }
+
+  function mostrarPanelWA() {
+    if (editIndex < 0) return;
+    var os = historial[editIndex];
+    var enlace = construirEnlaceTarea(os, editIndex);
+    document.getElementById('shareLinkInput').value = enlace;
+    document.getElementById('waPostTitulo').textContent = os.id + ' GUARDADA CORRECTAMENTE';
+    // Mostrar nombre del tecnico
+    var tecNomEl = document.getElementById('waTecnicoNombre');
+    if (tecNomEl) tecNomEl.textContent = os.tecnico || '-';
+    // Limpiar telefono y estado
+    var telEl = document.getElementById('waTelefono');
+    if (telEl) telEl.value = '';
+    var stEl = document.getElementById('telStatus');
+    if (stEl) stEl.textContent = '';
+    var prioColor = os.prioridad === 'Urgente' ? '#c0392b' : os.prioridad === 'Alta' ? '#e8a000' : '#1a8a4a';
+    var prioEmoji = os.prioridad === 'Urgente' ? '\u{1F534}' : os.prioridad === 'Alta' ? '\u{1F7E0}' : '\u{1F7E2}';
+    function rFila(lbl, val, full) {
+      if (!val || val === '-') return '';
+      return '<div style="' + (full ? 'grid-column:1/-1;' : '') + 'padding:3px 0;border-bottom:1px solid #e8f0f8;">' +
+        '<span style="font-weight:700;color:#5a7a9a;font-size:0.78rem;">' + lbl + ': </span><span style="font-size:0.82rem;">' + val + '</span></div>';
+    }
+    var card =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;">' +
+      rFila('\u{1F4CB} N Orden', os.id, true) +
+      rFila('\u{1F527} Componente', os.componente, true) +
+      rFila('\u{1F4C5} Emision', formatFecha(os.fecha)) +
+      rFila('\u{1F4C5} Programada', formatFecha(os.fechaProg)) +
+      rFila('\u{1F4CD} Direccion', os.direccion) +
+      rFila('\u{1F501} Frecuencia', os.frecuencia) +
+      rFila('\u{1F477} Tecnico', os.tecnico, true) +
+      (os.actividad && os.actividad !== '-' ? rFila('\u{1F4DD} Actividad', os.actividad, true) : '') +
+      (os.obs && os.obs !== '-' ? rFila('\u{1F4AC} Instrucciones', os.obs, true) : '') +
+      '</div>' +
+      '<div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;">' +
+        '<span style="font-size:0.78rem;font-weight:700;color:#5a7a9a;">Prioridad:</span>' +
+        '<span style="background:' + prioColor + ';color:white;font-weight:700;padding:2px 10px;border-radius:8px;font-size:0.78rem;">' + prioEmoji + ' ' + os.prioridad + '</span>' +
+      '</div>';
+    document.getElementById('osResumenCard').innerHTML = card;
+    document.getElementById('panelFormOS').style.display = 'none';
+    document.getElementById('panelWAPost').style.display = 'block';
+    document.getElementById('btnGuardar').style.display = 'none';
+    document.getElementById('btnCancelarOS').textContent = 'Cerrar';
+    document.getElementById('btnGenerarLink').style.display = 'flex';
+    document.getElementById('btnGenerarLink').textContent = 'Volver al Formulario';
+    document.getElementById('btnGenerarLink').onclick = function() {
+      document.getElementById('panelFormOS').style.display = 'block';
+      document.getElementById('panelWAPost').style.display = 'none';
+      document.getElementById('btnGuardar').style.display = '';
+      document.getElementById('btnCancelarOS').textContent = 'Cancelar';
+      document.getElementById('btnGenerarLink').style.display = 'none';
+      document.getElementById('btnGenerarLink').onclick = mostrarPanelWA;
+    };
+  }
+
+  function generarEnlaceTarea() { mostrarPanelWA(); }
+
+  function copiarEnlace() {
+    var inp = document.getElementById('shareLinkInput');
+    if (!inp.value) return;
+    navigator.clipboard.writeText(inp.value).then(function() {
+      var btn = document.getElementById('btnCopiarEnlace');
+      if (btn) {
+        btn.innerHTML = '&#10003; Copiado!';
+        btn.style.background = '#1a8a4a';
+        setTimeout(function() { btn.innerHTML = '&#128203; Copiar'; btn.style.background = '#0b4f8a'; }, 2500);
+      }
+    }).catch(function() { inp.select(); document.execCommand('copy'); });
+  }
+
+  function soloCopiarEnlace() {
+    var inp = document.getElementById('shareLinkInput');
+    if (!inp.value) { alert('No hay enlace generado.'); return; }
+    navigator.clipboard.writeText(inp.value).then(function() {
+      var btns = document.querySelectorAll('#panelWAPost button');
+      btns.forEach(function(b) {
+        if (b.textContent.indexOf('Copiar') >= 0) {
+          var orig = b.innerHTML;
+          b.innerHTML = '&#10003; Enlace Copiado!';
+          b.style.background = 'linear-gradient(135deg,#1a8a4a,#27ae60)';
+          setTimeout(function() { b.innerHTML = orig; b.style.background = 'linear-gradient(135deg,#0b4f8a,#1a6fc4)'; }, 2500);
+        }
+      });
+    }).catch(function() { inp.select(); document.execCommand('copy'); });
+  }
+
+  function validarTelefono(input) {
+    var st = document.getElementById('telStatus');
+    var v = input.value;
+    if (!st) return;
+    if (v.length === 0) { st.textContent = ''; }
+    else if (v.length === 9) { st.textContent = '✅'; }
+    else if (v.length > 9) { st.textContent = '⚠️'; }
+    else { st.textContent = '⏳'; }
+  }
+
+  function construirMensajeWA(os, enlace) {
+    var prioEmoji = os.prioridad === 'Urgente' ? '\u{1F534}' : os.prioridad === 'Alta' ? '\u{1F7E0}' : '\u{1F7E2}';
+    var sep = '══════════════════════';
+    var lines = [
+      '\u{1F4CB} *EPS MARANON S.A.*',
+      '*ORDEN DE SERVICIO Nro ' + os.id + '*',
+      sep,
+      '\u{1F527} *Componente:* ' + os.componente,
+      '\u{1F501} *Frecuencia:* ' + os.frecuencia,
+      '\u{1F4C5} *Fecha de Emision:* ' + formatFecha(os.fecha)
+    ];
+    if (os.fechaProg && os.fechaProg !== '-') lines.push('\u{1F4C5} *Fecha Programada:* ' + formatFecha(os.fechaProg));
+    if (os.direccion && os.direccion !== '-') lines.push('\u{1F4CD} *Direccion:* ' + os.direccion);
+    if (os.codigo && os.codigo !== '-') lines.push('\u{1F4D0} *N Codigo:* ' + os.codigo);
+    lines.push(prioEmoji + ' *Prioridad:* ' + os.prioridad);
+    lines.push('\u{1F4CA} *Estado:* ' + os.estado);
+    if (os.actividad && os.actividad !== '-') lines.push('\u{1F4DD} *Actividad del Trabajo:*\n' + os.actividad);
+    if (os.obs && os.obs !== '-') lines.push('\u{1F4AC} *Instrucciones:*\n' + os.obs);
+    lines.push(sep);
+    lines.push('\u{1F477} Estimado/a *' + os.tecnico + '*,');
+    lines.push('');
+    lines.push('Se le asigna la Orden de Servicio indicada. Ingrese al siguiente enlace para completar el *Formulario de Tarea*:');
+    lines.push('');
+    lines.push('\u{1F517} ' + enlace);
+    lines.push('');
+    lines.push('En el formulario registre:');
+    lines.push('  \u2705 Observaciones del trabajo realizado');
+    lines.push('  \u2705 N Codigo (si aplica)');
+    lines.push('  \u2705 Estado de avance (Pendiente / En Proceso / Completado)');
+    lines.push('  \u{1F4F7} Evidencias fotograficas (tome fotos o adjunte archivos)');
+    lines.push('');
+    lines.push('\u26A0\uFE0F Los datos de la orden ya estan precargados. Solo complete los campos activos.');
+    lines.push('');
+    lines.push('_EPS Maranon S.A. - Sistema de Agua Potable y Alcantarillado_');
+    return lines.join('\n');
+  }
+
+  function enviarWhatsApp() {
+    if (editIndex < 0) { alert('Error: no hay orden activa. Guarde primero la O/S.'); return; }
+    var os = historial[editIndex];
+    var enlace = construirEnlaceTarea(os, editIndex);
+    document.getElementById('shareLinkInput').value = enlace;
+    var tel = (document.getElementById('waTelefono').value || '').replace(/[^0-9]/g,'');
+    if (tel.length > 0 && tel.length < 9) {
+      alert('Numero incompleto: ingrese los 9 digitos del numero peruano, o deje vacio para abrir WhatsApp Web.');
+      document.getElementById('waTelefono').focus();
+      return;
+    }
+    if (tel.length === 9) tel = '51' + tel;
+    var msg = encodeURIComponent(construirMensajeWA(os, enlace));
+    var waUrl = tel ? 'https://wa.me/' + tel + '?text=' + msg : 'https://wa.me/?text=' + msg;
+    // Feedback visual en el boton
+    var btn = document.getElementById('btnEnviarWA');
+    if (btn) {
+      var orig = btn.innerHTML;
+      btn.innerHTML = '\u23F3 Abriendo WhatsApp...';
+      btn.disabled = true;
+      setTimeout(function() { btn.innerHTML = orig; btn.disabled = false; }, 3000);
+    }
+    window.open(waUrl, '_blank');
+  }
+
+  function construirEnlaceTarea(os, idx) {
+    var params = btoa(
+      'idx=' + idx +
+      '&id=' + encodeURIComponent(os.id) +
+      '&componente=' + encodeURIComponent(os.componente) +
+      '&tecnico=' + encodeURIComponent(os.tecnico) +
+      '&direccion=' + encodeURIComponent(os.direccion && os.direccion !== '-' ? os.direccion : '') +
+      '&fechaProg=' + encodeURIComponent(os.fechaProg && os.fechaProg !== '-' ? os.fechaProg : '') +
+      '&frecuencia=' + encodeURIComponent(os.frecuencia || '') +
+      '&actividad=' + encodeURIComponent(os.actividad && os.actividad !== '-' ? os.actividad : '') +
+      '&prioridad=' + encodeURIComponent(os.prioridad || '') +
+      '&estado=' + encodeURIComponent(os.estado || 'Pendiente') +
+      '&obs=' + encodeURIComponent(os.obs && os.obs !== '-' ? os.obs : '') +
+      '&codigo=' + encodeURIComponent(os.codigo && os.codigo !== '-' ? os.codigo : '')
+    );
+    // URL inteligente: detecta automaticamente el entorno
+    var baseURL;
+    var host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host.match(/^192\.168\./) || host.match(/^10\./) || host === '') {
+      // XAMPP / Red local: usar IP real del servidor para que funcione en celulares
+      baseURL = window.location.protocol + '//' + window.location.host + window.location.pathname.replace(/\/[^\/]*$/, '/');
+    } else {
+      // GitHub Pages u otro hosting
+      baseURL = 'https://REDESAAL.github.io/eps-maranon/';
+    }
+    return baseURL + 'formulario_tarea.html?tarea=' + params;
+  }
+
+  function construirEnlaceGoogleForm(os) {
+    var idx = historial.indexOf(os);
+    return construirEnlaceTarea(os, idx >= 0 ? idx : editIndex);
+  }
+
+  function enviarWhatsAppDirecto(idx) {
+    var os = historial[idx];
+    var enlace = construirEnlaceTarea(os, idx);
+    var tel = prompt(
+      'Numero WhatsApp del tecnico\n(sin + ni espacios)\nPeru 9 digitos: 987654321\nOtro pais: codigo+numero: 51987654321\n\nDejar vacio para abrir WhatsApp Web sin numero especifico.',
+      ''
+    );
+    if (tel === null) return;
+    tel = (tel || '').replace(/\D/g,'');
+    if (tel.length === 9) tel = '51' + tel;
+    var msg = encodeURIComponent(construirMensajeWA(os, enlace));
+    var url = tel ? 'https://wa.me/' + tel + '?text=' + msg : 'https://wa.me/?text=' + msg;
+    window.open(url, '_blank');
+  }
+
+    // TAREA
+  // Puerta de acceso: antes de abrir el formulario, exige el PIN del tecnico asignado.
+  function abrirTarea(idx) {
+    var os = historial[idx];
+    if (!os) return;
+    _pinPendingIdx = idx;
+    document.getElementById('pinTecnicoNombre').textContent = os.tecnico || '-';
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinError').style.display = 'none';
+    document.getElementById('modalPIN').classList.add('active');
+    setTimeout(function() {
+      var el = document.getElementById('pinInput');
+      if (el) el.focus();
+    }, 150);
+  }
+
+  function cerrarPIN() {
+    document.getElementById('modalPIN').classList.remove('active');
+    _pinPendingIdx = null;
+  }
+
+  function validarPIN() {
+    var idx = _pinPendingIdx;
+    var os = historial[idx];
+    if (!os) { cerrarPIN(); return; }
+    var pinIngresado = (document.getElementById('pinInput').value || '').trim();
+    var pinCorrecto = TECNICO_PINS[os.tecnico];
+    if (!pinCorrecto || pinIngresado !== pinCorrecto) {
+      document.getElementById('pinError').style.display = 'block';
+      document.getElementById('pinInput').value = '';
+      document.getElementById('pinInput').focus();
+      return;
+    }
+    document.getElementById('modalPIN').classList.remove('active');
+    abrirFormularioTarea(idx);
+  }
+
+  function abrirFormularioTarea(idx) {
+    tareaIdx = idx;
+    var os = historial[idx];
+    document.getElementById('tareaNumero').textContent = os.id;
+    document.getElementById('tareaComponente').textContent = os.componente;
+    document.getElementById('tareaTecnico').textContent = os.tecnico;
+    document.getElementById('tareaDireccion').textContent = os.direccion;
+    document.getElementById('tareaFechaProg').textContent = formatFecha(os.fechaProg);
+    document.getElementById('tareaObs').value = os.obs && os.obs !== '-' ? os.obs : '';
+    document.getElementById('tareaCodigo').value = os.codigo && os.codigo !== '-' ? os.codigo : '';
+    setSelectValue('tareaEstado', os.estado);
+    // Reset file upload
+    document.getElementById('tareaArchivo').value = '';
+    document.getElementById('previewArea').innerHTML = '';
+    document.getElementById('contadorArchivos').style.display = 'none';
+    document.getElementById('uploadArea').classList.remove('has-file');
+    document.getElementById('uploadArea').style.display = 'block';
+    window._archivosData = [];
+    // Restore saved evidence if exists
+    if (os.evidencias && os.evidencias.length > 0) {
+      os.evidencias.forEach(function(ev) { agregarPreview(ev); });
+      actualizarContador();
+    } else if (os.evidencia) {
+      agregarPreview(os.evidencia);
+      actualizarContador();
+    }
+    document.getElementById('modalTarea').classList.add('active');
+  }
+
+  function cerrarTarea() { document.getElementById('modalTarea').classList.remove('active'); }
+
+  function guardarTarea() {
+    var idx = tareaIdx;
+    historial[idx].obs = document.getElementById('tareaObs').value || '-';
+    historial[idx].codigo = document.getElementById('tareaCodigo').value || historial[idx].codigo;
+    historial[idx].estado = document.getElementById('tareaEstado').value;
+
+    if (window._archivosData && window._archivosData.length > 0) {
+      var btn = document.querySelector('#modalTarea .btn-save');
+      btn.textContent = 'Comprimiendo...';
+      btn.disabled = true;
+      comprimirYGuardar(window._archivosData.slice(), function(archivosComprimidos) {
+        historial[idx].evidencias = archivosComprimidos;
+        historial[idx].evidencia = archivosComprimidos[0];
+        window._archivosData = [];
+        try {
+          guardarStorage();
+        } catch(e) {
+          alert('Advertencia: no se pudieron guardar las imagenes (almacenamiento lleno). Se guardaron los demas datos.');
+          historial[idx].evidencias = [];
+          historial[idx].evidencia = null;
+          guardarStorage();
+        }
+        renderHistorial();
+        cerrarTarea();
+        btn.textContent = 'Guardar Tarea';
+        btn.disabled = false;
+        alert('Tarea guardada correctamente para ' + historial[idx].id);
+      });
+    } else {
+      guardarStorage();
+      renderHistorial();
+      cerrarTarea();
+      alert('Tarea guardada correctamente para ' + historial[idx].id);
+    }
+  }
+
+  // Comprime imagenes con canvas, deja PDFs como texto de referencia
+  function comprimirYGuardar(archivos, callback) {
+    var resultado = [];
+    var pendientes = 0;
+    archivos.forEach(function(arch, i) {
+      resultado.push(null);
+      var esImagen = arch.type.indexOf('image') >= 0;
+      if (esImagen) {
+        pendientes++;
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var MAX_DIM = 1200;
+          var w = img.width, h = img.height;
+          if (w > MAX_DIM || h > MAX_DIM) {
+            if (w > h) { h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+            else { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+          }
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          // Comprimir progresivamente hasta ~600KB
+          var quality = 0.75;
+          var comprimido = canvas.toDataURL('image/jpeg', quality);
+          while (comprimido.length > 800000 && quality > 0.2) {
+            quality -= 0.1;
+            comprimido = canvas.toDataURL('image/jpeg', quality);
+          }
+          resultado[i] = {
+            name: arch.name.replace(/\.[^.]+$/, '.jpg'),
+            size: Math.round(comprimido.length * 0.75),
+            type: 'image/jpeg',
+            base64: comprimido,
+            comprimido: true
+          };
+          pendientes--;
+          if (pendientes === 0) finalizarGuardado(resultado, callback);
+        };
+        img.src = arch.base64;
+      } else {
+        // PDF: guardar solo metadata (no base64 para ahorrar espacio)
+        resultado[i] = {
+          name: arch.name,
+          size: arch.size,
+          type: arch.type,
+          base64: arch.base64,
+          esPDF: true
+        };
+      }
+    });
+    if (pendientes === 0) finalizarGuardado(resultado, callback);
+  }
+
+  function finalizarGuardado(resultado, callback) {
+    var limpios = resultado.filter(function(r) { return r !== null; });
+    callback(limpios);
+  }
+
+  function cargarArchivos(input) {
+    var files = [];
+    for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
+    var MAX = 4;
+    var MAXSIZE = 15 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf'];
+    var disponibles = MAX - window._archivosData.length;
+    if (disponibles <= 0) {
+      alert('Ya tiene 4 archivos. Quite alguno para agregar mas.');
+      input.value = ''; return;
+    }
+    if (files.length > disponibles) {
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas. Se tomaran los primeros.');
+      files = files.slice(0, disponibles);
+    }
+    var errores = [];
+    files.forEach(function(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
+      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 15MB'); return; }
+      var reader = new FileReader();
+      reader.onload = (function(f) {
+        return function(e) {
+          var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
+          window._archivosData.push(data);
+          agregarPreview(data);
+          actualizarContador();
+        };
+      })(file);
+      reader.readAsDataURL(file);
+    });
+    if (errores.length) alert('Errores:\n' + errores.join('\n'));
+    input.value = '';
+  }
+
+  function agregarPreview(data) {
+    var idx = window._archivosData ? window._archivosData.indexOf(data) : -1;
+    var idxStr = window._archivosData ? window._archivosData.length - 1 : 0;
+    var isImg = data.type.indexOf('image') >= 0;
+    var pa = document.getElementById('previewArea');
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:120px;max-width:160px;text-align:center;';
+    div.setAttribute('data-idx', pa.children.length);
+    if (isImg) {
+      div.innerHTML =
+        '<img src="' + data.base64 + '" style="width:100%;max-height:110px;object-fit:cover;border-radius:5px;display:block;">' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdx(' + pa.children.length + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else {
+      div.innerHTML =
+        '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdx(' + pa.children.length + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    }
+    pa.appendChild(div);
+    if (window._archivosData.length >= 4) {
+      document.getElementById('uploadArea').style.display = 'none';
+    }
+  }
+
+  function actualizarContador() {
+    var n = window._archivosData ? window._archivosData.length : 0;
+    var c = document.getElementById('contadorArchivos');
+    if (n > 0) {
+      c.style.display = 'block';
+      c.textContent = n + ' de 4 archivo(s) cargado(s)' + (n < 4 ? ' - puede agregar ' + (4-n) + ' mas' : ' - limite alcanzado');
+    } else {
+      c.style.display = 'none';
+      document.getElementById('uploadArea').style.display = 'block';
+    }
+  }
+
+  function quitarArchivoIdx(idx) {
+    if (!window._archivosData) return;
+    window._archivosData.splice(idx, 1);
+    var pa = document.getElementById('previewArea');
+    pa.innerHTML = '';
+    window._archivosData.forEach(function(d) { agregarPreview(d); });
+    actualizarContador();
+    if (window._archivosData.length < 4) document.getElementById('uploadArea').style.display = 'block';
+  }
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+    return (b/(1024*1024)).toFixed(1) + ' MB';
+  }
+
+  function mostrarPreviewGuardado(data) {
+    agregarPreview(data);
+  }
+
+  function verificarURLTarea() {
+    var params = new URLSearchParams(window.location.search);
+    var tareaParam = params.get('tarea');
+    if (!tareaParam) return;
+    try {
+      var decoded = new URLSearchParams(atob(tareaParam));
+      var idx = parseInt(decoded.get('idx'));
+
+      // Si el historial tiene la orden en este dispositivo, abrir directamente
+      if (!isNaN(idx) && historial[idx]) {
+        setTimeout(function() { abrirTarea(idx); }, 500);
+        return;
+      }
+
+      // Si no esta en historial local (otro dispositivo), reconstruir OS desde URL
+      var osDesdeURL = {
+        id:         decoded.get('id') || 'OS-???',
+        componente: decoded.get('componente') || '-',
+        tecnico:    decoded.get('tecnico') || '-',
+        direccion:  decoded.get('direccion') || '-',
+        fechaProg:  decoded.get('fechaProg') || '-',
+        frecuencia: decoded.get('frecuencia') || '-',
+        actividad:  decoded.get('actividad') || '-',
+        prioridad:  decoded.get('prioridad') || '-',
+        estado:     decoded.get('estado') || 'Pendiente',
+        obs:        decoded.get('obs') || '-',
+        codigo:     decoded.get('codigo') || '-',
+        fecha:      ''
+      };
+      historial.push(osDesdeURL);
+      var nuevoIdx = historial.length - 1;
+      setTimeout(function() { abrirTarea(nuevoIdx); }, 500);
+
+    } catch(e) { console.warn('Error al leer parametro tarea:', e); }
+  }
+
+  // ============================================================
+  // SISTEMA DE DETECCION DE RED Y ESTADO DEL SERVIDOR
+  // ============================================================
+  var _urlRed = '';
+
+  function detectarRed() {
+    var host = window.location.hostname;
+    var port = window.location.port;
+    var protocol = window.location.protocol;
+    var path = window.location.pathname.replace(/\/[^\/]*$/, '/');
+    var dot = document.getElementById('serverDot');
+    var txt = document.getElementById('serverStatusText');
+
+    if (host === 'localhost' || host === '127.0.0.1') {
+      // XAMPP local - intentar detectar IP real via RTCPeerConnection
+      _urlRed = protocol + '//localhost' + (port ? ':'+port : '') + path;
+      if (dot) { dot.style.background = '#ffcc00'; }
+      if (txt) txt.textContent = 'XAMPP Local';
+      detectarIPLocal(function(ip) {
+        if (ip) {
+          _urlRed = protocol + '//' + ip + (port ? ':'+port : '') + path;
+          if (dot) { dot.style.background = '#25d366'; dot.style.animation = 'none'; }
+          if (txt) txt.textContent = 'Red: ' + ip;
+        }
+      });
+    } else if (host.match(/^192\.168\./) || host.match(/^10\./)) {
+      _urlRed = protocol + '//' + host + (port ? ':'+port : '') + path;
+      if (dot) { dot.style.background = '#25d366'; dot.style.animation = 'none'; }
+      if (txt) txt.textContent = 'Red local: ' + host;
+    } else if (host.indexOf('github.io') >= 0) {
+      _urlRed = 'https://REDESAAL.github.io/eps-maranon/';
+      if (dot) { dot.style.background = '#25d366'; dot.style.animation = 'none'; }
+      if (txt) txt.textContent = 'En linea ✓';
+    } else {
+      _urlRed = protocol + '//' + host + (port ? ':'+port : '') + path;
+      if (dot) { dot.style.background = '#25d366'; dot.style.animation = 'none'; }
+      if (txt) txt.textContent = host;
+    }
+  }
+
+  function detectarIPLocal(callback) {
+    try {
+      var pc = new RTCPeerConnection({iceServers:[]});
+      pc.createDataChannel('');
+      pc.createOffer().then(function(o){ return pc.setLocalDescription(o); });
+      pc.onicecandidate = function(e) {
+        if (!e || !e.candidate) return;
+        var m = e.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+        if (m && m[1] !== '127.0.0.1' && (m[1].indexOf('192.168.') === 0 || m[1].indexOf('10.') === 0)) {
+          pc.close();
+          callback(m[1]);
+        }
+      };
+      setTimeout(function(){ pc.close(); callback(null); }, 3000);
+    } catch(e) { callback(null); }
+  }
+
+  function mostrarInfoRed() {
+    var host = window.location.hostname;
+    var port = window.location.port;
+    var path = window.location.pathname.replace(/\/[^\/]*$/, '/');
+    var esLocal = (host === 'localhost' || host === '127.0.0.1');
+    var esGitHub = host.indexOf('github.io') >= 0;
+
+    var html = '';
+
+    if (esGitHub) {
+      html = '<div style="background:#d1e7dd;border-radius:8px;padding:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;">' +
+        '<span style="font-size:1.8rem;">&#127760;</span>' +
+        '<div><div style="font-weight:700;color:#0a3622;">Aplicacion en linea</div>' +
+        '<div style="font-size:0.82rem;color:#1a7a4a;margin-top:2px;">Accesible desde cualquier dispositivo con internet</div></div></div>' +
+        '<div style="background:#f0f5fb;border-radius:8px;padding:12px;margin-bottom:10px;">' +
+        '<div style="font-size:0.72rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-bottom:6px;">URL Publica</div>' +
+        '<div style="background:white;border:1.5px solid #c8ddf0;border-radius:6px;padding:8px 12px;font-family:monospace;font-size:0.82rem;color:#0b4f8a;word-break:break-all;">' + _urlRed + '</div></div>' +
+        '<div style="font-size:0.78rem;color:#5a7a9a;line-height:1.6;">&#9989; Los tecnicos pueden abrir esta URL desde cualquier celular<br>&#9989; Los enlaces de WhatsApp funcionan correctamente</div>';
+    } else if (esLocal) {
+      var ipDetectada = _urlRed.indexOf('192.168.') >= 0 || _urlRed.indexOf('/10.') >= 0;
+      html = '<div style="background:#fff3cd;border-radius:8px;padding:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;">' +
+        '<span style="font-size:1.8rem;">&#127968;</span>' +
+        '<div><div style="font-weight:700;color:#664d03;">Servidor Local XAMPP</div>' +
+        '<div style="font-size:0.82rem;color:#856404;margin-top:2px;">' + (ipDetectada ? 'IP de red detectada - acceso desde celulares en el mismo WiFi' : 'Solo accesible desde esta computadora') + '</div></div></div>';
+
+      if (ipDetectada) {
+        html += '<div style="background:#f0f5fb;border-radius:8px;padding:12px;margin-bottom:10px;">' +
+          '<div style="font-size:0.72rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-bottom:6px;">&#128241; URL para Celulares (misma WiFi)</div>' +
+          '<div style="background:white;border:1.5px solid #c8ddf0;border-radius:6px;padding:8px 12px;font-family:monospace;font-size:0.85rem;color:#0b4f8a;word-break:break-all;" id="urlRedDisplay">' + _urlRed + '</div></div>' +
+          '<div style="font-size:0.78rem;color:#5a7a9a;line-height:1.8;margin-bottom:10px;">&#9989; Tecnico en la misma red WiFi puede abrir esta URL<br>&#9989; Enlace WhatsApp funciona en red local<br>&#9888; Para acceso por internet sube a GitHub Pages</div>';
+      } else {
+        html += '<div style="background:#f8d7da;border-radius:8px;padding:12px;margin-bottom:10px;">' +
+          '<div style="font-size:0.78rem;color:#721c24;">&#128683; No se detecto IP de red. Asegurese que XAMPP este conectado a WiFi de la oficina.</div></div>' +
+          '<div style="background:#f0f5fb;border-radius:8px;padding:12px;margin-bottom:10px;">' +
+          '<div style="font-size:0.72rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-bottom:6px;">URL Local</div>' +
+          '<div style="background:white;border:1.5px solid #c8ddf0;border-radius:6px;padding:8px 12px;font-family:monospace;font-size:0.85rem;color:#0b4f8a;">' + _urlRed + '</div></div>';
+      }
+
+      html += '<div style="border-top:1px solid #eaf0f8;padding-top:12px;margin-top:4px;">' +
+        '<div style="font-size:0.72rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-bottom:8px;">&#128640; Para acceso por internet (recomendado)</div>' +
+        '<div style="font-size:0.78rem;color:#5a7a9a;line-height:1.6;">1. Sube el archivo <strong>index.html</strong> a GitHub<br>' +
+        '2. Activa GitHub Pages en Settings<br>' +
+        '3. URL publica: <strong>https://REDESAAL.github.io/eps-maranon/</strong></div></div>';
+    }
+
+    document.getElementById('redInfo').innerHTML = html;
+    document.getElementById('modalRed').classList.add('active');
+  }
+
+  function copiarURLRed() {
+    if (!_urlRed) return;
+    navigator.clipboard.writeText(_urlRed).then(function() {
+      var btn = event.target.closest('button');
+      var orig = btn.innerHTML;
+      btn.innerHTML = '&#10003; Copiada!';
+      btn.style.background = '#1a8a4a';
+      setTimeout(function(){ btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+    }).catch(function(){
+      var d = document.getElementById('urlRedDisplay');
+      if (d) { var r = document.createRange(); r.selectNode(d); window.getSelection().removeAllRanges(); window.getSelection().addRange(r); document.execCommand('copy'); }
+    });
+  }
+
+  // INIT
+  document.getElementById('modalOS').addEventListener('click', function(e) { if (e.target === this) cerrarOS(); });
+  document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
+  document.getElementById('modalPIN').addEventListener('click', function(e) { if (e.target === this) cerrarPIN(); });
+  document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+
+  cargarHistorial();
+  verificarURLTarea();
+  detectarRed();
+</script>
+</body>
+</html>
