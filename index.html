@@ -174,9 +174,53 @@
     .os-grid { grid-template-columns: 1fr; }
     .container { padding: 20px 10px; }
   }
+
+  /* LOGIN */
+  .login-overlay {
+    position: fixed; inset: 0; z-index: 3000;
+    background: linear-gradient(135deg, var(--azul) 60%, var(--azul-claro) 100%);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .login-box {
+    background: white; border-radius: 16px; width: 380px; max-width: 100%;
+    padding: 36px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  .login-box img { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 12px; }
+  .login-box h2 { font-family: "Bebas Neue", sans-serif; letter-spacing: 2px; color: var(--azul); font-size: 1.5rem; }
+  .login-box p { font-size: 0.82rem; color: #7a8fa6; margin-bottom: 24px; }
+  .login-field { text-align: left; margin-bottom: 16px; }
+  .login-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .login-field input { width: 100%; border: 1.5px solid #d0dce8; border-radius: 7px; padding: 10px 12px; font-family: "DM Sans", sans-serif; font-size: 0.95rem; color: var(--texto); background: #f8fbff; transition: border-color 0.2s; }
+  .login-field input:focus { outline: none; border-color: var(--azul-claro); background: #eef5ff; }
+  .login-error { display: none; color: var(--rojo); font-size: 0.82rem; margin-bottom: 14px; text-align: left; }
+  .btn-login { width: 100%; background: var(--azul); color: white; border: none; border-radius: 8px; padding: 12px; font-family: "DM Sans", sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.18s; }
+  .btn-login:hover { background: var(--azul-claro); }
+  .user-badge { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; padding: 5px 12px; font-size: 0.72rem; color: white; }
+  .btn-logout { background: none; border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 10px; padding: 3px 10px; font-size: 0.7rem; cursor: pointer; }
+  .btn-logout:hover { background: rgba(255,255,255,0.15); }
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <img src="data:image/png;base64,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" alt="Logo">
+    <h2>EPS MARANON S.A.</h2>
+    <p>Ingrese sus credenciales para continuar</p>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUsuario" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Contrasena</label>
+      <input type="password" id="loginClave" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion()">
+    </div>
+    <div class="login-error" id="loginError">Usuario o contrasena incorrectos.</div>
+    <button class="btn-login" onclick="iniciarSesion()">Ingresar</button>
+  </div>
+</div>
 
 <div class="header">
   <div class="header-logo">
@@ -187,6 +231,10 @@
     <p>Plan de Mantenimiento Preventivo - Sistema de Agua Potable y Alcantarillado</p>
   </div>
   <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="user-badge" id="usuarioActualBadge"></div>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesion</button>
+    </div>
     <div class="header-badge">Vigente 2026</div>
     <div id="serverStatusBadge" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:4px 10px;font-size:0.70rem;color:white;cursor:pointer;" onclick="mostrarInfoRed()" title="Ver informacion de red">
       <span id="serverDot" style="width:7px;height:7px;border-radius:50%;background:#ffcc00;display:inline-block;animation:pulse 1.5s infinite;"></span>
@@ -203,6 +251,7 @@
   </div>
 
   <!-- AGUA POTABLE -->
+  <div class="solo-admin">
   <div class="section-title"><span class="num">III</span> Mantenimiento - Sistema de Agua Potable</div>
   <div class="table-wrap">
     <table>
@@ -246,8 +295,10 @@
       </tbody>
     </table>
   </div>
+  </div>
 
   <!-- ALCANTARILLADO -->
+  <div class="solo-admin">
   <div class="section-title"><span class="num">IV</span> Mantenimiento - Sistema de Alcantarillado</div>
   <div class="table-wrap">
     <table>
@@ -270,13 +321,14 @@
       </tbody>
     </table>
   </div>
+  </div>
 
   <!-- HISTORIAL -->
   <div class="historial-header">
     <div class="section-title" style="border:none;padding:0;margin:0"><span class="num">V</span> Historial de Ordenes de Servicio</div>
     <div class="hist-actions">
       <button class="btn-export btn-csv" onclick="exportarCSV()">&#128196; Exportar Excel/CSV</button>
-      <button class="btn-export btn-clear" onclick="limpiarHistorial()">&#128465; Limpiar Todo</button>
+      <button class="btn-export btn-clear" id="btnLimpiarTodo" onclick="limpiarHistorial()">&#128465; Limpiar Todo</button>
     </div>
   </div>
   <div class="table-wrap">
@@ -471,37 +523,6 @@
   </div>
 </div>
 
-<!-- MODAL PIN DE VERIFICACION DE TECNICO -->
-<div class="modal-overlay" id="modalPIN">
-  <div class="modal" style="width:380px;">
-    <div class="modal-header" style="background:linear-gradient(135deg,#1a7a4a,#27ae60);">
-      <h3>Verificar Identidad</h3>
-      <button class="modal-close" onclick="cerrarPIN()">&#10005;</button>
-    </div>
-    <div class="modal-body">
-      <div style="font-size:0.88rem;color:#2c3e56;margin-bottom:16px;line-height:1.5;">
-        Esta orden esta asignada a:<br>
-        <strong id="pinTecnicoNombre" style="color:#1a7a4a;font-size:0.98rem;"></strong>
-      </div>
-      <div class="os-field">
-        <label>Ingrese su PIN de 4 digitos</label>
-        <input type="password" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*"
-               placeholder="&#8226;&#8226;&#8226;&#8226;"
-               style="letter-spacing:10px;font-size:1.3rem;text-align:center;"
-               onkeydown="if(event.key==='Enter') validarPIN(); this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);"
-               oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
-      </div>
-      <div id="pinError" style="display:none;color:#c0392b;font-size:0.8rem;margin-top:10px;">
-        &#9888; PIN incorrecto. Intente nuevamente, o contacte al coordinador si olvido su PIN.
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="cerrarPIN()">Cancelar</button>
-      <button class="btn-save" style="background:#1a7a4a;" onclick="validarPIN()">Validar</button>
-    </div>
-  </div>
-</div>
-
 <!-- AREA DE IMPRESION -->
 <div id="printArea"></div>
 
@@ -523,20 +544,82 @@
 </div>
 
 <script>
-  // PIN de acceso por tecnico/operador. Solo quien conozca el PIN puede llenar
-  // el formulario de tarea de las ordenes asignadas a ese tecnico.
-  // Puede cambiar estos numeros por los que prefiera.
-  var TECNICO_PINS = {
-    'Tec. Grimaniel Estela Guevara': '1001',
-    'Op. Jorge Vasquez Ocana':       '1002',
-    'Op. Jairo Herrera Ramirez':     '1003',
-    'Op. Elver Davila Bustamante':   '1004',
-    'Op. Gilmer Alarcon Torres':     '1005',
-    'Op. Angel Alejandria Estela':   '1006',
-    'Op. Oscar Mijahuanca Huaman':   '1007',
-    'Op. Victor Carranza Cabrera':   '1008'
-  };
-  var _pinPendingIdx = null;
+  // ============================================================
+  // SISTEMA DE CREDENCIALES Y ACCESO POR MODULO
+  // ============================================================
+  // Datos de ejemplo: cambie usuario/clave/nombre segun corresponda.
+  // "nombre" debe coincidir EXACTAMENTE con el texto usado en "Tecnico Asignado"
+  // para que el filtrado de ordenes por tecnico funcione bien.
+  var USUARIOS = [
+    { usuario: 'coordinador', clave: 'coord2026', rol: 'coordinador', nombre: 'Coordinador General' },
+    { usuario: 'supervisor',  clave: 'super2026', rol: 'supervisor',  nombre: 'Supervisor de Mantenimiento' },
+    { usuario: 'grimaniel', clave: '1001', rol: 'tecnico', nombre: 'Tec. Grimaniel Estela Guevara' },
+    { usuario: 'jorge',     clave: '1002', rol: 'tecnico', nombre: 'Op. Jorge Vasquez Ocana' },
+    { usuario: 'jairo',     clave: '1003', rol: 'tecnico', nombre: 'Op. Jairo Herrera Ramirez' },
+    { usuario: 'elver',     clave: '1004', rol: 'tecnico', nombre: 'Op. Elver Davila Bustamante' },
+    { usuario: 'gilmer',    clave: '1005', rol: 'tecnico', nombre: 'Op. Gilmer Alarcon Torres' },
+    { usuario: 'angel',     clave: '1006', rol: 'tecnico', nombre: 'Op. Angel Alejandria Estela' },
+    { usuario: 'oscar',     clave: '1007', rol: 'tecnico', nombre: 'Op. Oscar Mijahuanca Huaman' },
+    { usuario: 'victor',    clave: '1008', rol: 'tecnico', nombre: 'Op. Victor Carranza Cabrera' }
+  ];
+  var SESSION_KEY = 'eps_maranon_sesion';
+  var currentUser = null;
+
+  function iniciarSesion() {
+    var u = (document.getElementById('loginUsuario').value || '').trim();
+    var c = (document.getElementById('loginClave').value || '').trim();
+    var encontrado = null;
+    for (var i = 0; i < USUARIOS.length; i++) {
+      if (USUARIOS[i].usuario.toLowerCase() === u.toLowerCase() && USUARIOS[i].clave === c) {
+        encontrado = USUARIOS[i];
+        break;
+      }
+    }
+    if (!encontrado) {
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    currentUser = encontrado;
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
+    mostrarApp();
+  }
+
+  function cerrarSesion() {
+    try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+    location.reload();
+  }
+
+  function aplicarPermisos() {
+    if (!currentUser) return;
+    var esTec = currentUser.rol === 'tecnico';
+    var esCoord = currentUser.rol === 'coordinador';
+
+    // Solo Coordinador y Supervisor crean ordenes de servicio (secciones III y IV)
+    document.querySelectorAll('.solo-admin').forEach(function(el) {
+      el.style.display = esTec ? 'none' : '';
+    });
+
+    // Solo Coordinador puede borrar todo el historial
+    var btnClear = document.getElementById('btnLimpiarTodo');
+    if (btnClear) btnClear.style.display = esCoord ? '' : 'none';
+
+    // Insignia de usuario en el encabezado
+    var badge = document.getElementById('usuarioActualBadge');
+    if (badge) {
+      var rolTexto = currentUser.rol.charAt(0).toUpperCase() + currentUser.rol.slice(1);
+      badge.textContent = '\u{1F464} ' + currentUser.nombre + ' \u2022 ' + rolTexto;
+    }
+  }
+
+  function mostrarApp() {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.querySelector('.header').style.display = 'flex';
+    document.querySelector('.container').style.display = 'block';
+    aplicarPermisos();
+    cargarHistorial();
+    verificarURLTarea();
+    detectarRed();
+  }
 
   var STORE_KEY = 'eps_maranon_historial';
   var historial = [];
@@ -680,13 +763,29 @@
   function renderHistorial() {
     var tbody = document.getElementById('historialBody');
     tbody.innerHTML = '';
-    if (historial.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="14"><div class="historial-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/></svg>No hay ordenes registradas.</div></td></tr>';
+    var esTec = currentUser && currentUser.rol === 'tecnico';
+
+    var filas = [];
+    historial.forEach(function(os, idx) {
+      if (esTec && os.tecnico !== currentUser.nombre) return;
+      filas.push({ os: os, idx: idx });
+    });
+
+    if (filas.length === 0) {
+      var msg = esTec ? 'No tiene ordenes asignadas.' : 'No hay ordenes registradas.';
+      tbody.innerHTML = '<tr><td colspan="14"><div class="historial-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/></svg>' + msg + '</div></td></tr>';
       return;
     }
-    historial.forEach(function(os, idx) {
+    filas.forEach(function(item) {
+      var os = item.os, idx = item.idx;
       var estadoKey = os.estado.replace(/\s/g,'');
       var tr = document.createElement('tr');
+      var celdaWA = esTec ? '<td style="text-align:center;color:#c4d3e0;">&mdash;</td>' :
+        '<td style="text-align:center"><button class="btn-wa-row" onclick="enviarWhatsAppDirecto(' + idx + ')">&#128232; WhatsApp</button></td>';
+      var celdaEditar = esTec ? '<td style="text-align:center;color:#c4d3e0;">&mdash;</td>' :
+        '<td style="text-align:center"><button class="btn-edit-row" onclick="editarOS(' + idx + ')">Editar</button></td>';
+      var celdaEliminar = esTec ? '<td style="text-align:center;color:#c4d3e0;">&mdash;</td>' :
+        '<td style="text-align:center"><button class="btn-delete-row" onclick="eliminarOS(' + idx + ')">Eliminar</button></td>';
       tr.innerHTML =
         '<td><strong>' + os.id + '</strong></td>' +
         '<td>' + os.codigo + '</td>' +
@@ -698,10 +797,10 @@
         '<td>' + os.prioridad + '</td>' +
         '<td><span class="badge-estado badge-' + estadoKey + '">' + os.estado + '</span></td>' +
         '<td style="text-align:center"><button class="btn-tarea-row" onclick="abrirTarea(' + idx + ')">Llenar</button></td>' +
-        '<td style="text-align:center"><button class="btn-wa-row" onclick="enviarWhatsAppDirecto(' + idx + ')">&#128232; WhatsApp</button></td>' +
-        '<td style="text-align:center"><button class="btn-edit-row" onclick="editarOS(' + idx + ')">Editar</button></td>' +
+        celdaWA +
+        celdaEditar +
         '<td style="text-align:center"><button class="btn-print-row" onclick="imprimirOS(' + idx + ')">PDF</button></td>' +
-        '<td style="text-align:center"><button class="btn-delete-row" onclick="eliminarOS(' + idx + ')">Eliminar</button></td>';
+        celdaEliminar;
       tbody.appendChild(tr);
     });
   }
@@ -1005,39 +1104,15 @@
   }
 
     // TAREA
-  // Puerta de acceso: antes de abrir el formulario, exige el PIN del tecnico asignado.
+  // Puerta de acceso: verifica que el usuario logueado sea el tecnico asignado
+  // (o un rol administrativo) antes de abrir el formulario.
   function abrirTarea(idx) {
     var os = historial[idx];
     if (!os) return;
-    _pinPendingIdx = idx;
-    document.getElementById('pinTecnicoNombre').textContent = os.tecnico || '-';
-    document.getElementById('pinInput').value = '';
-    document.getElementById('pinError').style.display = 'none';
-    document.getElementById('modalPIN').classList.add('active');
-    setTimeout(function() {
-      var el = document.getElementById('pinInput');
-      if (el) el.focus();
-    }, 150);
-  }
-
-  function cerrarPIN() {
-    document.getElementById('modalPIN').classList.remove('active');
-    _pinPendingIdx = null;
-  }
-
-  function validarPIN() {
-    var idx = _pinPendingIdx;
-    var os = historial[idx];
-    if (!os) { cerrarPIN(); return; }
-    var pinIngresado = (document.getElementById('pinInput').value || '').trim();
-    var pinCorrecto = TECNICO_PINS[os.tecnico];
-    if (!pinCorrecto || pinIngresado !== pinCorrecto) {
-      document.getElementById('pinError').style.display = 'block';
-      document.getElementById('pinInput').value = '';
-      document.getElementById('pinInput').focus();
+    if (currentUser && currentUser.rol === 'tecnico' && os.tecnico !== currentUser.nombre) {
+      alert('Esta orden no esta asignada a su usuario. Solo puede llenar sus propias ordenes.');
       return;
     }
-    document.getElementById('modalPIN').classList.remove('active');
     abrirFormularioTarea(idx);
   }
 
@@ -1419,12 +1494,32 @@
   // INIT
   document.getElementById('modalOS').addEventListener('click', function(e) { if (e.target === this) cerrarOS(); });
   document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
-  document.getElementById('modalPIN').addEventListener('click', function(e) { if (e.target === this) cerrarPIN(); });
   document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 
-  cargarHistorial();
-  verificarURLTarea();
-  detectarRed();
+  // Verificar si ya hay una sesion activa en este navegador (misma pestana/sesion)
+  (function iniciarVerificacionSesion() {
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.container').style.display = 'none';
+    try {
+      var guardado = sessionStorage.getItem(SESSION_KEY);
+      if (guardado) {
+        var u = JSON.parse(guardado);
+        var valido = USUARIOS.some(function(x) { return x.usuario === u.usuario && x.clave === u.clave; });
+        if (valido) { currentUser = u; }
+      }
+    } catch(e) {}
+
+    if (currentUser) {
+      mostrarApp();
+    } else {
+      document.getElementById('loginOverlay').style.display = 'flex';
+      setTimeout(function() {
+        var el = document.getElementById('loginUsuario');
+        if (el) el.focus();
+      }, 100);
+    }
+  })();
 </script>
+
 </body>
 </html>
