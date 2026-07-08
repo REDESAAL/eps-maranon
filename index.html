@@ -204,6 +204,37 @@
   .user-badge { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; padding: 5px 12px; font-size: 0.72rem; color: white; }
   .btn-logout { background: none; border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 10px; padding: 3px 10px; font-size: 0.7rem; cursor: pointer; }
   .btn-logout:hover { background: rgba(255,255,255,0.15); }
+
+  /* CONFIGURACION DEL SISTEMA */
+  .config-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px; }
+  @media (max-width: 860px) { .config-wrap { grid-template-columns: 1fr; } }
+  .config-col { background: white; border-radius: 12px; box-shadow: var(--sombra); padding: 20px; }
+  .config-col h4 { color: var(--azul); font-family: "Bebas Neue", sans-serif; letter-spacing: 1px; font-size: 1.1rem; margin-bottom: 14px; border-bottom: 2px solid #eaf2fb; padding-bottom: 8px; }
+  .config-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .config-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: #f8fbff; border: 1px solid #e0eaf5; border-radius: 8px; padding: 10px 12px; }
+  .config-item-info { flex: 1; font-size: 0.82rem; }
+  .config-item-info strong { color: var(--azul); display: block; margin-bottom: 2px; }
+  .config-item-info .meta { color: #7a8fa6; font-size: 0.76rem; }
+  .config-item-info .coords { font-size: 0.74rem; color: #4a6a8a; margin-top: 3px; }
+  .btn-config-del { background: none; border: none; color: var(--rojo); cursor: pointer; font-size: 1rem; padding: 2px 6px; flex-shrink: 0; }
+  .btn-config-del:hover { background: #fdeaea; border-radius: 6px; }
+  .config-form { border-top: 1px dashed #d0dce8; padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .config-form input, .config-form textarea { width: 100%; border: 1.5px solid #d0dce8; border-radius: 7px; padding: 9px 11px; font-family: "DM Sans", sans-serif; font-size: 0.85rem; color: var(--texto); background: #f8fbff; }
+  .config-form textarea { min-height: 50px; resize: vertical; }
+  .config-label { font-size: 0.74rem; font-weight: 600; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; }
+  .config-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; background: #f8fbff; border: 1px solid #e0eaf5; border-radius: 7px; padding: 10px; }
+  .config-checks label { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--texto); cursor: pointer; }
+  .btn-config-add { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+  .btn-config-add:hover { background: var(--azul-claro); }
+
+  /* INSIGNIAS DE NAVEGACION (circulos) */
+  .badges-nav { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; margin: 8px 0 40px; }
+  .badge-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; background: none; border: none; padding: 0; }
+  .badge-circle { width: 108px; height: 108px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff, #e6e6e6 65%, #cfcfcf 100%); border: 1px solid #d2d2d2; box-shadow: 0 3px 8px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .badge-item:hover .badge-circle { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.8); }
+  .badge-circle svg { width: 46px; height: 46px; }
+  .badge-label { margin-top: 10px; color: var(--azul); font-weight: 800; text-transform: uppercase; text-align: center; font-size: 0.78rem; line-height: 1.25; letter-spacing: 0.3px; max-width: 130px; }
+  .badge-item.badge-active .badge-circle { background: radial-gradient(circle at 35% 30%, #eaf5ff, #cfe6f7 65%, #9fd3ff 100%); border: 1px solid #0b4f8a; box-shadow: 0 0 0 3px rgba(11,79,138,0.15), 0 3px 8px rgba(0,0,0,0.12); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -262,75 +293,83 @@
     Garantizar la operatividad y vida util de los componentes del sistema de agua potable y alcantarillado mediante actividades preventivas programadas, asignacion de coordinadores responsables y emision de ordenes de servicio.
   </div>
 
+  <!-- INSIGNIAS DE NAVEGACION -->
+  <div class="solo-admin badges-nav">
+    <button class="badge-item" data-sec="config" onclick="mostrarSeccion('config')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div class="badge-label">II<br>Configuracion<br>del Sistema</div>
+    </button>
+    <button class="badge-item" data-sec="agua" onclick="mostrarSeccion('agua')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M12 2s7 8.5 7 13a7 7 0 0 1-14 0c0-4.5 7-13 7-13z"/></svg>
+      </div>
+      <div class="badge-label">III<br>Agua Potable</div>
+    </button>
+    <button class="badge-item" data-sec="alcant" onclick="mostrarSeccion('alcant')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16" stroke-width="1.2"/><path d="M7 7l10 10M17 7L7 17" stroke-width="1"/></svg>
+      </div>
+      <div class="badge-label">IV<br>Alcantarillado</div>
+    </button>
+    <button class="badge-item" data-sec="todo" onclick="mostrarSeccion('todo')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <div class="badge-label">Ver Todo</div>
+    </button>
+  </div>
+
+  <!-- CONFIGURACION DEL SISTEMA -->
+  <div class="solo-admin" id="seccionConfig">
+  <div class="section-title"><span class="num">II</span> Configuracion del Sistema</div>
+  <div class="config-wrap">
+    <div class="config-col">
+      <h4>Agua Potable</h4>
+      <div id="configListaAgua" class="config-lista"></div>
+      <div class="config-form">
+        <input type="text" id="cfgAguaComponente" placeholder="Componente (ej. Valvula de Purga)">
+        <input type="text" id="cfgAguaFrecuencia" placeholder="Frecuencia (ej. Trimestral)">
+        <textarea id="cfgAguaActividad" placeholder="Actividad (ej. Inspeccion, limpieza, prueba operativa)"></textarea>
+        <label class="config-label">Coordinador(es) responsable(s)</label>
+        <div id="cfgAguaCoords" class="config-checks"></div>
+        <button class="btn-config-add" onclick="agregarComponente('agua')">&#10133; Agregar componente</button>
+      </div>
+    </div>
+    <div class="config-col">
+      <h4>Alcantarillado</h4>
+      <div id="configListaAlcant" class="config-lista"></div>
+      <div class="config-form">
+        <input type="text" id="cfgAlcantComponente" placeholder="Componente (ej. Buzones)">
+        <input type="text" id="cfgAlcantFrecuencia" placeholder="Frecuencia (ej. Semestral)">
+        <textarea id="cfgAlcantActividad" placeholder="Actividad (ej. Inspeccion y limpieza)"></textarea>
+        <label class="config-label">Coordinador(es) responsable(s)</label>
+        <div id="cfgAlcantCoords" class="config-checks"></div>
+        <button class="btn-config-add" onclick="agregarComponente('alcantarillado')">&#10133; Agregar componente</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
   <!-- AGUA POTABLE -->
-  <div class="solo-admin">
+  <div class="solo-admin" id="seccionAgua">
   <div class="section-title"><span class="num">III</span> Mantenimiento - Sistema de Agua Potable</div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Componente</th><th>Frecuencia</th><th>Actividad</th><th>Coordinador Responsable</th><th>Orden de Servicio</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Valvulas Reductoras de Presion</strong></td>
-          <td><span class="badge-freq">Trimestral</span></td>
-          <td>Inspeccion, limpieza, calibracion y verificacion</td>
-          <td><select class="coord-select"><option>Tec. Grimaniel Estela Guevara</option><option>Op. Jorge Vasquez Ocana</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Valvulas Reductoras de Presion','Trimestral')">&#128196; Crear O/S</button></td>
-        </tr>
-        <tr>
-          <td><strong>Manometros</strong></td>
-          <td><span class="badge-freq">Quincenal</span></td>
-          <td>Control y verificacion de presion</td>
-          <td><select class="coord-select"><option>Tec. Grimaniel Estela Guevara</option><option>Op. Jorge Vasquez Ocana</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Manometros','Quincenal')">&#128196; Crear O/S</button></td>
-        </tr>
-        <tr>
-          <td><strong>Dataloggers</strong></td>
-          <td><span class="badge-freq">Cada 03 dias</span></td>
-          <td>Inspeccion, retirar, instalar y activar</td>
-          <td><select class="coord-select"><option>Tec. Grimaniel Estela Guevara</option><option>Op. Jairo Herrera Ramirez</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Dataloggers','Cada 03 dias')">&#128196; Crear O/S</button></td>
-        </tr>
-        <tr>
-          <td><strong>Grifo Contra Incendio</strong></td>
-          <td><span class="badge-freq">Semestral</span></td>
-          <td>Inspeccion y mantenimiento preventivo</td>
-          <td><select class="coord-select"><option>Op. Elver Davila Bustamante</option><option>Op. Gilmer Alarcon Torres</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Grifo Contra Incendio','Semestral')">&#128196; Crear O/S</button></td>
-        </tr>
-        <tr>
-          <td><strong>Valvulas de Aire</strong></td>
-          <td><span class="badge-freq">Semestral</span></td>
-          <td>Inspeccion y mantenimiento preventivo y/o correctivo</td>
-          <td><select class="coord-select"><option>Op. Gilmer Alarcon Torres</option><option>Op. Oscar Mijahuanca Huaman</option><option>Op. Angel Alejandria Estela</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Valvulas de Aire','Semestral')">&#128196; Crear O/S</button></td>
-        </tr>
-      </tbody>
+      <tbody id="tablaAguaBody"></tbody>
     </table>
   </div>
   </div>
 
   <!-- ALCANTARILLADO -->
-  <div class="solo-admin">
+  <div class="solo-admin" id="seccionAlcant">
   <div class="section-title"><span class="num">IV</span> Mantenimiento - Sistema de Alcantarillado</div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Componente</th><th>Frecuencia</th><th>Actividad</th><th>Coordinador Responsable</th><th>Orden de Servicio</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Buzones</strong></td>
-          <td><span class="badge-freq">Semestral</span></td>
-          <td>Inspeccion y limpieza</td>
-          <td><select class="coord-select"><option>Op. Elver Davila Bustamante</option><option>Op. Angel Alejandria Estela</option><option>Op. Oscar Mijahuanca Huaman</option><option>Op. Gilmer Alarcon Torres</option><option>Op. Victor Carranza Cabrera</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Buzones','Semestral')">&#128196; Crear O/S</button></td>
-        </tr>
-        <tr>
-          <td><strong>Red de Alcantarillado</strong></td>
-          <td><span class="badge-freq">Programado</span></td>
-          <td>Limpieza con hidrojet e inspeccion</td>
-          <td><select class="coord-select"><option>Op. Angel Alejandria Estela</option><option>Op. Oscar Mijahuanca Huaman</option><option>Op. Victor Carranza Cabrera</option></select></td>
-          <td><button class="os-btn" onclick="abrirOS('Red de Alcantarillado','Programado')">&#128196; Crear O/S</button></td>
-        </tr>
-      </tbody>
+      <tbody id="tablaAlcantBody"></tbody>
     </table>
   </div>
   </div>
@@ -516,7 +555,7 @@
           <select id="tareaEstado"><option>Pendiente</option><option>En Proceso</option><option>Completado</option></select>
         </div>
         <div class="os-field full">
-          <label>Evidencia del Trabajo (hasta 4 archivos)</label>
+          <label>Evidencia del Trabajo (hasta 10 archivos)</label>
           <div class="upload-area" id="uploadArea" onclick="document.getElementById('tareaArchivo').click()">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir archivos</div>
@@ -699,9 +738,42 @@
     document.querySelector('.container').style.display = 'block';
     aplicarPermisos();
     cargarHistorial();
+    cargarPlanGuardado();
+    firebaseCargarPlanInicial(function() {
+      renderTodoElPlan();
+      irASeccionPorURL();
+    });
     firebaseEscucharCambios();
     verificarURLTarea();
     detectarRed();
+  }
+
+  // Filtra la vista para mostrar solo la seccion elegida (o todas si es 'todo')
+  function mostrarSeccion(nombre) {
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant' };
+    Object.keys(secciones).forEach(function(key) {
+      var el = document.getElementById(secciones[key]);
+      if (!el) return;
+      el.style.display = (nombre === 'todo' || key === nombre) ? '' : 'none';
+    });
+    document.querySelectorAll('.badge-item').forEach(function(b) { b.classList.remove('badge-active'); });
+    var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
+    if (btnActivo) btnActivo.classList.add('badge-active');
+    if (nombre !== 'todo') {
+      var destino = document.getElementById(secciones[nombre]);
+      if (destino) setTimeout(function() { destino.scrollIntoView({ behavior: 'smooth' }); }, 60);
+    }
+  }
+
+  // Si la URL trae ?seccion=config|agua|alcant, muestra esa seccion directamente al cargar
+  function irASeccionPorURL() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var seccion = params.get('seccion');
+      if (seccion === 'config' || seccion === 'agua' || seccion === 'alcant') {
+        mostrarSeccion(seccion);
+      }
+    } catch(e) {}
   }
 
   // MI CUENTA - cambiar usuario y/o contrasena propios
@@ -765,6 +837,165 @@
   }
 
   var STORE_KEY = 'eps_maranon_historial';
+  var MAX_ARCHIVOS = 10; // limite de fotos/archivos de evidencia por orden
+
+  // ============================================================
+  // CONFIGURACION DEL SISTEMA: componentes del plan de mantenimiento
+  // ============================================================
+  var PLAN_KEY = 'eps_maranon_plan';
+
+  var planAgua = [
+    { componente: 'Valvulas Reductoras de Presion', frecuencia: 'Trimestral', actividad: 'Inspeccion, limpieza, calibracion y verificacion', coordinadores: ['Tec. Grimaniel Estela Guevara', 'Op. Jorge Vasquez Ocana'] },
+    { componente: 'Manometros', frecuencia: 'Quincenal', actividad: 'Control y verificacion de presion', coordinadores: ['Tec. Grimaniel Estela Guevara', 'Op. Jorge Vasquez Ocana'] },
+    { componente: 'Dataloggers', frecuencia: 'Cada 03 dias', actividad: 'Inspeccion, retirar, instalar y activar', coordinadores: ['Tec. Grimaniel Estela Guevara', 'Op. Jairo Herrera Ramirez'] },
+    { componente: 'Grifo Contra Incendio', frecuencia: 'Semestral', actividad: 'Inspeccion y mantenimiento preventivo', coordinadores: ['Op. Elver Davila Bustamante', 'Op. Gilmer Alarcon Torres'] },
+    { componente: 'Valvulas de Aire', frecuencia: 'Semestral', actividad: 'Inspeccion y mantenimiento preventivo y/o correctivo', coordinadores: ['Op. Gilmer Alarcon Torres', 'Op. Oscar Mijahuanca Huaman', 'Op. Angel Alejandria Estela'] },
+    { componente: 'Valvula de Purga', frecuencia: 'Trimestral', actividad: 'Inspeccion, limpieza, prueba operativa', coordinadores: ['Tec. Grimaniel Estela Guevara'] }
+  ];
+
+  var planAlcantarillado = [
+    { componente: 'Buzones', frecuencia: 'Semestral', actividad: 'Inspeccion y limpieza', coordinadores: ['Op. Elver Davila Bustamante', 'Op. Angel Alejandria Estela', 'Op. Oscar Mijahuanca Huaman', 'Op. Gilmer Alarcon Torres', 'Op. Victor Carranza Cabrera'] },
+    { componente: 'Red de Alcantarillado', frecuencia: 'Programado', actividad: 'Limpieza con hidrojet e inspeccion', coordinadores: ['Op. Angel Alejandria Estela', 'Op. Oscar Mijahuanca Huaman', 'Op. Victor Carranza Cabrera'] }
+  ];
+
+  function cargarPlanGuardado() {
+    try {
+      var guardado = localStorage.getItem(PLAN_KEY);
+      if (guardado) {
+        var data = JSON.parse(guardado);
+        if (data && Array.isArray(data.agua) && data.agua.length > 0) { planAgua = data.agua; }
+        if (data && Array.isArray(data.alcantarillado) && data.alcantarillado.length > 0) { planAlcantarillado = data.alcantarillado; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarPlan() {
+    try { localStorage.setItem(PLAN_KEY, JSON.stringify({ agua: planAgua, alcantarillado: planAlcantarillado })); } catch(e) {}
+    firebaseGuardarPlan();
+  }
+
+  function firebaseGuardarPlan() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('plan').set({ agua: planAgua, alcantarillado: planAlcantarillado }).catch(function() {});
+  }
+
+  function firebaseCargarPlanInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('plan').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (data && Array.isArray(data.agua) && data.agua.length > 0) { planAgua = data.agua; }
+        if (data && Array.isArray(data.alcantarillado) && data.alcantarillado.length > 0) { planAlcantarillado = data.alcantarillado; }
+        else { firebaseGuardarPlan(); }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  // Lista de nombres de tecnicos/operadores disponibles para asignar como coordinadores
+  function listaNombresTecnicos() {
+    return USUARIOS.filter(function(u) { return u.rol === 'tecnico'; }).map(function(u) { return u.nombre; });
+  }
+
+  function renderChecksCoordinadores(idCont) {
+    var cont = document.getElementById(idCont);
+    if (!cont) return;
+    cont.innerHTML = listaNombresTecnicos().map(function(nombre, i) {
+      var safeId = idCont + '_chk' + i;
+      return '<label><input type="checkbox" id="' + safeId + '" value="' + nombre.replace(/"/g,'&quot;') + '"> ' + nombre + '</label>';
+    }).join('');
+  }
+
+  function renderPlanTabla(sistema) {
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var tbodyId = sistema === 'agua' ? 'tablaAguaBody' : 'tablaAlcantBody';
+    var tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    if (plan.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#7a8fa6;padding:20px;">No hay componentes configurados. Agreguelos en la seccion II.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = plan.map(function(item) {
+      var opciones = (item.coordinadores || []).map(function(c) { return '<option>' + c + '</option>'; }).join('');
+      var compEsc = item.componente.replace(/'/g, "\\'");
+      var freqEsc = item.frecuencia.replace(/'/g, "\\'");
+      return '<tr>' +
+        '<td><strong>' + item.componente + '</strong></td>' +
+        '<td><span class="badge-freq">' + item.frecuencia + '</span></td>' +
+        '<td>' + item.actividad + '</td>' +
+        '<td><select class="coord-select">' + opciones + '</select></td>' +
+        '<td><button class="os-btn" onclick="abrirOS(\'' + compEsc + '\',\'' + freqEsc + '\')">&#128196; Crear O/S</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderConfiguracion(sistema) {
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var listaId = sistema === 'agua' ? 'configListaAgua' : 'configListaAlcant';
+    var lista = document.getElementById(listaId);
+    if (!lista) return;
+    if (plan.length === 0) {
+      lista.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;">Sin componentes aun.</div>';
+      return;
+    }
+    lista.innerHTML = plan.map(function(item, idx) {
+      return '<div class="config-item">' +
+        '<div class="config-item-info">' +
+          '<strong>' + item.componente + '</strong>' +
+          '<span class="meta">' + item.frecuencia + ' &middot; ' + item.actividad + '</span>' +
+          '<div class="coords">' + (item.coordinadores || []).join(', ') + '</div>' +
+        '</div>' +
+        '<button class="btn-config-del" onclick="eliminarComponente(\'' + sistema + '\', ' + idx + ')" title="Quitar componente">&#128465;</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function agregarComponente(sistema) {
+    var prefijo = sistema === 'agua' ? 'cfgAgua' : 'cfgAlcant';
+    var componente = (document.getElementById(prefijo + 'Componente').value || '').trim();
+    var frecuencia = (document.getElementById(prefijo + 'Frecuencia').value || '').trim();
+    var actividad = (document.getElementById(prefijo + 'Actividad').value || '').trim();
+    if (!componente || !frecuencia || !actividad) {
+      alert('Complete componente, frecuencia y actividad.');
+      return;
+    }
+    var checksContId = sistema === 'agua' ? 'cfgAguaCoords' : 'cfgAlcantCoords';
+    var checks = document.querySelectorAll('#' + checksContId + ' input[type="checkbox"]:checked');
+    var coordinadores = Array.prototype.map.call(checks, function(c) { return c.value; });
+    if (coordinadores.length === 0) {
+      alert('Seleccione al menos un coordinador/tecnico responsable.');
+      return;
+    }
+    var nuevo = { componente: componente, frecuencia: frecuencia, actividad: actividad, coordinadores: coordinadores };
+    if (sistema === 'agua') { planAgua.push(nuevo); } else { planAlcantarillado.push(nuevo); }
+    guardarPlan();
+    renderPlanTabla(sistema);
+    renderConfiguracion(sistema);
+    document.getElementById(prefijo + 'Componente').value = '';
+    document.getElementById(prefijo + 'Frecuencia').value = '';
+    document.getElementById(prefijo + 'Actividad').value = '';
+    renderChecksCoordinadores(checksContId);
+  }
+
+  function eliminarComponente(sistema, idx) {
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var item = plan[idx];
+    if (!item) return;
+    if (!confirm('Quitar el componente "' + item.componente + '" del plan? Esto no elimina ordenes ya creadas.')) return;
+    plan.splice(idx, 1);
+    guardarPlan();
+    renderPlanTabla(sistema);
+    renderConfiguracion(sistema);
+  }
+
+  function renderTodoElPlan() {
+    renderPlanTabla('agua');
+    renderPlanTabla('alcantarillado');
+    renderConfiguracion('agua');
+    renderConfiguracion('alcantarillado');
+    renderChecksCoordinadores('cfgAguaCoords');
+    renderChecksCoordinadores('cfgAlcantCoords');
+  }
 
   // ============================================================
   // SINCRONIZACION EN TIEMPO REAL CON FIREBASE (con autenticacion)
@@ -853,6 +1084,15 @@
       if (Array.isArray(data) && data.length > 0) {
         USUARIOS = data;
         try { localStorage.setItem(USUARIOS_KEY, JSON.stringify(USUARIOS)); } catch(err) {}
+      }
+    });
+    _fbDb.ref('plan').on('value', function(snap) {
+      var data = snap.val();
+      if (data) {
+        if (Array.isArray(data.agua) && data.agua.length > 0) { planAgua = data.agua; }
+        if (Array.isArray(data.alcantarillado) && data.alcantarillado.length > 0) { planAlcantarillado = data.alcantarillado; }
+        try { localStorage.setItem(PLAN_KEY, JSON.stringify({ agua: planAgua, alcantarillado: planAlcantarillado })); } catch(err) {}
+        renderTodoElPlan();
       }
     });
   }
@@ -1480,12 +1720,12 @@
   function cargarArchivos(input) {
     var files = [];
     for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
-    var MAX = 4;
+    var MAX = MAX_ARCHIVOS;
     var MAXSIZE = 15 * 1024 * 1024;
     var allowed = ['jpg','jpeg','png','pdf'];
     var disponibles = MAX - window._archivosData.length;
     if (disponibles <= 0) {
-      alert('Ya tiene 4 archivos. Quite alguno para agregar mas.');
+      alert('Ya tiene ' + MAX + ' archivos. Quite alguno para agregar mas.');
       input.value = ''; return;
     }
     if (files.length > disponibles) {
@@ -1534,7 +1774,7 @@
         '<button onclick="quitarArchivoIdx(' + pa.children.length + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
     }
     pa.appendChild(div);
-    if (window._archivosData.length >= 4) {
+    if (window._archivosData.length >= MAX_ARCHIVOS) {
       document.getElementById('uploadArea').style.display = 'none';
     }
   }
@@ -1558,7 +1798,7 @@
     pa.innerHTML = '';
     window._archivosData.forEach(function(d) { agregarPreview(d); });
     actualizarContador();
-    if (window._archivosData.length < 4) document.getElementById('uploadArea').style.display = 'block';
+    if (window._archivosData.length < MAX_ARCHIVOS) document.getElementById('uploadArea').style.display = 'block';
   }
 
   function formatBytes(b) {
