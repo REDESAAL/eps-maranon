@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Plan de Mantenimiento Preventivo - EPS Maranon S.A.</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -175,6 +176,37 @@
     .container { padding: 20px 10px; }
   }
 
+  /* RESPONSIVO PARA CELULARES DE TODA GAMA (pantallas pequenas y medianas) */
+  @media (max-width: 600px) {
+    body { font-size: 15px; }
+    .badges-nav { gap: 20px; }
+    .badge-circle { width: 78px; height: 78px; }
+    .badge-circle svg { width: 34px; height: 34px; }
+    .badge-label { font-size: 0.66rem; max-width: 100px; }
+    .section-title { font-size: 0.95rem; padding: 10px 0; }
+    .table-wrap table { font-size: 0.78rem; }
+    .table-wrap th, .table-wrap td { padding: 8px 6px !important; white-space: nowrap; }
+    .os-btn, .btn-tarea-row, .btn-wa-row, .btn-edit-row, .btn-print-row, .btn-delete-row { font-size: 0.72rem; padding: 6px 8px; }
+    .modal { width: 100%; max-width: 100vw; border-radius: 14px 14px 0 0; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .config-form input, .config-form textarea, .login-field input { font-size: 16px; } /* evita zoom automatico en iOS */
+    header div[style*="margin-left:auto"] { align-items: center; width: 100%; }
+    .user-badge { font-size: 0.66rem; }
+  }
+
+  @media (max-width: 380px) {
+    .badges-nav { gap: 12px; }
+    .badge-circle { width: 66px; height: 66px; }
+    .badge-circle svg { width: 28px; height: 28px; }
+    .badge-label { font-size: 0.6rem; max-width: 82px; }
+  }
+
+  /* Botones e inputs con tamano minimo tactil para pantallas tactiles de cualquier gama */
+  button, input[type="text"], input[type="password"], input[type="file"], select, textarea {
+    min-height: 40px;
+  }
+  .btn-config-del, .btn-close-preview, .modal-close { min-height: auto; }
+
   /* LOGIN */
   .login-overlay {
     position: fixed; inset: 0; z-index: 3000;
@@ -218,6 +250,11 @@
   .config-item-info .coords { font-size: 0.74rem; color: #4a6a8a; margin-top: 3px; }
   .btn-config-del { background: none; border: none; color: var(--rojo); cursor: pointer; font-size: 1rem; padding: 2px 6px; flex-shrink: 0; }
   .btn-config-del:hover { background: #fdeaea; border-radius: 6px; }
+  .btn-config-edit { background: none; border: none; color: var(--azul); cursor: pointer; font-size: 1rem; padding: 2px 6px; flex-shrink: 0; }
+  .btn-config-edit:hover { background: #eaf2fb; border-radius: 6px; }
+  .config-item-acciones { display: flex; gap: 2px; flex-shrink: 0; }
+  .config-form.editando { border: 1.5px solid var(--azul); border-radius: 10px; padding: 12px; background: #f5f9ff; }
+  .btn-config-cancelar { background: none; border: 1px solid #d0dce8; color: #7a8fa6; border-radius: 8px; padding: 8px; font-size: 0.8rem; cursor: pointer; }
   .config-form { border-top: 1px dashed #d0dce8; padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
   .config-form input, .config-form textarea { width: 100%; border: 1.5px solid #d0dce8; border-radius: 7px; padding: 9px 11px; font-family: "DM Sans", sans-serif; font-size: 0.85rem; color: var(--texto); background: #f8fbff; }
   .config-form textarea { min-height: 50px; resize: vertical; }
@@ -288,6 +325,11 @@
 
 <div class="container">
 
+  <div id="btnVolverWrap" style="display:none;margin-bottom:18px;">
+    <button class="btn-logout" style="color:var(--azul);border-color:var(--azul);" onclick="mostrarSeccion('inicio')">&#8592; Volver al inicio</button>
+  </div>
+
+  <div id="pantallaInicio">
   <div class="objetivo">
     <strong>I. OBJETIVO</strong>
     Garantizar la operatividad y vida util de los componentes del sistema de agua potable y alcantarillado mediante actividades preventivas programadas, asignacion de coordinadores responsables y emision de ordenes de servicio.
@@ -313,12 +355,13 @@
       </div>
       <div class="badge-label">IV<br>Alcantarillado</div>
     </button>
-    <button class="badge-item" data-sec="todo" onclick="mostrarSeccion('todo')">
+    <button class="badge-item" data-sec="historial" onclick="mostrarSeccion('historial')">
       <div class="badge-circle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
       </div>
-      <div class="badge-label">Ver Todo</div>
+      <div class="badge-label">V<br>Historial de<br>Ordenes de Servicio</div>
     </button>
+  </div>
   </div>
 
   <!-- CONFIGURACION DEL SISTEMA -->
@@ -328,25 +371,44 @@
     <div class="config-col">
       <h4>Agua Potable</h4>
       <div id="configListaAgua" class="config-lista"></div>
-      <div class="config-form">
+      <div class="config-form" id="cfgAguaForm">
         <input type="text" id="cfgAguaComponente" placeholder="Componente (ej. Valvula de Purga)">
         <input type="text" id="cfgAguaFrecuencia" placeholder="Frecuencia (ej. Trimestral)">
         <textarea id="cfgAguaActividad" placeholder="Actividad (ej. Inspeccion, limpieza, prueba operativa)"></textarea>
         <label class="config-label">Coordinador(es) responsable(s)</label>
         <div id="cfgAguaCoords" class="config-checks"></div>
-        <button class="btn-config-add" onclick="agregarComponente('agua')">&#10133; Agregar componente</button>
+        <button class="btn-config-add" id="cfgAguaBtnGuardar" onclick="agregarComponente('agua')">&#10133; Agregar componente</button>
+        <button class="btn-config-cancelar" id="cfgAguaBtnCancelar" style="display:none;" onclick="cancelarEdicionComponente('agua')">Cancelar edicion</button>
       </div>
     </div>
     <div class="config-col">
       <h4>Alcantarillado</h4>
       <div id="configListaAlcant" class="config-lista"></div>
-      <div class="config-form">
+      <div class="config-form" id="cfgAlcantForm">
         <input type="text" id="cfgAlcantComponente" placeholder="Componente (ej. Buzones)">
         <input type="text" id="cfgAlcantFrecuencia" placeholder="Frecuencia (ej. Semestral)">
         <textarea id="cfgAlcantActividad" placeholder="Actividad (ej. Inspeccion y limpieza)"></textarea>
         <label class="config-label">Coordinador(es) responsable(s)</label>
         <div id="cfgAlcantCoords" class="config-checks"></div>
-        <button class="btn-config-add" onclick="agregarComponente('alcantarillado')">&#10133; Agregar componente</button>
+        <button class="btn-config-add" id="cfgAlcantBtnGuardar" onclick="agregarComponente('alcantarillado')">&#10133; Agregar componente</button>
+        <button class="btn-config-cancelar" id="cfgAlcantBtnCancelar" style="display:none;" onclick="cancelarEdicionComponente('alcantarillado')">Cancelar edicion</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="panelTecnicos" style="display:none;margin-top:24px;">
+    <div class="config-col">
+      <h4>Tecnicos y Operarios (usuarios de acceso)</h4>
+      <div id="configListaTecnicos" class="config-lista"></div>
+      <div class="config-form" id="cfgTecForm">
+        <input type="text" id="cfgTecNombre" placeholder="Nombre completo (ej. Op. Juan Perez Lopez)">
+        <input type="text" id="cfgTecUsuario" placeholder="Usuario de acceso (ej. jperez)">
+        <div class="campo-clave">
+          <input type="password" id="cfgTecClave" placeholder="Contrasena">
+          <button type="button" class="btn-ver-clave" onclick="alternarClave('cfgTecClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
+        </div>
+        <button class="btn-config-add" id="cfgTecBtnGuardar" onclick="guardarTecnico()">&#10133; Agregar tecnico/operario</button>
+        <button class="btn-config-cancelar" id="cfgTecBtnCancelar" style="display:none;" onclick="cancelarEdicionTecnico()">Cancelar edicion</button>
       </div>
     </div>
   </div>
@@ -375,6 +437,7 @@
   </div>
 
   <!-- HISTORIAL -->
+  <div id="seccionHistorial">
   <div class="historial-header">
     <div class="section-title" style="border:none;padding:0;margin:0"><span class="num">V</span> Historial de Ordenes de Servicio</div>
     <div class="hist-actions">
@@ -407,6 +470,7 @@
     </table>
   </div>
 
+</div>
 </div>
 
 <!-- MODAL ORDEN DE SERVICIO -->
@@ -724,6 +788,10 @@
     var btnClear = document.getElementById('btnLimpiarTodo');
     if (btnClear) btnClear.style.display = esCoord ? '' : 'none';
 
+    // Solo Coordinador gestiona usuarios (tecnicos/operarios)
+    var panelTec = document.getElementById('panelTecnicos');
+    if (panelTec) panelTec.style.display = esCoord ? '' : 'none';
+
     // Insignia de usuario en el encabezado
     var badge = document.getElementById('usuarioActualBadge');
     if (badge) {
@@ -746,31 +814,54 @@
     firebaseEscucharCambios();
     verificarURLTarea();
     detectarRed();
+
+    // Vista inicial: el tecnico va directo a su historial (no tiene portada/circulos);
+    // Coordinador y Supervisor arrancan en la pantalla de inicio con los circulos.
+    if (currentUser && currentUser.rol === 'tecnico') {
+      mostrarSeccion('historial');
+    } else {
+      mostrarSeccion('inicio');
+    }
   }
 
-  // Filtra la vista para mostrar solo la seccion elegida (o todas si es 'todo')
+  // Filtra la vista: 'inicio' muestra la portada + circulos; cualquier otro
+  // nombre muestra solo esa seccion como si fuera una pagina aparte.
   function mostrarSeccion(nombre) {
-    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant' };
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial' };
+    var pantallaInicio = document.getElementById('pantallaInicio');
+    var btnVolver = document.getElementById('btnVolverWrap');
+    var esTec = currentUser && currentUser.rol === 'tecnico';
+
+    if (nombre === 'inicio') {
+      if (pantallaInicio) pantallaInicio.style.display = '';
+      if (btnVolver) btnVolver.style.display = 'none';
+      Object.keys(secciones).forEach(function(key) {
+        var el = document.getElementById(secciones[key]);
+        if (el) el.style.display = 'none';
+      });
+      document.querySelectorAll('.badge-item').forEach(function(b) { b.classList.remove('badge-active'); });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (pantallaInicio) pantallaInicio.style.display = 'none';
+    if (btnVolver) btnVolver.style.display = esTec ? 'none' : 'block';
     Object.keys(secciones).forEach(function(key) {
       var el = document.getElementById(secciones[key]);
-      if (!el) return;
-      el.style.display = (nombre === 'todo' || key === nombre) ? '' : 'none';
+      if (el) el.style.display = (key === nombre) ? '' : 'none';
     });
     document.querySelectorAll('.badge-item').forEach(function(b) { b.classList.remove('badge-active'); });
     var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
     if (btnActivo) btnActivo.classList.add('badge-active');
-    if (nombre !== 'todo') {
-      var destino = document.getElementById(secciones[nombre]);
-      if (destino) setTimeout(function() { destino.scrollIntoView({ behavior: 'smooth' }); }, 60);
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Si la URL trae ?seccion=config|agua|alcant, muestra esa seccion directamente al cargar
+  // Si la URL trae ?seccion=config|agua|alcant|historial, muestra esa seccion directamente al cargar
   function irASeccionPorURL() {
     try {
       var params = new URLSearchParams(window.location.search);
       var seccion = params.get('seccion');
-      if (seccion === 'config' || seccion === 'agua' || seccion === 'alcant') {
+      if (seccion === 'config' || seccion === 'agua' || seccion === 'alcant' || seccion === 'historial') {
         mostrarSeccion(seccion);
       }
     } catch(e) {}
@@ -929,6 +1020,8 @@
     }).join('');
   }
 
+  var _editandoComponente = { agua: null, alcantarillado: null };
+
   function renderConfiguracion(sistema) {
     var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
     var listaId = sistema === 'agua' ? 'configListaAgua' : 'configListaAlcant';
@@ -945,9 +1038,48 @@
           '<span class="meta">' + item.frecuencia + ' &middot; ' + item.actividad + '</span>' +
           '<div class="coords">' + (item.coordinadores || []).join(', ') + '</div>' +
         '</div>' +
-        '<button class="btn-config-del" onclick="eliminarComponente(\'' + sistema + '\', ' + idx + ')" title="Quitar componente">&#128465;</button>' +
+        '<div class="config-item-acciones">' +
+          '<button class="btn-config-edit" onclick="editarComponente(\'' + sistema + '\', ' + idx + ')" title="Editar componente">&#9998;</button>' +
+          '<button class="btn-config-del" onclick="eliminarComponente(\'' + sistema + '\', ' + idx + ')" title="Quitar componente">&#128465;</button>' +
+        '</div>' +
       '</div>';
     }).join('');
+  }
+
+  function editarComponente(sistema, idx) {
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var item = plan[idx];
+    if (!item) return;
+    var prefijo = sistema === 'agua' ? 'cfgAgua' : 'cfgAlcant';
+    var checksContId = prefijo + 'Coords';
+
+    _editandoComponente[sistema] = idx;
+
+    document.getElementById(prefijo + 'Componente').value = item.componente;
+    document.getElementById(prefijo + 'Frecuencia').value = item.frecuencia;
+    document.getElementById(prefijo + 'Actividad').value = item.actividad;
+    renderChecksCoordinadores(checksContId);
+    (item.coordinadores || []).forEach(function(nombre) {
+      var checks = document.querySelectorAll('#' + checksContId + ' input[type="checkbox"]');
+      checks.forEach(function(c) { if (c.value === nombre) c.checked = true; });
+    });
+
+    document.getElementById(prefijo + 'Form').classList.add('editando');
+    document.getElementById(prefijo + 'BtnGuardar').innerHTML = '&#128190; Guardar cambios';
+    document.getElementById(prefijo + 'BtnCancelar').style.display = 'block';
+    document.getElementById(prefijo + 'Form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function cancelarEdicionComponente(sistema) {
+    var prefijo = sistema === 'agua' ? 'cfgAgua' : 'cfgAlcant';
+    _editandoComponente[sistema] = null;
+    document.getElementById(prefijo + 'Componente').value = '';
+    document.getElementById(prefijo + 'Frecuencia').value = '';
+    document.getElementById(prefijo + 'Actividad').value = '';
+    renderChecksCoordinadores(prefijo + 'Coords');
+    document.getElementById(prefijo + 'Form').classList.remove('editando');
+    document.getElementById(prefijo + 'BtnGuardar').innerHTML = '&#10133; Agregar componente';
+    document.getElementById(prefijo + 'BtnCancelar').style.display = 'none';
   }
 
   function agregarComponente(sistema) {
@@ -959,22 +1091,30 @@
       alert('Complete componente, frecuencia y actividad.');
       return;
     }
-    var checksContId = sistema === 'agua' ? 'cfgAguaCoords' : 'cfgAlcantCoords';
+    var checksContId = prefijo + 'Coords';
     var checks = document.querySelectorAll('#' + checksContId + ' input[type="checkbox"]:checked');
     var coordinadores = Array.prototype.map.call(checks, function(c) { return c.value; });
     if (coordinadores.length === 0) {
       alert('Seleccione al menos un coordinador/tecnico responsable.');
       return;
     }
-    var nuevo = { componente: componente, frecuencia: frecuencia, actividad: actividad, coordinadores: coordinadores };
-    if (sistema === 'agua') { planAgua.push(nuevo); } else { planAlcantarillado.push(nuevo); }
+    var datos = { componente: componente, frecuencia: frecuencia, actividad: actividad, coordinadores: coordinadores };
+    var idxEdicion = _editandoComponente[sistema];
+
+    if (idxEdicion !== null && idxEdicion !== undefined) {
+      var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+      plan[idxEdicion] = datos;
+      cancelarEdicionComponente(sistema);
+    } else {
+      if (sistema === 'agua') { planAgua.push(datos); } else { planAlcantarillado.push(datos); }
+      document.getElementById(prefijo + 'Componente').value = '';
+      document.getElementById(prefijo + 'Frecuencia').value = '';
+      document.getElementById(prefijo + 'Actividad').value = '';
+      renderChecksCoordinadores(checksContId);
+    }
     guardarPlan();
     renderPlanTabla(sistema);
     renderConfiguracion(sistema);
-    document.getElementById(prefijo + 'Componente').value = '';
-    document.getElementById(prefijo + 'Frecuencia').value = '';
-    document.getElementById(prefijo + 'Actividad').value = '';
-    renderChecksCoordinadores(checksContId);
   }
 
   function eliminarComponente(sistema, idx) {
@@ -983,6 +1123,7 @@
     if (!item) return;
     if (!confirm('Quitar el componente "' + item.componente + '" del plan? Esto no elimina ordenes ya creadas.')) return;
     plan.splice(idx, 1);
+    if (_editandoComponente[sistema] === idx) { cancelarEdicionComponente(sistema); }
     guardarPlan();
     renderPlanTabla(sistema);
     renderConfiguracion(sistema);
@@ -993,6 +1134,128 @@
     renderPlanTabla('alcantarillado');
     renderConfiguracion('agua');
     renderConfiguracion('alcantarillado');
+    renderChecksCoordinadores('cfgAguaCoords');
+    renderChecksCoordinadores('cfgAlcantCoords');
+    renderListaTecnicos();
+  }
+
+  // ============================================================
+  // GESTION DE TECNICOS Y OPERARIOS (usuarios con rol 'tecnico')
+  // ============================================================
+  var _editandoTecnicoIdx = null;
+
+  function renderListaTecnicos() {
+    var lista = document.getElementById('configListaTecnicos');
+    if (!lista) return;
+    var tecnicos = USUARIOS.map(function(u, idx) { return { u: u, idx: idx }; })
+      .filter(function(x) { return x.u.rol === 'tecnico'; });
+    if (tecnicos.length === 0) {
+      lista.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;">Sin tecnicos registrados aun.</div>';
+      return;
+    }
+    lista.innerHTML = tecnicos.map(function(x) {
+      return '<div class="config-item">' +
+        '<div class="config-item-info">' +
+          '<strong>' + x.u.nombre + '</strong>' +
+          '<span class="meta">Usuario: ' + x.u.usuario + '</span>' +
+        '</div>' +
+        '<div class="config-item-acciones">' +
+          '<button class="btn-config-edit" onclick="editarTecnico(' + x.idx + ')" title="Editar">&#9998;</button>' +
+          '<button class="btn-config-del" onclick="eliminarTecnico(' + x.idx + ')" title="Quitar">&#128465;</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function editarTecnico(idx) {
+    var u = USUARIOS[idx];
+    if (!u) return;
+    _editandoTecnicoIdx = idx;
+    document.getElementById('cfgTecNombre').value = u.nombre;
+    document.getElementById('cfgTecUsuario').value = u.usuario;
+    document.getElementById('cfgTecClave').value = '';
+    document.getElementById('cfgTecClave').placeholder = 'Dejar en blanco para no cambiarla';
+    document.getElementById('cfgTecForm').classList.add('editando');
+    document.getElementById('cfgTecBtnGuardar').innerHTML = '&#128190; Guardar cambios';
+    document.getElementById('cfgTecBtnCancelar').style.display = 'block';
+    document.getElementById('cfgTecForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function cancelarEdicionTecnico() {
+    _editandoTecnicoIdx = null;
+    document.getElementById('cfgTecNombre').value = '';
+    document.getElementById('cfgTecUsuario').value = '';
+    document.getElementById('cfgTecClave').value = '';
+    document.getElementById('cfgTecClave').placeholder = 'Contrasena';
+    document.getElementById('cfgTecForm').classList.remove('editando');
+    document.getElementById('cfgTecBtnGuardar').innerHTML = '&#10133; Agregar tecnico/operario';
+    document.getElementById('cfgTecBtnCancelar').style.display = 'none';
+  }
+
+  function guardarTecnico() {
+    var nombre = (document.getElementById('cfgTecNombre').value || '').trim();
+    var usuario = (document.getElementById('cfgTecUsuario').value || '').trim();
+    var clave = (document.getElementById('cfgTecClave').value || '').trim();
+
+    if (!nombre || !usuario) {
+      alert('Complete el nombre completo y el usuario de acceso.');
+      return;
+    }
+
+    var enUsoPorOtro = USUARIOS.some(function(u, i) {
+      return u.usuario.toLowerCase() === usuario.toLowerCase() && i !== _editandoTecnicoIdx;
+    });
+    if (enUsoPorOtro) {
+      alert('Ese nombre de usuario ya esta en uso. Elija otro.');
+      return;
+    }
+
+    if (_editandoTecnicoIdx !== null && _editandoTecnicoIdx !== undefined) {
+      var nombreAnterior = USUARIOS[_editandoTecnicoIdx].nombre;
+      USUARIOS[_editandoTecnicoIdx].nombre = nombre;
+      USUARIOS[_editandoTecnicoIdx].usuario = usuario;
+      if (clave) { USUARIOS[_editandoTecnicoIdx].clave = clave; }
+
+      // Si cambio el nombre, actualizar referencias en el plan de mantenimiento
+      if (nombreAnterior !== nombre) {
+        [planAgua, planAlcantarillado].forEach(function(plan) {
+          plan.forEach(function(item) {
+            if (item.coordinadores) {
+              item.coordinadores = item.coordinadores.map(function(c) { return c === nombreAnterior ? nombre : c; });
+            }
+          });
+        });
+        guardarPlan();
+        renderPlanTabla('agua');
+        renderPlanTabla('alcantarillado');
+        renderConfiguracion('agua');
+        renderConfiguracion('alcantarillado');
+      }
+      cancelarEdicionTecnico();
+    } else {
+      if (!clave) {
+        alert('Ingrese una contrasena para el nuevo usuario.');
+        return;
+      }
+      USUARIOS.push({ usuario: usuario, clave: clave, rol: 'tecnico', nombre: nombre });
+      document.getElementById('cfgTecNombre').value = '';
+      document.getElementById('cfgTecUsuario').value = '';
+      document.getElementById('cfgTecClave').value = '';
+    }
+    guardarUsuarios();
+    renderListaTecnicos();
+    renderChecksCoordinadores('cfgAguaCoords');
+    renderChecksCoordinadores('cfgAlcantCoords');
+  }
+
+  function eliminarTecnico(idx) {
+    var u = USUARIOS[idx];
+    if (!u) return;
+    if (!confirm('Quitar el acceso de "' + u.nombre + '"? Ya no podra iniciar sesion. Las ordenes ya asignadas a su nombre se conservan en el historial.')) return;
+    USUARIOS.splice(idx, 1);
+    if (_editandoTecnicoIdx === idx) { cancelarEdicionTecnico(); }
+    guardarUsuarios();
+    renderListaTecnicos();
     renderChecksCoordinadores('cfgAguaCoords');
     renderChecksCoordinadores('cfgAlcantCoords');
   }
