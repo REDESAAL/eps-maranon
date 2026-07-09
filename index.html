@@ -398,7 +398,7 @@
 
   <div id="panelTecnicos" style="display:none;margin-top:24px;">
     <div class="config-col">
-      <h4>Tecnicos y Operarios (usuarios de acceso)</h4>
+      <h4>Usuarios del Sistema (Coordinador, Supervisor, Tecnicos)</h4>
       <div id="configListaTecnicos" class="config-lista"></div>
       <div class="config-form" id="cfgTecForm">
         <input type="text" id="cfgTecNombre" placeholder="Nombre completo (ej. Op. Juan Perez Lopez)">
@@ -407,7 +407,13 @@
           <input type="password" id="cfgTecClave" placeholder="Contrasena">
           <button type="button" class="btn-ver-clave" onclick="alternarClave('cfgTecClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
         </div>
-        <button class="btn-config-add" id="cfgTecBtnGuardar" onclick="guardarTecnico()">&#10133; Agregar tecnico/operario</button>
+        <label class="config-label">Rol</label>
+        <select id="cfgTecRol">
+          <option value="tecnico">Tecnico / Operario</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="coordinador">Coordinador</option>
+        </select>
+        <button class="btn-config-add" id="cfgTecBtnGuardar" onclick="guardarTecnico()">&#10133; Agregar usuario</button>
         <button class="btn-config-cancelar" id="cfgTecBtnCancelar" style="display:none;" onclick="cancelarEdicionTecnico()">Cancelar edicion</button>
       </div>
     </div>
@@ -761,6 +767,12 @@
       }
     }
     if (!encontrado) {
+      document.getElementById('loginError').textContent = 'Usuario o contrasena incorrectos.';
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    if (encontrado.activo === false) {
+      document.getElementById('loginError').textContent = 'Este usuario esta deshabilitado. Contacte al coordinador.';
       document.getElementById('loginError').style.display = 'block';
       return;
     }
@@ -1140,28 +1152,33 @@
   }
 
   // ============================================================
-  // GESTION DE TECNICOS Y OPERARIOS (usuarios con rol 'tecnico')
+  // GESTION DE USUARIOS (Coordinador, Supervisor, Tecnicos/Operarios)
   // ============================================================
   var _editandoTecnicoIdx = null;
+  var NOMBRES_ROL = { coordinador: 'Coordinador', supervisor: 'Supervisor', tecnico: 'Tecnico/Operario' };
 
   function renderListaTecnicos() {
     var lista = document.getElementById('configListaTecnicos');
     if (!lista) return;
-    var tecnicos = USUARIOS.map(function(u, idx) { return { u: u, idx: idx }; })
-      .filter(function(x) { return x.u.rol === 'tecnico'; });
-    if (tecnicos.length === 0) {
-      lista.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;">Sin tecnicos registrados aun.</div>';
+    if (USUARIOS.length === 0) {
+      lista.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;">Sin usuarios registrados aun.</div>';
       return;
     }
-    lista.innerHTML = tecnicos.map(function(x) {
+    lista.innerHTML = USUARIOS.map(function(u, idx) {
+      var deshabilitado = u.activo === false;
+      var estiloTachado = deshabilitado ? 'style="opacity:0.5;text-decoration:line-through;"' : '';
+      var etiquetaEstado = deshabilitado ? ' <span style="color:var(--rojo);text-decoration:none;font-weight:700;">(Deshabilitado)</span>' : '';
+      var iconoToggle = deshabilitado ? '&#128274;' : '&#128275;';
+      var tituloToggle = deshabilitado ? 'Habilitar acceso' : 'Deshabilitar acceso';
       return '<div class="config-item">' +
-        '<div class="config-item-info">' +
-          '<strong>' + x.u.nombre + '</strong>' +
-          '<span class="meta">Usuario: ' + x.u.usuario + '</span>' +
+        '<div class="config-item-info" ' + estiloTachado + '>' +
+          '<strong>' + u.nombre + etiquetaEstado + '</strong>' +
+          '<span class="meta">Usuario: ' + u.usuario + ' &middot; ' + (NOMBRES_ROL[u.rol] || u.rol) + '</span>' +
         '</div>' +
         '<div class="config-item-acciones">' +
-          '<button class="btn-config-edit" onclick="editarTecnico(' + x.idx + ')" title="Editar">&#9998;</button>' +
-          '<button class="btn-config-del" onclick="eliminarTecnico(' + x.idx + ')" title="Quitar">&#128465;</button>' +
+          '<button class="btn-config-edit" onclick="alternarActivoTecnico(' + idx + ')" title="' + tituloToggle + '">' + iconoToggle + '</button>' +
+          '<button class="btn-config-edit" onclick="editarTecnico(' + idx + ')" title="Editar">&#9998;</button>' +
+          '<button class="btn-config-del" onclick="eliminarTecnico(' + idx + ')" title="Quitar">&#128465;</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -1175,6 +1192,7 @@
     document.getElementById('cfgTecUsuario').value = u.usuario;
     document.getElementById('cfgTecClave').value = '';
     document.getElementById('cfgTecClave').placeholder = 'Dejar en blanco para no cambiarla';
+    document.getElementById('cfgTecRol').value = u.rol;
     document.getElementById('cfgTecForm').classList.add('editando');
     document.getElementById('cfgTecBtnGuardar').innerHTML = '&#128190; Guardar cambios';
     document.getElementById('cfgTecBtnCancelar').style.display = 'block';
@@ -1187,8 +1205,9 @@
     document.getElementById('cfgTecUsuario').value = '';
     document.getElementById('cfgTecClave').value = '';
     document.getElementById('cfgTecClave').placeholder = 'Contrasena';
+    document.getElementById('cfgTecRol').value = 'tecnico';
     document.getElementById('cfgTecForm').classList.remove('editando');
-    document.getElementById('cfgTecBtnGuardar').innerHTML = '&#10133; Agregar tecnico/operario';
+    document.getElementById('cfgTecBtnGuardar').innerHTML = '&#10133; Agregar usuario';
     document.getElementById('cfgTecBtnCancelar').style.display = 'none';
   }
 
@@ -1196,6 +1215,7 @@
     var nombre = (document.getElementById('cfgTecNombre').value || '').trim();
     var usuario = (document.getElementById('cfgTecUsuario').value || '').trim();
     var clave = (document.getElementById('cfgTecClave').value || '').trim();
+    var rol = document.getElementById('cfgTecRol').value;
 
     if (!nombre || !usuario) {
       alert('Complete el nombre completo y el usuario de acceso.');
@@ -1214,6 +1234,7 @@
       var nombreAnterior = USUARIOS[_editandoTecnicoIdx].nombre;
       USUARIOS[_editandoTecnicoIdx].nombre = nombre;
       USUARIOS[_editandoTecnicoIdx].usuario = usuario;
+      USUARIOS[_editandoTecnicoIdx].rol = rol;
       if (clave) { USUARIOS[_editandoTecnicoIdx].clave = clave; }
 
       // Si cambio el nombre, actualizar referencias en el plan de mantenimiento
@@ -1237,10 +1258,11 @@
         alert('Ingrese una contrasena para el nuevo usuario.');
         return;
       }
-      USUARIOS.push({ usuario: usuario, clave: clave, rol: 'tecnico', nombre: nombre });
+      USUARIOS.push({ usuario: usuario, clave: clave, rol: rol, nombre: nombre, activo: true });
       document.getElementById('cfgTecNombre').value = '';
       document.getElementById('cfgTecUsuario').value = '';
       document.getElementById('cfgTecClave').value = '';
+      document.getElementById('cfgTecRol').value = 'tecnico';
     }
     guardarUsuarios();
     renderListaTecnicos();
@@ -1248,9 +1270,28 @@
     renderChecksCoordinadores('cfgAlcantCoords');
   }
 
+  function alternarActivoTecnico(idx) {
+    var u = USUARIOS[idx];
+    if (!u) return;
+    var nuevoEstado = u.activo === false;
+    if (!nuevoEstado && currentUser && currentUser.usuario === u.usuario) {
+      alert('No puede deshabilitar su propio usuario mientras esta conectado.');
+      return;
+    }
+    var accion = nuevoEstado ? 'habilitar' : 'deshabilitar';
+    if (!confirm('Desea ' + accion + ' el acceso de "' + u.nombre + '"?')) return;
+    u.activo = nuevoEstado;
+    guardarUsuarios();
+    renderListaTecnicos();
+  }
+
   function eliminarTecnico(idx) {
     var u = USUARIOS[idx];
     if (!u) return;
+    if (currentUser && currentUser.usuario === u.usuario) {
+      alert('No puede eliminar su propio usuario mientras esta conectado.');
+      return;
+    }
     if (!confirm('Quitar el acceso de "' + u.nombre + '"? Ya no podra iniciar sesion. Las ordenes ya asignadas a su nombre se conservan en el historial.')) return;
     USUARIOS.splice(idx, 1);
     if (_editandoTecnicoIdx === idx) { cancelarEdicionTecnico(); }
@@ -2248,7 +2289,7 @@
           var guardado = sessionStorage.getItem(SESSION_KEY);
           if (guardado) {
             var u = JSON.parse(guardado);
-            var valido = USUARIOS.some(function(x) { return x.usuario === u.usuario && x.clave === u.clave; });
+            var valido = USUARIOS.some(function(x) { return x.usuario === u.usuario && x.clave === u.clave && x.activo !== false; });
             if (valido) { currentUser = u; }
           }
         } catch(e) {}
