@@ -1919,15 +1919,9 @@
       '*EPS MARANON S.A. - Orden ' + os.id + '*',
       '* Componente: ' + os.componente,
       '* Prioridad: ' + os.prioridad + ' | Estado: ' + os.estado,
-      '* Fecha: ' + formatFecha(os.fecha)
+      '* Fecha: ' + formatFecha(os.fecha),
+      baseURL
     ];
-    if (os.actividad && os.actividad !== '-') lines.push('* Actividad: ' + os.actividad);
-    lines.push('');
-    lines.push('Estimado/a *' + os.tecnico + '*, ingrese con su usuario y complete el formulario:');
-    lines.push(enlace);
-    lines.push('');
-    lines.push('O ingrese a la app y busque la orden ' + os.id + ':');
-    lines.push(baseURL);
     return lines.join('\n');
   }
 
