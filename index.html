@@ -408,11 +408,15 @@
           <button type="button" class="btn-ver-clave" onclick="alternarClave('cfgTecClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
         </div>
         <label class="config-label">Rol</label>
-        <select id="cfgTecRol">
+        <select id="cfgTecRol" onchange="alternarPanelComponentesTec()">
           <option value="tecnico">Tecnico / Operario</option>
           <option value="supervisor">Supervisor</option>
           <option value="coordinador">Coordinador</option>
         </select>
+        <div id="cfgTecComponentesWrap" style="display:block;">
+          <label class="config-label">Asignar componente(s) (crea Orden de Servicio automaticamente)</label>
+          <div id="cfgTecComponentes" class="config-checks"></div>
+        </div>
         <button class="btn-config-add" id="cfgTecBtnGuardar" onclick="guardarTecnico()">&#10133; Agregar usuario</button>
         <button class="btn-config-cancelar" id="cfgTecBtnCancelar" style="display:none;" onclick="cancelarEdicionTecnico()">Cancelar edicion</button>
         <div id="cfgTecMsg" style="display:none;font-size:0.82rem;margin-top:6px;font-weight:600;"></div>
@@ -505,14 +509,6 @@
           <div class="os-field"><label>Tecnico Asignado</label>
             <select id="osTecnico">
               <option>-- Seleccionar --</option>
-              <option>Tec. Grimaniel Estela Guevara</option>
-              <option>Op. Jorge Vasquez Ocana</option>
-              <option>Op. Jairo Herrera Ramirez</option>
-              <option>Op. Elver Davila Bustamante</option>
-              <option>Op. Gilmer Alarcon Torres</option>
-              <option>Op. Angel Alejandria Estela</option>
-              <option>Op. Oscar Mijahuanca Huaman</option>
-              <option>Op. Victor Carranza Cabrera</option>
             </select>
           </div>
           <div class="os-field"><label>Fecha Programada</label><input type="date" id="osFechaProg"></div>
@@ -566,7 +562,7 @@
         <div style="background:#fff;border:1.5px solid #c8ddf0;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
           <div style="font-size:0.68rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
             &#128279; Enlace al Formulario de Tarea
-            <span style="background:#e8f2ff;color:#0b4f8a;border-radius:4px;padding:1px 6px;font-size:0.62rem;">REDESAAL.github.io/eps-maranon/formulario_tarea</span>
+            <span style="background:#e8f2ff;color:#0b4f8a;border-radius:4px;padding:1px 6px;font-size:0.62rem;">REDESAAL.github.io/eps-maranon/index.html</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
             <input type="text" id="shareLinkInput" readonly style="flex:1;border:1.5px solid #dbe9f8;border-radius:6px;padding:7px 10px;font-size:0.72rem;color:#4a6a8a;background:#f8fbff;font-family:'DM Sans',sans-serif;min-width:0;cursor:pointer;" onclick="this.select()">
@@ -998,7 +994,7 @@
 
   // Lista de nombres de tecnicos/operadores disponibles para asignar como coordinadores
   function listaNombresTecnicos() {
-    return USUARIOS.filter(function(u) { return u.rol === 'tecnico'; }).map(function(u) { return u.nombre; });
+    return USUARIOS.filter(function(u) { return u.rol === 'tecnico' && u.activo !== false; }).map(function(u) { return u.nombre; });
   }
 
   function renderChecksCoordinadores(idCont) {
@@ -1142,6 +1138,18 @@
     renderConfiguracion(sistema);
   }
 
+  // Llena el dropdown "Tecnico Asignado" del formulario de Orden de Servicio
+  // con los tecnicos/operarios activos registrados en Usuarios del Sistema.
+  function renderSelectOsTecnico() {
+    var sel = document.getElementById('osTecnico');
+    if (!sel) return;
+    var valorActual = sel.value;
+    var tecnicos = listaNombresTecnicos();
+    sel.innerHTML = '<option>-- Seleccionar --</option>' +
+      tecnicos.map(function(nombre) { return '<option>' + nombre + '</option>'; }).join('');
+    if (tecnicos.indexOf(valorActual) >= 0) { sel.value = valorActual; }
+  }
+
   function renderTodoElPlan() {
     renderPlanTabla('agua');
     renderPlanTabla('alcantarillado');
@@ -1150,6 +1158,8 @@
     renderChecksCoordinadores('cfgAguaCoords');
     renderChecksCoordinadores('cfgAlcantCoords');
     renderListaTecnicos();
+    renderChecksComponentesTec();
+    renderSelectOsTecnico();
   }
 
   // ============================================================
@@ -1197,6 +1207,17 @@
     document.getElementById('cfgTecForm').classList.add('editando');
     document.getElementById('cfgTecBtnGuardar').innerHTML = '&#128190; Guardar cambios';
     document.getElementById('cfgTecBtnCancelar').style.display = 'block';
+
+    if (u.rol === 'tecnico') {
+      document.getElementById('cfgTecComponentesWrap').style.display = 'block';
+      var yaAsignados = [];
+      planAgua.forEach(function(item) { if ((item.coordinadores || []).indexOf(u.nombre) >= 0) yaAsignados.push('agua|' + item.componente); });
+      planAlcantarillado.forEach(function(item) { if ((item.coordinadores || []).indexOf(u.nombre) >= 0) yaAsignados.push('alcantarillado|' + item.componente); });
+      renderChecksComponentesTec(yaAsignados);
+    } else {
+      document.getElementById('cfgTecComponentesWrap').style.display = 'none';
+    }
+
     document.getElementById('cfgTecForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
@@ -1210,6 +1231,70 @@
     document.getElementById('cfgTecForm').classList.remove('editando');
     document.getElementById('cfgTecBtnGuardar').innerHTML = '&#10133; Agregar usuario';
     document.getElementById('cfgTecBtnCancelar').style.display = 'none';
+    document.getElementById('cfgTecComponentesWrap').style.display = 'block';
+    renderChecksComponentesTec();
+  }
+
+  function alternarPanelComponentesTec() {
+    var rol = document.getElementById('cfgTecRol').value;
+    var wrap = document.getElementById('cfgTecComponentesWrap');
+    if (!wrap) return;
+    if (rol === 'tecnico') {
+      wrap.style.display = 'block';
+      renderChecksComponentesTec();
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  function renderChecksComponentesTec(marcados) {
+    var cont = document.getElementById('cfgTecComponentes');
+    if (!cont) return;
+    marcados = marcados || [];
+    var opciones = planAgua.map(function(item) { return { sistema: 'agua', item: item }; })
+      .concat(planAlcantarillado.map(function(item) { return { sistema: 'alcantarillado', item: item }; }));
+    if (opciones.length === 0) {
+      cont.innerHTML = '<div style="color:#7a8fa6;font-size:0.78rem;">No hay componentes configurados en la seccion II todavia.</div>';
+      return;
+    }
+    cont.innerHTML = opciones.map(function(op) {
+      var valor = op.sistema + '|' + op.item.componente;
+      var checked = marcados.indexOf(valor) >= 0 ? 'checked' : '';
+      var etiqueta = op.item.componente + ' (' + (op.sistema === 'agua' ? 'Agua Potable' : 'Alcantarillado') + ')';
+      return '<label><input type="checkbox" class="chkComponenteTec" value="' + valor.replace(/"/g,'&quot;') + '" ' + checked + '> ' + etiqueta + '</label>';
+    }).join('');
+  }
+
+  // Crea automaticamente una Orden de Servicio para el tecnico dado, a partir
+  // de un componente del plan, y agrega al tecnico como coordinador de ese componente.
+  function crearOSAutomaticaParaTecnico(nombreTecnico, sistema, nombreComponente) {
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var item = plan.filter(function(x) { return x.componente === nombreComponente; })[0];
+    if (!item) return;
+
+    if (!item.coordinadores) item.coordinadores = [];
+    if (item.coordinadores.indexOf(nombreTecnico) === -1) {
+      item.coordinadores.push(nombreTecnico);
+    }
+
+    var num = String(osCounter).padStart(3, '0');
+    var hoy = new Date().toISOString().split('T')[0];
+    var os = {
+      id: 'OS-' + num,
+      codigo: '-',
+      fecha: hoy,
+      fechaProg: '-',
+      componente: item.componente,
+      frecuencia: item.frecuencia,
+      direccion: '-',
+      tecnico: nombreTecnico,
+      prioridad: 'Normal',
+      estado: 'Pendiente',
+      actividad: item.actividad || '-',
+      obs: 'Orden generada automaticamente al asignar el componente en Usuarios del Sistema.'
+    };
+    historial.push(os);
+    osCounter++;
   }
 
   function guardarTecnico() {
@@ -1278,12 +1363,36 @@
       document.getElementById('cfgTecRol').value = 'tecnico';
     }
     guardarUsuarios();
+
+    // Si es tecnico y marco componentes, crear ordenes de servicio automaticamente
+    var ordenesCreadas = 0;
+    if (rol === 'tecnico') {
+      var checks = document.querySelectorAll('#cfgTecComponentes input.chkComponenteTec:checked');
+      if (checks.length > 0) {
+        Array.prototype.forEach.call(checks, function(c) {
+          var partes = c.value.split('|');
+          crearOSAutomaticaParaTecnico(nombre, partes[0], partes[1]);
+          ordenesCreadas++;
+        });
+        guardarPlan();
+        guardarStorage();
+        renderPlanTabla('agua');
+        renderPlanTabla('alcantarillado');
+        renderConfiguracion('agua');
+        renderConfiguracion('alcantarillado');
+        renderHistorial();
+        renderChecksComponentesTec();
+      }
+    }
+
     renderListaTecnicos();
     renderChecksCoordinadores('cfgAguaCoords');
     renderChecksCoordinadores('cfgAlcantCoords');
+    renderSelectOsTecnico();
 
     msgEl.style.color = '#1a7a4a';
-    msgEl.textContent = (eraEdicion ? 'Usuario actualizado' : 'Usuario agregado') + ' correctamente: ' + nombre + ' (' + usuario + ').';
+    msgEl.textContent = (eraEdicion ? 'Usuario actualizado' : 'Usuario agregado') + ' correctamente: ' + nombre + ' (' + usuario + ').' +
+      (ordenesCreadas > 0 ? ' Se crearon ' + ordenesCreadas + ' orden(es) de servicio automaticamente.' : '');
     msgEl.style.display = 'block';
     var listaEl = document.getElementById('configListaTecnicos');
     if (listaEl) listaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1302,6 +1411,7 @@
     u.activo = nuevoEstado;
     guardarUsuarios();
     renderListaTecnicos();
+    renderSelectOsTecnico();
   }
 
   function eliminarTecnico(idx) {
@@ -1318,6 +1428,7 @@
     renderListaTecnicos();
     renderChecksCoordinadores('cfgAguaCoords');
     renderChecksCoordinadores('cfgAlcantCoords');
+    renderSelectOsTecnico();
   }
 
   // ============================================================
@@ -1415,6 +1526,8 @@
       if (Array.isArray(data) && data.length > 0) {
         USUARIOS = data;
         try { localStorage.setItem(USUARIOS_KEY, JSON.stringify(USUARIOS)); } catch(err) {}
+        renderSelectOsTecnico();
+        if (document.getElementById('configListaTecnicos')) renderListaTecnicos();
       }
     });
     _fbDb.ref('plan').on('value', function(snap) {
@@ -1887,7 +2000,7 @@
       // GitHub Pages u otro hosting
       baseURL = 'https://REDESAAL.github.io/eps-maranon/';
     }
-    return baseURL + 'formulario_tarea.html?tarea=' + params;
+    return baseURL + 'index.html?tarea=' + params;
   }
 
   function construirEnlaceGoogleForm(os) {
