@@ -403,6 +403,7 @@
       <div class="config-form" id="cfgTecForm">
         <input type="text" id="cfgTecNombre" placeholder="Nombre completo (ej. Op. Juan Perez Lopez)">
         <input type="text" id="cfgTecUsuario" placeholder="Usuario de acceso (ej. jperez)">
+        <input type="text" id="cfgTecCelular" placeholder="Celular WhatsApp (9 digitos, ej. 987654321) - opcional" maxlength="9" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,9)">
         <div class="campo-clave">
           <input type="password" id="cfgTecClave" placeholder="Contrasena">
           <button type="button" class="btn-ver-clave" onclick="alternarClave('cfgTecClave', this)" aria-label="Mostrar contrasena">&#128065;</button>
@@ -1201,6 +1202,7 @@
     _editandoTecnicoIdx = idx;
     document.getElementById('cfgTecNombre').value = u.nombre;
     document.getElementById('cfgTecUsuario').value = u.usuario;
+    document.getElementById('cfgTecCelular').value = u.celular || '';
     document.getElementById('cfgTecClave').value = '';
     document.getElementById('cfgTecClave').placeholder = 'Dejar en blanco para no cambiarla';
     document.getElementById('cfgTecRol').value = u.rol;
@@ -1225,6 +1227,7 @@
     _editandoTecnicoIdx = null;
     document.getElementById('cfgTecNombre').value = '';
     document.getElementById('cfgTecUsuario').value = '';
+    document.getElementById('cfgTecCelular').value = '';
     document.getElementById('cfgTecClave').value = '';
     document.getElementById('cfgTecClave').placeholder = 'Contrasena';
     document.getElementById('cfgTecRol').value = 'tecnico';
@@ -1300,6 +1303,7 @@
   function guardarTecnico() {
     var nombre = (document.getElementById('cfgTecNombre').value || '').trim();
     var usuario = (document.getElementById('cfgTecUsuario').value || '').trim();
+    var celular = (document.getElementById('cfgTecCelular').value || '').trim();
     var clave = (document.getElementById('cfgTecClave').value || '').trim();
     var rol = document.getElementById('cfgTecRol').value;
     var msgEl = document.getElementById('cfgTecMsg');
@@ -1307,6 +1311,10 @@
 
     if (!nombre || !usuario) {
       alert('Complete el nombre completo y el usuario de acceso.');
+      return;
+    }
+    if (celular && celular.length !== 9) {
+      alert('El celular debe tener 9 digitos (Peru), o dejarse vacio.');
       return;
     }
 
@@ -1325,6 +1333,7 @@
       var usuarioAnterior = USUARIOS[_editandoTecnicoIdx].usuario;
       USUARIOS[_editandoTecnicoIdx].nombre = nombre;
       USUARIOS[_editandoTecnicoIdx].usuario = usuario;
+      USUARIOS[_editandoTecnicoIdx].celular = celular;
       USUARIOS[_editandoTecnicoIdx].rol = rol;
       if (clave) { USUARIOS[_editandoTecnicoIdx].clave = clave; }
 
@@ -1356,9 +1365,10 @@
         alert('Ingrese una contrasena para el nuevo usuario.');
         return;
       }
-      USUARIOS.push({ usuario: usuario, clave: clave, rol: rol, nombre: nombre, activo: true });
+      USUARIOS.push({ usuario: usuario, clave: clave, rol: rol, nombre: nombre, celular: celular, activo: true });
       document.getElementById('cfgTecNombre').value = '';
       document.getElementById('cfgTecUsuario').value = '';
+      document.getElementById('cfgTecCelular').value = '';
       document.getElementById('cfgTecClave').value = '';
       document.getElementById('cfgTecRol').value = 'tecnico';
     }
@@ -1818,6 +1828,12 @@
     return '<tr><td style="background:#eaf2fb;font-weight:700;color:#0b4f8a;padding:7px 12px;border:1px solid #d0e3f5;font-size:0.75rem;text-transform:uppercase;white-space:nowrap;width:130px">' + label + '</td><td style="padding:7px 12px;border:1px solid #d0e3f5;">' + val + '</td></tr>';
   }
 
+  // Busca el celular guardado de un tecnico/operario por su nombre completo
+  function buscarCelularTecnico(nombreTecnico) {
+    var u = USUARIOS.filter(function(x) { return x.nombre === nombreTecnico; })[0];
+    return (u && u.celular) ? u.celular : '';
+  }
+
   function mostrarPanelWA() {
     if (editIndex < 0) return;
     var os = historial[editIndex];
@@ -1827,11 +1843,12 @@
     // Mostrar nombre del tecnico
     var tecNomEl = document.getElementById('waTecnicoNombre');
     if (tecNomEl) tecNomEl.textContent = os.tecnico || '-';
-    // Limpiar telefono y estado
+    // Autocompletar telefono guardado del tecnico (si tiene), y estado
     var telEl = document.getElementById('waTelefono');
-    if (telEl) telEl.value = '';
+    var celularGuardado = buscarCelularTecnico(os.tecnico);
+    if (telEl) telEl.value = celularGuardado;
     var stEl = document.getElementById('telStatus');
-    if (stEl) stEl.textContent = '';
+    if (stEl) stEl.textContent = celularGuardado ? '\u2705' : '';
     var prioColor = os.prioridad === 'Urgente' ? '#c0392b' : os.prioridad === 'Alta' ? '#e8a000' : '#1a8a4a';
     var prioEmoji = os.prioridad === 'Urgente' ? '\u{1F534}' : os.prioridad === 'Alta' ? '\u{1F7E0}' : '\u{1F7E2}';
     function rFila(lbl, val, full) {
@@ -1979,11 +1996,14 @@
   function enviarWhatsAppDirecto(idx) {
     var os = historial[idx];
     var enlace = construirEnlaceTarea(os, idx);
-    var tel = prompt(
-      'Numero WhatsApp del tecnico\n(sin + ni espacios)\nPeru 9 digitos: 987654321\nOtro pais: codigo+numero: 51987654321\n\nDejar vacio para abrir WhatsApp Web sin numero especifico.',
-      ''
-    );
-    if (tel === null) return;
+    var tel = buscarCelularTecnico(os.tecnico);
+    if (!tel) {
+      tel = prompt(
+        'Numero WhatsApp del tecnico\n(sin + ni espacios)\nPeru 9 digitos: 987654321\nOtro pais: codigo+numero: 51987654321\n\nDejar vacio para abrir WhatsApp Web sin numero especifico.',
+        ''
+      );
+      if (tel === null) return;
+    }
     tel = (tel || '').replace(/\D/g,'');
     if (tel.length === 9) tel = '51' + tel;
     var msg = encodeURIComponent(construirMensajeWA(os, enlace));
