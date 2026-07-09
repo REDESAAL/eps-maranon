@@ -1774,15 +1774,49 @@
   function imprimirOS(idx) {
     var os = historial[idx];
     var pa = document.getElementById('printArea');
+
+    var fotos = (os.evidencias || []).filter(function(e) { return e && e.type && e.type.indexOf('image') >= 0; });
+    var docs = (os.evidencias || []).filter(function(e) { return e && e.esPDF; });
+
+    var panelFotos = '';
+    if (fotos.length > 0) {
+      panelFotos =
+        '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo (' + fotos.length + ')</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;">' +
+        fotos.map(function(f, i) {
+          return '<div style="border:1px solid #c8d8ec;border-radius:6px;overflow:hidden;background:#fafcff;">' +
+            '<img src="' + f.base64 + '" style="width:100%;height:130px;object-fit:cover;display:block;">' +
+            '<div style="font-size:0.68rem;color:#0b4f8a;font-weight:700;text-align:center;padding:4px;border-top:1px solid #eaf0f8;">Foto ' + (i + 1) + '</div>' +
+            '</div>';
+        }).join('') +
+        '</div>';
+    } else {
+      panelFotos =
+        '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo</div>' +
+        '<div style="padding:14px 4px;font-size:0.78rem;color:#888;font-style:italic;">Sin evidencias fotograficas registradas para esta orden.</div>';
+    }
+
+    var panelDocs = '';
+    if (docs.length > 0) {
+      panelDocs =
+        '<div style="margin-top:14px;font-size:0.75rem;color:#0b4f8a;font-weight:700;">Documentos adjuntos:</div>' +
+        '<ul style="margin:4px 0 0 18px;font-size:0.75rem;color:#555;">' +
+        docs.map(function(d) { return '<li>' + d.name + '</li>'; }).join('') +
+        '</ul>';
+    }
+
     pa.innerHTML =
       '<div style="font-family:Arial,sans-serif;max-width:750px;margin:0 auto;background:#fff;">' +
       '<div style="background:#0b4f8a;color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;">' +
       '<div><div style="font-size:1.5rem;font-weight:800;letter-spacing:3px;">EPS Maranon S.A.</div>' +
-      '<div style="font-size:0.82rem;opacity:0.85;margin-top:4px;">Sistema de Agua Potable y Alcantarillado</div></div>' +
+      '<div style="font-size:0.82rem;opacity:0.85;margin-top:4px;">Sistema de Agua Potable y Alcantarillado</div>' +
+      '<div style="font-size:0.68rem;opacity:0.7;margin-top:2px;">Oficina de Distribucion y Recoleccion (ODR)</div></div>' +
       '<div style="text-align:right"><div style="background:#e8a000;color:#fff;font-weight:800;font-size:1.05rem;padding:7px 18px;border-radius:6px;">' + os.id + '</div>' +
       '<div style="font-size:0.75rem;opacity:0.75;margin-top:5px;">ORDEN DE SERVICIO</div></div></div>' +
       '<div style="height:5px;background:linear-gradient(90deg,#e8a000,#f5c842);"></div>' +
       '<div style="border:1px solid #c8d8ec;border-top:none;border-radius:0 0 8px 8px;padding:28px;">' +
+
+      '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-bottom:10px;">I. Datos Generales de la Orden</div>' +
       '<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-bottom:6px;"><tr>' +
       '<td style="width:50%;padding:0 8px 0 0;vertical-align:top;">' +
       '<table style="width:100%;border-collapse:collapse;">' +
@@ -1793,14 +1827,20 @@
       '<td style="width:50%;padding:0 0 0 8px;vertical-align:top;">' +
       '<table style="width:100%;border-collapse:collapse;">' +
       filaP('Componente', os.componente) + filaP('Frecuencia', os.frecuencia) +
-      filaP('Direccion', os.direccion) + filaP('Tecnico', os.tecnico) +
-      filaP('Actividad', os.actividad || '-') +
-      '<tr><td colspan="2" style="background:#eaf2fb;font-weight:700;color:#0b4f8a;padding:7px 12px;border:1px solid #d0e3f5;font-size:0.75rem;text-transform:uppercase;">Observaciones</td></tr>' +
-      '<tr><td colspan="2" style="padding:7px 12px;border:1px solid #d0e3f5;">' + os.obs + '</td></tr>' +
+      filaP('Direccion', os.direccion) + filaP('Tecnico Responsable', os.tecnico) +
       '</table></td></tr></table>' +
+
+      '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin:18px 0 10px;">II. Descripcion del Trabajo Programado</div>' +
+      '<div style="border:1px solid #d0e3f5;border-radius:4px;padding:10px 14px;font-size:0.85rem;background:#fafcff;">' + (os.actividad || '-') + '</div>' +
+
+      '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin:18px 0 10px;">III. Observaciones / Trabajo Realizado</div>' +
+      '<div style="border:1px solid #d0e3f5;border-radius:4px;padding:10px 14px;font-size:0.85rem;background:#fafcff;min-height:40px;">' + (os.obs || '-') + '</div>' +
+
+      panelFotos + panelDocs +
+
       '<div style="border-top:2px dashed #c8d8ec;margin:28px 0 24px;"></div>' +
-      '<table style="width:100%;border-collapse:collapse;margin-top:28px;">' +
-      '<tr><td colspan="3" style="padding-bottom:10px;"><div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;">Firmas de Conformidad</div></td></tr>' +
+      '<table style="width:100%;border-collapse:collapse;margin-top:10px;">' +
+      '<tr><td colspan="3" style="padding-bottom:10px;"><div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;">V. Firmas de Conformidad</div></td></tr>' +
       '<tr style="vertical-align:bottom;">' +
       '<td style="width:33%;text-align:center;padding:0 12px 0 0;border-right:1px dashed #c8d8ec;">' +
       '<div style="height:60px;"></div><div style="border-top:2px solid #0b4f8a;margin:0 10px;"></div>' +
