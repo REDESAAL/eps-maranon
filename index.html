@@ -1785,7 +1785,7 @@
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;">' +
         fotos.map(function(f, i) {
           return '<div style="border:1px solid #c8d8ec;border-radius:6px;overflow:hidden;background:#fafcff;">' +
-            '<img src="' + f.base64 + '" style="width:100%;height:130px;object-fit:cover;display:block;">' +
+            '<img src="' + f.base64 + '" style="width:100%;height:180px;object-fit:contain;background:#f0f4f9;display:block;">' +
             '<div style="font-size:0.68rem;color:#0b4f8a;font-weight:700;text-align:center;padding:4px;border-top:1px solid #eaf0f8;">Foto ' + (i + 1) + '</div>' +
             '</div>';
         }).join('') +
@@ -2234,7 +2234,7 @@
     div.setAttribute('data-idx', pa.children.length);
     if (isImg) {
       div.innerHTML =
-        '<img src="' + data.base64 + '" style="width:100%;max-height:110px;object-fit:cover;border-radius:5px;display:block;">' +
+        '<img src="' + data.base64 + '" style="width:100%;max-height:140px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
         '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
         '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
         '<button onclick="quitarArchivoIdx(' + pa.children.length + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
