@@ -1914,39 +1914,20 @@
   }
 
   function construirMensajeWA(os, enlace) {
-    var prioEmoji = os.prioridad === 'Urgente' ? '\u{1F534}' : os.prioridad === 'Alta' ? '\u{1F7E0}' : '\u{1F7E2}';
-    var sep = '══════════════════════';
+    var baseURL = 'https://REDESAAL.github.io/eps-maranon/';
     var lines = [
-      '\u{1F4CB} *EPS MARANON S.A.*',
-      '*ORDEN DE SERVICIO Nro ' + os.id + '*',
-      sep,
-      '\u{1F527} *Componente:* ' + os.componente,
-      '\u{1F501} *Frecuencia:* ' + os.frecuencia,
-      '\u{1F4C5} *Fecha de Emision:* ' + formatFecha(os.fecha)
+      '*EPS MARANON S.A. - Orden ' + os.id + '*',
+      '* Componente: ' + os.componente,
+      '* Prioridad: ' + os.prioridad + ' | Estado: ' + os.estado,
+      '* Fecha: ' + formatFecha(os.fecha)
     ];
-    if (os.fechaProg && os.fechaProg !== '-') lines.push('\u{1F4C5} *Fecha Programada:* ' + formatFecha(os.fechaProg));
-    if (os.direccion && os.direccion !== '-') lines.push('\u{1F4CD} *Direccion:* ' + os.direccion);
-    if (os.codigo && os.codigo !== '-') lines.push('\u{1F4D0} *N Codigo:* ' + os.codigo);
-    lines.push(prioEmoji + ' *Prioridad:* ' + os.prioridad);
-    lines.push('\u{1F4CA} *Estado:* ' + os.estado);
-    if (os.actividad && os.actividad !== '-') lines.push('\u{1F4DD} *Actividad del Trabajo:*\n' + os.actividad);
-    if (os.obs && os.obs !== '-') lines.push('\u{1F4AC} *Instrucciones:*\n' + os.obs);
-    lines.push(sep);
-    lines.push('\u{1F477} Estimado/a *' + os.tecnico + '*,');
+    if (os.actividad && os.actividad !== '-') lines.push('* Actividad: ' + os.actividad);
     lines.push('');
-    lines.push('Se le asigna la Orden de Servicio indicada. Ingrese al siguiente enlace para completar el *Formulario de Tarea*:');
+    lines.push('Estimado/a *' + os.tecnico + '*, ingrese con su usuario y complete el formulario:');
+    lines.push(enlace);
     lines.push('');
-    lines.push('\u{1F517} ' + enlace);
-    lines.push('');
-    lines.push('En el formulario registre:');
-    lines.push('  \u2705 Observaciones del trabajo realizado');
-    lines.push('  \u2705 N Codigo (si aplica)');
-    lines.push('  \u2705 Estado de avance (Pendiente / En Proceso / Completado)');
-    lines.push('  \u{1F4F7} Evidencias fotograficas (tome fotos o adjunte archivos)');
-    lines.push('');
-    lines.push('\u26A0\uFE0F Los datos de la orden ya estan precargados. Solo complete los campos activos.');
-    lines.push('');
-    lines.push('_EPS Maranon S.A. - Sistema de Agua Potable y Alcantarillado_');
+    lines.push('O ingrese a la app y busque la orden ' + os.id + ':');
+    lines.push(baseURL);
     return lines.join('\n');
   }
 
@@ -1990,16 +1971,8 @@
       '&obs=' + encodeURIComponent(os.obs && os.obs !== '-' ? os.obs : '') +
       '&codigo=' + encodeURIComponent(os.codigo && os.codigo !== '-' ? os.codigo : '')
     );
-    // URL inteligente: detecta automaticamente el entorno
-    var baseURL;
-    var host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1' || host.match(/^192\.168\./) || host.match(/^10\./) || host === '') {
-      // XAMPP / Red local: usar IP real del servidor para que funcione en celulares
-      baseURL = window.location.protocol + '//' + window.location.host + window.location.pathname.replace(/\/[^\/]*$/, '/');
-    } else {
-      // GitHub Pages u otro hosting
-      baseURL = 'https://REDESAAL.github.io/eps-maranon/';
-    }
+    // URL fija de GitHub Pages (siempre la misma, sin detectar entorno)
+    var baseURL = 'https://REDESAAL.github.io/eps-maranon/';
     return baseURL + 'index.html?tarea=' + params;
   }
 
