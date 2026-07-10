@@ -623,15 +623,26 @@
           <select id="tareaEstado"><option>Pendiente</option><option>En Proceso</option><option>Completado</option></select>
         </div>
         <div class="os-field full">
-          <label>Evidencia del Trabajo (hasta 10 archivos)</label>
-          <div class="upload-area" id="uploadArea" onclick="document.getElementById('tareaArchivo').click()">
+          <label>Fotos de Inicio (antes del trabajo, hasta 5 archivos)</label>
+          <div class="upload-area" id="uploadAreaInicio" onclick="document.getElementById('tareaArchivoInicio').click()">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir archivos</div>
-            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 4 archivos &bull; Se comprimen automaticamente</div>
-            <input type="file" id="tareaArchivo" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivos(this)">
+            <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir fotos de INICIO</div>
+            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 5 archivos &bull; Se comprimen automaticamente</div>
+            <input type="file" id="tareaArchivoInicio" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivos(this, 'inicio')">
           </div>
-          <div id="previewArea" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;"></div>
-          <div id="contadorArchivos" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+          <div id="previewAreaInicio" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+          <div id="contadorArchivosInicio" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+        </div>
+        <div class="os-field full">
+          <label>Fotos de Fin (trabajo culminado, hasta 5 archivos)</label>
+          <div class="upload-area" id="uploadAreaFin" onclick="document.getElementById('tareaArchivoFin').click()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir fotos de FIN</div>
+            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 5 archivos &bull; Se comprimen automaticamente</div>
+            <input type="file" id="tareaArchivoFin" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivos(this, 'fin')">
+          </div>
+          <div id="previewAreaFin" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+          <div id="contadorArchivosFin" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
         </div>
       </div>
     </div>
@@ -938,7 +949,8 @@
   }
 
   var STORE_KEY = 'eps_maranon_historial';
-  var MAX_ARCHIVOS = 10; // limite de fotos/archivos de evidencia por orden
+  var MAX_ARCHIVOS = 10; // limite total de referencia
+  var MAX_ARCHIVOS_SECCION = 5; // limite de archivos por seccion (Inicio / Fin)
 
   // ============================================================
   // CONFIGURACION DEL SISTEMA: componentes del plan de mantenimiento
@@ -1555,7 +1567,7 @@
   var osCounter = 1;
   var editIndex = -1;
   var tareaIdx = -1;
-  window._archivosData = [];
+  window._archivosData = { inicio: [], fin: [] };
 
   function cargarHistorial() {
     try {
@@ -1775,35 +1787,40 @@
     var os = historial[idx];
     var pa = document.getElementById('printArea');
 
-    var fotos = (os.evidencias || []).filter(function(e) { return e && e.type && e.type.indexOf('image') >= 0; });
-    var docs = (os.evidencias || []).filter(function(e) { return e && e.esPDF; });
+    // Nuevo formato: evidenciasInicio / evidenciasFin. Si no existen, usa el
+    // formato antiguo (evidencias) como "Fin" para ordenes creadas antes de este cambio.
+    var evInicio = os.evidenciasInicio || [];
+    var evFin = (os.evidenciasFin && os.evidenciasFin.length > 0) ? os.evidenciasFin : (os.evidencias || []);
 
-    var panelFotos = '';
-    if (fotos.length > 0) {
-      panelFotos =
-        '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo (' + fotos.length + ')</div>' +
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;">' +
-        fotos.map(function(f, i) {
-          return '<div style="border:1px solid #c8d8ec;border-radius:6px;overflow:hidden;background:#fafcff;">' +
-            '<img src="' + f.base64 + '" style="width:100%;height:180px;object-fit:contain;background:#f0f4f9;display:block;">' +
-            '<div style="font-size:0.68rem;color:#0b4f8a;font-weight:700;text-align:center;padding:4px;border-top:1px solid #eaf0f8;">Foto ' + (i + 1) + '</div>' +
-            '</div>';
-        }).join('') +
-        '</div>';
-    } else {
-      panelFotos =
-        '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo</div>' +
-        '<div style="padding:14px 4px;font-size:0.78rem;color:#888;font-style:italic;">Sin evidencias fotograficas registradas para esta orden.</div>';
+    function construirGaleria(titulo, lista) {
+      var fotos = lista.filter(function(e) { return e && e.type && e.type.indexOf('image') >= 0; });
+      var docs = lista.filter(function(e) { return e && e.esPDF; });
+      var html = '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:18px;">' + titulo + ' (' + fotos.length + ')</div>';
+      if (fotos.length > 0) {
+        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;">' +
+          fotos.map(function(f, i) {
+            return '<div style="border:1px solid #c8d8ec;border-radius:6px;overflow:hidden;background:#fafcff;">' +
+              '<img src="' + f.base64 + '" style="width:100%;height:170px;object-fit:contain;background:#f0f4f9;display:block;">' +
+              '<div style="font-size:0.68rem;color:#0b4f8a;font-weight:700;text-align:center;padding:4px;border-top:1px solid #eaf0f8;">Foto ' + (i + 1) + '</div>' +
+              '</div>';
+          }).join('') +
+          '</div>';
+      } else {
+        html += '<div style="padding:10px 4px;font-size:0.78rem;color:#888;font-style:italic;">Sin fotos registradas.</div>';
+      }
+      if (docs.length > 0) {
+        html += '<div style="margin-top:10px;font-size:0.75rem;color:#0b4f8a;font-weight:700;">Documentos adjuntos:</div>' +
+          '<ul style="margin:4px 0 0 18px;font-size:0.75rem;color:#555;">' +
+          docs.map(function(d) { return '<li>' + d.name + '</li>'; }).join('') +
+          '</ul>';
+      }
+      return html;
     }
 
-    var panelDocs = '';
-    if (docs.length > 0) {
-      panelDocs =
-        '<div style="margin-top:14px;font-size:0.75rem;color:#0b4f8a;font-weight:700;">Documentos adjuntos:</div>' +
-        '<ul style="margin:4px 0 0 18px;font-size:0.75rem;color:#555;">' +
-        docs.map(function(d) { return '<li>' + d.name + '</li>'; }).join('') +
-        '</ul>';
-    }
+    var panelFotos =
+      '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo</div>' +
+      construirGaleria('Fotos de Inicio', evInicio) +
+      construirGaleria('Fotos de Fin', evFin);
 
     pa.innerHTML =
       '<div style="font-family:Arial,sans-serif;max-width:750px;margin:0 auto;background:#fff;">' +
@@ -1836,7 +1853,7 @@
       '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin:18px 0 10px;">III. Observaciones / Trabajo Realizado</div>' +
       '<div style="border:1px solid #d0e3f5;border-radius:4px;padding:10px 14px;font-size:0.85rem;background:#fafcff;min-height:40px;">' + (os.obs || '-') + '</div>' +
 
-      panelFotos + panelDocs +
+      panelFotos +
 
       '<div style="border-top:2px dashed #c8d8ec;margin:28px 0 24px;"></div>' +
       '<table style="width:100%;border-collapse:collapse;margin-top:10px;">' +
@@ -2075,20 +2092,31 @@
     document.getElementById('tareaObs').value = os.obs && os.obs !== '-' ? os.obs : '';
     document.getElementById('tareaCodigo').value = os.codigo && os.codigo !== '-' ? os.codigo : '';
     setSelectValue('tareaEstado', os.estado);
-    // Reset file upload
-    document.getElementById('tareaArchivo').value = '';
-    document.getElementById('previewArea').innerHTML = '';
-    document.getElementById('contadorArchivos').style.display = 'none';
-    document.getElementById('uploadArea').classList.remove('has-file');
-    document.getElementById('uploadArea').style.display = 'block';
-    window._archivosData = [];
-    // Restore saved evidence if exists
-    if (os.evidencias && os.evidencias.length > 0) {
-      os.evidencias.forEach(function(ev) { agregarPreview(ev); });
-      actualizarContador();
+    // Reset file upload (ambas secciones)
+    document.getElementById('tareaArchivoInicio').value = '';
+    document.getElementById('tareaArchivoFin').value = '';
+    document.getElementById('previewAreaInicio').innerHTML = '';
+    document.getElementById('previewAreaFin').innerHTML = '';
+    document.getElementById('contadorArchivosInicio').style.display = 'none';
+    document.getElementById('contadorArchivosFin').style.display = 'none';
+    document.getElementById('uploadAreaInicio').style.display = 'block';
+    document.getElementById('uploadAreaFin').style.display = 'block';
+    window._archivosData = { inicio: [], fin: [] };
+    // Restaurar evidencias guardadas (nuevo formato separado)
+    if (os.evidenciasInicio && os.evidenciasInicio.length > 0) {
+      os.evidenciasInicio.forEach(function(ev) { agregarPreview(ev, 'inicio'); });
+      actualizarContador('inicio');
+    }
+    if (os.evidenciasFin && os.evidenciasFin.length > 0) {
+      os.evidenciasFin.forEach(function(ev) { agregarPreview(ev, 'fin'); });
+      actualizarContador('fin');
+    } else if (os.evidencias && os.evidencias.length > 0) {
+      // Compatibilidad con ordenes antiguas (evidencia unica, se muestran como "Fin")
+      os.evidencias.forEach(function(ev) { agregarPreview(ev, 'fin'); });
+      actualizarContador('fin');
     } else if (os.evidencia) {
-      agregarPreview(os.evidencia);
-      actualizarContador();
+      agregarPreview(os.evidencia, 'fin');
+      actualizarContador('fin');
     }
     document.getElementById('modalTarea').classList.add('active');
   }
@@ -2101,20 +2129,23 @@
     historial[idx].codigo = document.getElementById('tareaCodigo').value || historial[idx].codigo;
     historial[idx].estado = document.getElementById('tareaEstado').value;
 
-    if (window._archivosData && window._archivosData.length > 0) {
+    var hayInicio = window._archivosData.inicio && window._archivosData.inicio.length > 0;
+    var hayFin = window._archivosData.fin && window._archivosData.fin.length > 0;
+
+    if (hayInicio || hayFin) {
       var btn = document.querySelector('#modalTarea .btn-save');
       btn.textContent = 'Comprimiendo...';
       btn.disabled = true;
-      comprimirYGuardar(window._archivosData.slice(), function(archivosComprimidos) {
-        historial[idx].evidencias = archivosComprimidos;
-        historial[idx].evidencia = archivosComprimidos[0];
-        window._archivosData = [];
+
+      var pendientesSecciones = (hayInicio ? 1 : 0) + (hayFin ? 1 : 0);
+      var terminar = function() {
+        pendientesSecciones--;
+        if (pendientesSecciones > 0) return;
+        window._archivosData = { inicio: [], fin: [] };
         try {
           guardarStorage();
         } catch(e) {
-          alert('Advertencia: no se pudieron guardar las imagenes (almacenamiento lleno). Se guardaron los demas datos.');
-          historial[idx].evidencias = [];
-          historial[idx].evidencia = null;
+          alert('Advertencia: no se pudieron guardar todas las imagenes (almacenamiento lleno). Se guardaron los demas datos.');
           guardarStorage();
         }
         renderHistorial();
@@ -2122,7 +2153,20 @@
         btn.textContent = 'Guardar Tarea';
         btn.disabled = false;
         alert('Tarea guardada correctamente para ' + historial[idx].id);
-      });
+      };
+
+      if (hayInicio) {
+        comprimirYGuardar(window._archivosData.inicio.slice(), function(comprimidos) {
+          historial[idx].evidenciasInicio = comprimidos;
+          terminar();
+        });
+      }
+      if (hayFin) {
+        comprimirYGuardar(window._archivosData.fin.slice(), function(comprimidos) {
+          historial[idx].evidenciasFin = comprimidos;
+          terminar();
+        });
+      }
     } else {
       guardarStorage();
       renderHistorial();
@@ -2189,19 +2233,20 @@
     callback(limpios);
   }
 
-  function cargarArchivos(input) {
+  function cargarArchivos(input, seccion) {
     var files = [];
     for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
-    var MAX = MAX_ARCHIVOS;
+    var MAX = MAX_ARCHIVOS_SECCION;
     var MAXSIZE = 15 * 1024 * 1024;
     var allowed = ['jpg','jpeg','png','pdf'];
-    var disponibles = MAX - window._archivosData.length;
+    var suf = seccion === 'inicio' ? 'Inicio' : 'Fin';
+    var disponibles = MAX - window._archivosData[seccion].length;
     if (disponibles <= 0) {
-      alert('Ya tiene ' + MAX + ' archivos. Quite alguno para agregar mas.');
+      alert('Ya tiene ' + MAX + ' archivos en Fotos de ' + suf + '. Quite alguno para agregar mas.');
       input.value = ''; return;
     }
     if (files.length > disponibles) {
-      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas. Se tomaran los primeros.');
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas en esta seccion. Se tomaran los primeros.');
       files = files.slice(0, disponibles);
     }
     var errores = [];
@@ -2213,9 +2258,9 @@
       reader.onload = (function(f) {
         return function(e) {
           var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
-          window._archivosData.push(data);
-          agregarPreview(data);
-          actualizarContador();
+          window._archivosData[seccion].push(data);
+          agregarPreview(data, seccion);
+          actualizarContador(seccion);
         };
       })(file);
       reader.readAsDataURL(file);
@@ -2224,11 +2269,10 @@
     input.value = '';
   }
 
-  function agregarPreview(data) {
-    var idx = window._archivosData ? window._archivosData.indexOf(data) : -1;
-    var idxStr = window._archivosData ? window._archivosData.length - 1 : 0;
+  function agregarPreview(data, seccion) {
+    var suf = seccion === 'inicio' ? 'Inicio' : 'Fin';
     var isImg = data.type.indexOf('image') >= 0;
-    var pa = document.getElementById('previewArea');
+    var pa = document.getElementById('previewArea' + suf);
     var div = document.createElement('div');
     div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:120px;max-width:160px;text-align:center;';
     div.setAttribute('data-idx', pa.children.length);
@@ -2237,40 +2281,42 @@
         '<img src="' + data.base64 + '" style="width:100%;max-height:140px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
         '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
         '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
-        '<button onclick="quitarArchivoIdx(' + pa.children.length + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+        '<button onclick="quitarArchivoIdx(' + pa.children.length + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
     } else {
       div.innerHTML =
         '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
         '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
         '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
-        '<button onclick="quitarArchivoIdx(' + pa.children.length + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+        '<button onclick="quitarArchivoIdx(' + pa.children.length + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
     }
     pa.appendChild(div);
-    if (window._archivosData.length >= MAX_ARCHIVOS) {
-      document.getElementById('uploadArea').style.display = 'none';
+    if (window._archivosData[seccion].length >= MAX_ARCHIVOS_SECCION) {
+      document.getElementById('uploadArea' + suf).style.display = 'none';
     }
   }
 
-  function actualizarContador() {
-    var n = window._archivosData ? window._archivosData.length : 0;
-    var c = document.getElementById('contadorArchivos');
+  function actualizarContador(seccion) {
+    var suf = seccion === 'inicio' ? 'Inicio' : 'Fin';
+    var n = window._archivosData && window._archivosData[seccion] ? window._archivosData[seccion].length : 0;
+    var c = document.getElementById('contadorArchivos' + suf);
     if (n > 0) {
       c.style.display = 'block';
-      c.textContent = n + ' de 4 archivo(s) cargado(s)' + (n < 4 ? ' - puede agregar ' + (4-n) + ' mas' : ' - limite alcanzado');
+      c.textContent = n + ' de ' + MAX_ARCHIVOS_SECCION + ' archivo(s) cargado(s)' + (n < MAX_ARCHIVOS_SECCION ? ' - puede agregar ' + (MAX_ARCHIVOS_SECCION - n) + ' mas' : ' - limite alcanzado');
     } else {
       c.style.display = 'none';
-      document.getElementById('uploadArea').style.display = 'block';
+      document.getElementById('uploadArea' + suf).style.display = 'block';
     }
   }
 
-  function quitarArchivoIdx(idx) {
-    if (!window._archivosData) return;
-    window._archivosData.splice(idx, 1);
-    var pa = document.getElementById('previewArea');
+  function quitarArchivoIdx(idx, seccion) {
+    if (!window._archivosData || !window._archivosData[seccion]) return;
+    var suf = seccion === 'inicio' ? 'Inicio' : 'Fin';
+    window._archivosData[seccion].splice(idx, 1);
+    var pa = document.getElementById('previewArea' + suf);
     pa.innerHTML = '';
-    window._archivosData.forEach(function(d) { agregarPreview(d); });
-    actualizarContador();
-    if (window._archivosData.length < MAX_ARCHIVOS) document.getElementById('uploadArea').style.display = 'block';
+    window._archivosData[seccion].forEach(function(d) { agregarPreview(d, seccion); });
+    actualizarContador(seccion);
+    if (window._archivosData[seccion].length < MAX_ARCHIVOS_SECCION) document.getElementById('uploadArea' + suf).style.display = 'block';
   }
 
   function formatBytes(b) {
@@ -2279,8 +2325,8 @@
     return (b/(1024*1024)).toFixed(1) + ' MB';
   }
 
-  function mostrarPreviewGuardado(data) {
-    agregarPreview(data);
+  function mostrarPreviewGuardado(data, seccion) {
+    agregarPreview(data, seccion);
   }
 
   function verificarURLTarea() {
