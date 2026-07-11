@@ -219,7 +219,7 @@
     text-align: center;
   }
   .login-box img { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 12px; }
-  .login-box h2 { font-family: "Bebas Neue", sans-serif; letter-spacing: 2px; color: var(--azul); font-size: 1.5rem; }
+  .login-box h2 { font-family: "Bebas Neue", sans-serif; letter-spacing: 2px; color: #04213d; font-size: 1.7rem; font-weight: 700; }
   .login-box p { font-size: 0.82rem; color: #7a8fa6; margin-bottom: 24px; }
   .login-field { text-align: left; margin-bottom: 16px; }
   .login-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
@@ -1797,10 +1797,10 @@
       var docs = lista.filter(function(e) { return e && e.esPDF; });
       var html = '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:18px;">' + titulo + ' (' + fotos.length + ')</div>';
       if (fotos.length > 0) {
-        html += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;">' +
+        html += '<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:12px;">' +
           fotos.map(function(f, i) {
             return '<div style="border:1px solid #c8d8ec;border-radius:6px;overflow:hidden;background:#fafcff;">' +
-              '<img src="' + f.base64 + '" style="width:100%;height:260px;object-fit:contain;background:#f0f4f9;display:block;">' +
+              '<img src="' + f.base64 + '" style="width:100%;height:420px;object-fit:contain;background:#f0f4f9;display:block;">' +
               '<div style="font-size:0.68rem;color:#0b4f8a;font-weight:700;text-align:center;padding:4px;border-top:1px solid #eaf0f8;">Foto ' + (i + 1) + '</div>' +
               '</div>';
           }).join('') +
@@ -1857,7 +1857,7 @@
 
       '<div style="border-top:2px dashed #c8d8ec;margin:28px 0 24px;"></div>' +
       '<table style="width:100%;border-collapse:collapse;margin-top:10px;">' +
-      '<tr><td colspan="3" style="padding-bottom:10px;"><div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;">V. Firmas de Conformidad</div></td></tr>' +
+      '<tr style="page-break-before:always;break-before:page;"><td colspan="3" style="padding-bottom:10px;"><div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;">V. Firmas de Conformidad</div></td></tr>' +
       '<tr style="vertical-align:bottom;">' +
       '<td style="width:33%;text-align:center;padding:0 12px 0 0;border-right:1px dashed #c8d8ec;">' +
       '<div style="height:60px;"></div><div style="border-top:2px solid #0b4f8a;margin:0 10px;"></div>' +
