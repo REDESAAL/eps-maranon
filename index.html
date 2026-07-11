@@ -372,6 +372,12 @@
       </div>
       <div class="badge-label">VI<br>Orden de<br>Trabajo</div>
     </button>
+    <button class="badge-item" data-sec="reportediario" onclick="mostrarSeccion('reportediario')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      </div>
+      <div class="badge-label">VII<br>Reporte<br>Diario</div>
+    </button>
   </div>
   </div>
 
@@ -469,7 +475,7 @@
     </div>
   </div>
   <div style="position:relative;max-width:420px;margin-bottom:14px;">
-    <input type="text" id="buscarHistorial" placeholder="Buscar por N Orden, Codigo, Fecha o Componente..." oninput="renderHistorial()"
+    <input type="text" id="buscarHistorial" placeholder="Buscar por N Orden, Codigo, Fecha, Componente o Tecnico..." oninput="renderHistorial()"
            style="width:100%;padding:10px 36px 10px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#f8fbff;">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a8fa6" stroke-width="2" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </div>
@@ -505,6 +511,25 @@
   <div class="section-title"><span class="num">VI</span> Orden de Trabajo</div>
   <div id="ordenTrabajoInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
   <div id="ordenTrabajoContenido"></div>
+</div>
+
+<!-- REPORTE DIARIO -->
+<div id="seccionReporteDiario">
+  <div class="section-title"><span class="num">VII</span> Reporte Diario</div>
+  <div class="config-wrap">
+    <div class="config-col" style="text-align:center;">
+      <h4>1. Agua Potable</h4>
+      <p style="font-size:0.82rem;color:#7a8fa6;margin-bottom:16px;">Reporte diario de actividades del sistema de agua potable.</p>
+      <button class="btn-config-add" onclick="abrirReporteDiario('agua')">&#128196; Hoja Nueva</button>
+      <div id="listaReportesAgua" style="margin-top:18px;text-align:left;"></div>
+    </div>
+    <div class="config-col" style="text-align:center;">
+      <h4>2. Alcantarillado</h4>
+      <p style="font-size:0.82rem;color:#7a8fa6;margin-bottom:16px;">Reporte diario de actividades del sistema de alcantarillado.</p>
+      <button class="btn-config-add" onclick="abrirReporteDiario('alcantarillado')">&#128196; Hoja Nueva</button>
+      <div id="listaReportesAlcant" style="margin-top:18px;text-align:left;"></div>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -715,6 +740,67 @@
   </div>
 </div>
 
+<!-- MODAL REPORTE DIARIO -->
+<div class="modal-overlay" id="modalReporteDiario">
+  <div class="modal" style="width:640px;">
+    <div class="modal-header" id="rdHeader" style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);">
+      <h3>REPORTE</h3>
+      <button class="modal-close" onclick="cerrarReporteDiario()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="os-grid">
+        <div class="os-field"><label>N Orden</label><input type="text" id="rdNumero" readonly style="background:#eef3f9;"></div>
+        <div class="os-field"><label>Fecha de Emision</label><input type="text" id="rdFecha" readonly style="background:#eef3f9;"></div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field"><label>N Codigo</label><input type="text" id="rdCodigo" placeholder="Ej: DL-2025-001"></div>
+        <div class="os-field"><label>Direccion / Ubicacion</label><input type="text" id="rdDireccion" placeholder="Ej: Jr. Amazonas 245"></div>
+      </div>
+      <div class="os-field full">
+        <label>Nombre Completo</label>
+        <input type="text" id="rdNombre" readonly style="background:#eef3f9;">
+      </div>
+      <div class="os-field full">
+        <label>Componente</label>
+        <select id="rdComponente"><option value="">-- Seleccionar --</option></select>
+      </div>
+      <div class="os-field full">
+        <label>Ocurrencia <span id="rdOcurrenciaContador" style="font-weight:400;color:#7a8fa6;"></span></label>
+        <textarea id="rdOcurrencia" rows="4" placeholder="Describa la ocurrencia del dia..." oninput="contarPalabras('rdOcurrencia','rdOcurrenciaContador')"></textarea>
+      </div>
+      <div class="os-field full">
+        <label>Observacion / Instruccion <span id="rdObsContador" style="font-weight:400;color:#7a8fa6;"></span></label>
+        <textarea id="rdObservacion" rows="4" placeholder="Observaciones o instrucciones..." oninput="contarPalabras('rdObservacion','rdObsContador')"></textarea>
+      </div>
+
+      <div class="os-field full">
+        <label>Fotos de Inicio (hasta 5 archivos)</label>
+        <div class="upload-area" id="uploadAreaRdInicio" onclick="document.getElementById('rdArchivoInicio').click()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir fotos de INICIO</div>
+          <input type="file" id="rdArchivoInicio" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosRD(this, 'inicio')">
+        </div>
+        <div id="previewAreaRdInicio" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="contadorArchivosRdInicio" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+      </div>
+      <div class="os-field full">
+        <label>Fotos de Fin (hasta 5 archivos)</label>
+        <div class="upload-area" id="uploadAreaRdFin" onclick="document.getElementById('rdArchivoFin').click()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir fotos de FIN</div>
+          <input type="file" id="rdArchivoFin" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosRD(this, 'fin')">
+        </div>
+        <div id="previewAreaRdFin" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="contadorArchivosRdFin" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarReporteDiario()">Cancelar</button>
+      <button class="btn-save" style="background:#1a7a4a;" onclick="guardarReporteDiario()">Guardar Reporte</button>
+    </div>
+  </div>
+</div>
+
 <!-- AREA DE IMPRESION -->
 <div id="printArea"></div>
 
@@ -851,9 +937,13 @@
     aplicarPermisos();
     cargarHistorial();
     cargarPlanGuardado();
+    cargarReportesGuardados();
     firebaseCargarPlanInicial(function() {
       renderTodoElPlan();
       irASeccionPorURL();
+    });
+    firebaseCargarReportesInicial(function() {
+      renderTodosLosReportes();
     });
     firebaseEscucharCambios();
     verificarURLTarea();
@@ -871,7 +961,7 @@
   // Filtra la vista: 'inicio' muestra la portada + circulos; cualquier otro
   // nombre muestra solo esa seccion como si fuera una pagina aparte.
   function mostrarSeccion(nombre) {
-    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo' };
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario' };
     var pantallaInicio = document.getElementById('pantallaInicio');
     var btnVolver = document.getElementById('btnVolverWrap');
     var esTec = currentUser && currentUser.rol === 'tecnico';
@@ -909,7 +999,7 @@
     try {
       var params = new URLSearchParams(window.location.search);
       var seccion = params.get('seccion');
-      if (seccion === 'config' || seccion === 'agua' || seccion === 'alcant' || seccion === 'historial') {
+      if (seccion === 'config' || seccion === 'agua' || seccion === 'alcant' || seccion === 'historial' || seccion === 'ordentrabajo' || seccion === 'reportediario') {
         mostrarSeccion(seccion);
       }
     } catch(e) {}
@@ -978,6 +1068,46 @@
   var STORE_KEY = 'eps_maranon_historial';
   var MAX_ARCHIVOS = 10; // limite total de referencia
   var MAX_ARCHIVOS_SECCION = 5; // limite de archivos por seccion (Inicio / Fin)
+
+  // ============================================================
+  // MODULO VII: REPORTE DIARIO
+  // ============================================================
+  var REPORTES_KEY = 'eps_maranon_reportes';
+  var reportesDiarios = [];
+  var reporteCounter = 1;
+  window._archivosRD = { inicio: [], fin: [] };
+  var _rdSistemaActual = null;
+
+  function cargarReportesGuardados() {
+    try {
+      var g = localStorage.getItem(REPORTES_KEY);
+      if (g) {
+        var lista = JSON.parse(g);
+        if (Array.isArray(lista)) { reportesDiarios = lista; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarReportes() {
+    try { localStorage.setItem(REPORTES_KEY, JSON.stringify(reportesDiarios)); } catch(e) {}
+    firebaseGuardarReportes();
+  }
+
+  function firebaseGuardarReportes() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('reportesDiarios').set(reportesDiarios).catch(function() {});
+  }
+
+  function firebaseCargarReportesInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('reportesDiarios').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (Array.isArray(data)) { reportesDiarios = data; }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
 
   // ============================================================
   // CONFIGURACION DEL SISTEMA: componentes del plan de mantenimiento
@@ -1590,6 +1720,14 @@
         renderTodoElPlan();
       }
     });
+    _fbDb.ref('reportesDiarios').on('value', function(snap) {
+      var data = snap.val();
+      if (Array.isArray(data)) {
+        reportesDiarios = data;
+        try { localStorage.setItem(REPORTES_KEY, JSON.stringify(reportesDiarios)); } catch(err) {}
+        renderTodosLosReportes();
+      }
+    });
   }
 
   var historial = [];
@@ -1808,7 +1946,7 @@
     historial.forEach(function(os, idx) {
       if (esTec && os.tecnico !== currentUser.nombre) return;
       if (busqueda) {
-        var campos = [os.id, os.codigo, formatFecha(os.fecha), os.componente].join(' ').toLowerCase();
+        var campos = [os.id, os.codigo, formatFecha(os.fecha), os.componente, os.tecnico].join(' ').toLowerCase();
         if (campos.indexOf(busqueda) === -1) return;
       }
       filas.push({ os: os, idx: idx });
@@ -2430,6 +2568,215 @@
     agregarPreview(data, seccion);
   }
 
+  // ---------- REPORTE DIARIO: abrir / contar palabras / archivos / guardar ----------
+
+  function contarPalabras(idTextarea, idContador) {
+    var el = document.getElementById(idTextarea);
+    var texto = el.value.trim();
+    var palabras = texto === '' ? [] : texto.split(/\s+/);
+    document.getElementById(idContador).textContent = palabras.length > 0 ? '(' + palabras.length + ' palabras)' : '';
+  }
+
+  function abrirReporteDiario(sistema) {
+    _rdSistemaActual = sistema;
+    var nombreSistema = sistema === 'agua' ? 'Agua Potable' : 'Alcantarillado';
+    document.getElementById('rdHeader').querySelector('h3').textContent = 'REPORTE - ' + nombreSistema.toUpperCase();
+    document.getElementById('rdNumero').value = 'RD-' + String(reporteCounter).padStart(3, '0');
+    document.getElementById('rdFecha').value = formatFecha(new Date().toISOString().split('T')[0]);
+    document.getElementById('rdCodigo').value = '';
+    document.getElementById('rdDireccion').value = '';
+    document.getElementById('rdNombre').value = (currentUser && currentUser.nombre) || '-';
+    document.getElementById('rdOcurrencia').value = '';
+    document.getElementById('rdObservacion').value = '';
+    document.getElementById('rdOcurrenciaContador').textContent = '';
+    document.getElementById('rdObsContador').textContent = '';
+
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var sel = document.getElementById('rdComponente');
+    sel.innerHTML = '<option value="">-- Seleccionar --</option>' +
+      plan.map(function(item) { return '<option>' + item.componente + '</option>'; }).join('');
+
+    window._archivosRD = { inicio: [], fin: [] };
+    document.getElementById('rdArchivoInicio').value = '';
+    document.getElementById('rdArchivoFin').value = '';
+    document.getElementById('previewAreaRdInicio').innerHTML = '';
+    document.getElementById('previewAreaRdFin').innerHTML = '';
+    document.getElementById('contadorArchivosRdInicio').style.display = 'none';
+    document.getElementById('contadorArchivosRdFin').style.display = 'none';
+    document.getElementById('uploadAreaRdInicio').style.display = 'block';
+    document.getElementById('uploadAreaRdFin').style.display = 'block';
+
+    document.getElementById('modalReporteDiario').classList.add('active');
+  }
+
+  function cerrarReporteDiario() {
+    document.getElementById('modalReporteDiario').classList.remove('active');
+  }
+
+  function cargarArchivosRD(input, seccion) {
+    var files = [];
+    for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
+    var MAX = MAX_ARCHIVOS_SECCION;
+    var MAXSIZE = 15 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf'];
+    var suf = seccion === 'inicio' ? 'RdInicio' : 'RdFin';
+    var disponibles = MAX - window._archivosRD[seccion].length;
+    if (disponibles <= 0) {
+      alert('Ya tiene ' + MAX + ' archivos en esta seccion. Quite alguno para agregar mas.');
+      input.value = ''; return;
+    }
+    if (files.length > disponibles) {
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas. Se tomaran los primeros.');
+      files = files.slice(0, disponibles);
+    }
+    var errores = [];
+    files.forEach(function(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
+      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 15MB'); return; }
+      var reader = new FileReader();
+      reader.onload = (function(f) {
+        return function(e) {
+          var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
+          window._archivosRD[seccion].push(data);
+          agregarPreviewRD(data, seccion);
+          actualizarContadorRD(seccion);
+        };
+      })(file);
+      reader.readAsDataURL(file);
+    });
+    if (errores.length) alert('Errores:\n' + errores.join('\n'));
+    input.value = '';
+  }
+
+  function agregarPreviewRD(data, seccion) {
+    var suf = seccion === 'inicio' ? 'RdInicio' : 'RdFin';
+    var isImg = data.type.indexOf('image') >= 0;
+    var pa = document.getElementById('previewArea' + suf);
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:150px;max-width:190px;text-align:center;';
+    var idxActual = pa.children.length;
+    if (isImg) {
+      div.innerHTML =
+        '<img src="' + data.base64 + '" style="width:100%;max-height:170px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxRD(' + idxActual + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else {
+      div.innerHTML =
+        '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxRD(' + idxActual + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    }
+    pa.appendChild(div);
+    if (window._archivosRD[seccion].length >= MAX_ARCHIVOS_SECCION) {
+      document.getElementById('uploadArea' + suf).style.display = 'none';
+    }
+  }
+
+  function actualizarContadorRD(seccion) {
+    var suf = seccion === 'inicio' ? 'RdInicio' : 'RdFin';
+    var n = window._archivosRD[seccion].length;
+    var c = document.getElementById('contadorArchivos' + suf);
+    if (n > 0) {
+      c.style.display = 'block';
+      c.textContent = n + ' de ' + MAX_ARCHIVOS_SECCION + ' archivo(s) cargado(s)';
+    } else {
+      c.style.display = 'none';
+      document.getElementById('uploadArea' + suf).style.display = 'block';
+    }
+  }
+
+  function quitarArchivoIdxRD(idx, seccion) {
+    var suf = seccion === 'inicio' ? 'RdInicio' : 'RdFin';
+    window._archivosRD[seccion].splice(idx, 1);
+    var pa = document.getElementById('previewArea' + suf);
+    pa.innerHTML = '';
+    window._archivosRD[seccion].forEach(function(d) { agregarPreviewRD(d, seccion); });
+    actualizarContadorRD(seccion);
+    if (window._archivosRD[seccion].length < MAX_ARCHIVOS_SECCION) document.getElementById('uploadArea' + suf).style.display = 'block';
+  }
+
+  function guardarReporteDiario() {
+    var componente = document.getElementById('rdComponente').value;
+    if (!componente) { alert('Seleccione un componente.'); return; }
+
+    var reporte = {
+      id: document.getElementById('rdNumero').value,
+      sistema: _rdSistemaActual,
+      nombre: document.getElementById('rdNombre').value,
+      fecha: new Date().toISOString().split('T')[0],
+      codigo: document.getElementById('rdCodigo').value.trim() || '-',
+      direccion: document.getElementById('rdDireccion').value.trim() || '-',
+      componente: componente,
+      ocurrencia: document.getElementById('rdOcurrencia').value.trim() || '-',
+      observacion: document.getElementById('rdObservacion').value.trim() || '-'
+    };
+
+    var hayInicio = window._archivosRD.inicio.length > 0;
+    var hayFin = window._archivosRD.fin.length > 0;
+
+    var finalizar = function() {
+      reportesDiarios.push(reporte);
+      reporteCounter++;
+      guardarReportes();
+      renderListaReportes(_rdSistemaActual);
+      cerrarReporteDiario();
+      alert('Reporte guardado correctamente: ' + reporte.id);
+    };
+
+    if (hayInicio || hayFin) {
+      var pendientes = (hayInicio ? 1 : 0) + (hayFin ? 1 : 0);
+      var terminar = function() {
+        pendientes--;
+        if (pendientes > 0) return;
+        finalizar();
+      };
+      if (hayInicio) {
+        comprimirYGuardar(window._archivosRD.inicio.slice(), function(comprimidos) {
+          reporte.evidenciasInicio = comprimidos;
+          terminar();
+        });
+      }
+      if (hayFin) {
+        comprimirYGuardar(window._archivosRD.fin.slice(), function(comprimidos) {
+          reporte.evidenciasFin = comprimidos;
+          terminar();
+        });
+      }
+    } else {
+      finalizar();
+    }
+  }
+
+  function renderListaReportes(sistema) {
+    var contId = sistema === 'agua' ? 'listaReportesAgua' : 'listaReportesAlcant';
+    var cont = document.getElementById(contId);
+    if (!cont) return;
+    var lista = reportesDiarios.filter(function(r) { return r.sistema === sistema; }).slice().reverse();
+    if (lista.length === 0) {
+      cont.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;text-align:center;">Sin reportes registrados aun.</div>';
+      return;
+    }
+    cont.innerHTML = lista.map(function(r) {
+      var codDir = [];
+      if (r.codigo && r.codigo !== '-') codDir.push('Cod: ' + r.codigo);
+      if (r.direccion && r.direccion !== '-') codDir.push(r.direccion);
+      return '<div class="config-item">' +
+        '<div class="config-item-info">' +
+          '<strong>' + r.id + ' &middot; ' + r.componente + '</strong>' +
+          '<span class="meta">' + formatFecha(r.fecha) + ' &middot; ' + r.nombre + (codDir.length ? ' &middot; ' + codDir.join(' &middot; ') : '') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderTodosLosReportes() {
+    renderListaReportes('agua');
+    renderListaReportes('alcantarillado');
+  }
+
   function verificarURLTarea() {
     var params = new URLSearchParams(window.location.search);
     var tareaParam = params.get('tarea');
@@ -2590,6 +2937,7 @@
   document.getElementById('modalOS').addEventListener('click', function(e) { if (e.target === this) cerrarOS(); });
   document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
   document.getElementById('modalCuenta').addEventListener('click', function(e) { if (e.target === this) cerrarCuenta(); });
+  document.getElementById('modalReporteDiario').addEventListener('click', function(e) { if (e.target === this) cerrarReporteDiario(); });
   document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 
   // Verificar si ya hay una sesion activa en este navegador (misma pestana/sesion)
