@@ -378,6 +378,18 @@
       </div>
       <div class="badge-label">VII<br>Reporte<br>Diario</div>
     </button>
+    <button class="badge-item" data-sec="seguimiento" onclick="mostrarSeccion('seguimiento')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+      </div>
+      <div class="badge-label">VIII<br>Seguimiento<br>Operativo</div>
+    </button>
+    <button class="badge-item" data-sec="catalogo" onclick="mostrarSeccion('catalogo')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      </div>
+      <div class="badge-label">IX<br>Catalogo</div>
+    </button>
   </div>
   </div>
 
@@ -528,6 +540,97 @@
       <p style="font-size:0.82rem;color:#7a8fa6;margin-bottom:16px;">Reporte diario de actividades del sistema de alcantarillado.</p>
       <button class="btn-config-add" onclick="abrirReporteDiario('alcantarillado')">&#128196; Hoja Nueva</button>
       <div id="listaReportesAlcant" style="margin-top:18px;text-align:left;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SEGUIMIENTO OPERATIVO -->
+<div id="seccionSeguimiento">
+  <div class="section-title"><span class="num">VIII</span> Seguimiento Operativo</div>
+
+  <div class="config-wrap" style="margin-bottom:28px;">
+    <div class="config-col" style="text-align:center;">
+      <h4>1. Orden de Servicio</h4>
+      <div id="segCantidadOS" style="font-size:2.4rem;font-weight:800;color:var(--azul);">0</div>
+      <div style="font-size:0.8rem;color:#7a8fa6;">ordenes registradas en total</div>
+    </div>
+    <div class="config-col" style="text-align:center;">
+      <h4>2. Reporte Diario</h4>
+      <div id="segCantidadRD" style="font-size:2.4rem;font-weight:800;color:var(--azul);">0</div>
+      <div style="font-size:0.8rem;color:#7a8fa6;">reportes diarios registrados</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="font-size:0.95rem;">Por Tecnico / Operario</div>
+  <div id="segChipsTecnicos" style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 24px;"></div>
+
+  <div id="segDetalleWrap" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h4 id="segDetalleTitulo" style="color:var(--azul);"></h4>
+      <button class="btn-config-cancelar" onclick="cerrarDetalleSeguimiento()">Cerrar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>N Orden</th><th>Codigo</th><th>Fecha Emision</th><th>Fecha Programada</th><th>Componente</th><th>Prioridad</th><th>Estado</th><th>PDF</th></tr></thead>
+        <tbody id="segDetalleBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOGO -->
+<div id="seccionCatalogo">
+  <div class="section-title"><span class="num">IX</span> Catalogo</div>
+  <div class="config-wrap">
+    <div class="config-col">
+      <h4>Agua Potable</h4>
+      <div id="catalogoListaAgua" class="config-lista"></div>
+      <div class="config-form" id="catAguaForm">
+        <select id="catAguaComponente"><option value="">-- Seleccionar Componente --</option></select>
+        <input type="number" id="catAguaCantidad" placeholder="Cantidad" min="1">
+        <input type="text" id="catAguaCodigo" placeholder="N Codigo (ej: DL-2025-001)">
+        <input type="text" id="catAguaDireccion" placeholder="Direccion / Ubicacion">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="catAguaNorte" placeholder="Coordenada Norte" style="flex:1;">
+          <input type="text" id="catAguaEste" placeholder="Coordenada Este" style="flex:1;">
+        </div>
+        <input type="text" id="catAguaLocalidad" placeholder="Localidad">
+        <label class="config-label">Fecha Programada</label>
+        <input type="date" id="catAguaFechaProg">
+        <label class="config-label">Situacion</label>
+        <select id="catAguaSituacion">
+          <option value="Operativo">Operativo</option>
+          <option value="Inoperativo">Inoperativo</option>
+        </select>
+        <textarea id="catAguaObservacion" placeholder="Observacion" rows="2"></textarea>
+        <button class="btn-config-add" id="catAguaBtnGuardar" onclick="guardarCatalogo('agua')">&#10133; Agregar al catalogo</button>
+        <button class="btn-config-cancelar" id="catAguaBtnCancelar" style="display:none;" onclick="cancelarEdicionCatalogo('agua')">Cancelar edicion</button>
+      </div>
+    </div>
+    <div class="config-col">
+      <h4>Alcantarillado</h4>
+      <div id="catalogoListaAlcant" class="config-lista"></div>
+      <div class="config-form" id="catAlcantForm">
+        <select id="catAlcantComponente"><option value="">-- Seleccionar Componente --</option></select>
+        <input type="number" id="catAlcantCantidad" placeholder="Cantidad" min="1">
+        <input type="text" id="catAlcantCodigo" placeholder="N Codigo (ej: DL-2025-001)">
+        <input type="text" id="catAlcantDireccion" placeholder="Direccion / Ubicacion">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="catAlcantNorte" placeholder="Coordenada Norte" style="flex:1;">
+          <input type="text" id="catAlcantEste" placeholder="Coordenada Este" style="flex:1;">
+        </div>
+        <input type="text" id="catAlcantLocalidad" placeholder="Localidad">
+        <label class="config-label">Fecha Programada</label>
+        <input type="date" id="catAlcantFechaProg">
+        <label class="config-label">Situacion</label>
+        <select id="catAlcantSituacion">
+          <option value="Operativo">Operativo</option>
+          <option value="Inoperativo">Inoperativo</option>
+        </select>
+        <textarea id="catAlcantObservacion" placeholder="Observacion" rows="2"></textarea>
+        <button class="btn-config-add" id="catAlcantBtnGuardar" onclick="guardarCatalogo('alcantarillado')">&#10133; Agregar al catalogo</button>
+        <button class="btn-config-cancelar" id="catAlcantBtnCancelar" style="display:none;" onclick="cancelarEdicionCatalogo('alcantarillado')">Cancelar edicion</button>
+      </div>
     </div>
   </div>
 </div>
@@ -938,12 +1041,16 @@
     cargarHistorial();
     cargarPlanGuardado();
     cargarReportesGuardados();
+    cargarCatalogoGuardado();
     firebaseCargarPlanInicial(function() {
       renderTodoElPlan();
       irASeccionPorURL();
     });
     firebaseCargarReportesInicial(function() {
       renderTodosLosReportes();
+    });
+    firebaseCargarCatalogoInicial(function() {
+      renderCatalogoTodo();
     });
     firebaseEscucharCambios();
     verificarURLTarea();
@@ -961,7 +1068,7 @@
   // Filtra la vista: 'inicio' muestra la portada + circulos; cualquier otro
   // nombre muestra solo esa seccion como si fuera una pagina aparte.
   function mostrarSeccion(nombre) {
-    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario' };
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo' };
     var pantallaInicio = document.getElementById('pantallaInicio');
     var btnVolver = document.getElementById('btnVolverWrap');
     var esTec = currentUser && currentUser.rol === 'tecnico';
@@ -991,6 +1098,8 @@
     var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
     if (btnActivo) btnActivo.classList.add('badge-active');
     if (nombre === 'ordentrabajo') { renderOrdenTrabajo(); }
+    if (nombre === 'seguimiento') { renderSeguimiento(); }
+    if (nombre === 'catalogo') { renderCatalogoTodo(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1104,6 +1213,49 @@
       .then(function(snap) {
         var data = snap.val();
         if (Array.isArray(data)) { reportesDiarios = data; }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  // ============================================================
+  // MODULO IX: CATALOGO (inventario tecnico de componentes)
+  // ============================================================
+  var CATALOGO_KEY = 'eps_maranon_catalogo';
+  var catalogoAgua = [];
+  var catalogoAlcantarillado = [];
+  var _editandoCatalogoIdx = { agua: null, alcantarillado: null };
+
+  function cargarCatalogoGuardado() {
+    try {
+      var g = localStorage.getItem(CATALOGO_KEY);
+      if (g) {
+        var data = JSON.parse(g);
+        if (data && Array.isArray(data.agua)) { catalogoAgua = data.agua; }
+        if (data && Array.isArray(data.alcantarillado)) { catalogoAlcantarillado = data.alcantarillado; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarCatalogoStorage() {
+    try { localStorage.setItem(CATALOGO_KEY, JSON.stringify({ agua: catalogoAgua, alcantarillado: catalogoAlcantarillado })); } catch(e) {}
+    firebaseGuardarCatalogo();
+  }
+
+  function firebaseGuardarCatalogo() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('catalogo').set({ agua: catalogoAgua, alcantarillado: catalogoAlcantarillado }).catch(function() {});
+  }
+
+  function firebaseCargarCatalogoInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('catalogo').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (data) {
+          if (Array.isArray(data.agua)) { catalogoAgua = data.agua; }
+          if (Array.isArray(data.alcantarillado)) { catalogoAlcantarillado = data.alcantarillado; }
+        }
         callback();
       })
       .catch(function() { callback(); });
@@ -1726,6 +1878,15 @@
         reportesDiarios = data;
         try { localStorage.setItem(REPORTES_KEY, JSON.stringify(reportesDiarios)); } catch(err) {}
         renderTodosLosReportes();
+      }
+    });
+    _fbDb.ref('catalogo').on('value', function(snap) {
+      var data = snap.val();
+      if (data) {
+        if (Array.isArray(data.agua)) { catalogoAgua = data.agua; }
+        if (Array.isArray(data.alcantarillado)) { catalogoAlcantarillado = data.alcantarillado; }
+        try { localStorage.setItem(CATALOGO_KEY, JSON.stringify({ agua: catalogoAgua, alcantarillado: catalogoAlcantarillado })); } catch(err) {}
+        renderCatalogoTodo();
       }
     });
   }
@@ -2775,6 +2936,211 @@
   function renderTodosLosReportes() {
     renderListaReportes('agua');
     renderListaReportes('alcantarillado');
+  }
+
+  // ============================================================
+  // MODULO IX: CATALOGO
+  // ============================================================
+  function renderSelectComponenteCatalogo(sistema) {
+    var plan = sistema === 'agua' ? planAgua : planAlcantarillado;
+    var prefijo = sistema === 'agua' ? 'catAgua' : 'catAlcant';
+    var sel = document.getElementById(prefijo + 'Componente');
+    if (!sel) return;
+    var valorActual = sel.value;
+    sel.innerHTML = '<option value="">-- Seleccionar Componente --</option>' +
+      plan.map(function(item) { return '<option>' + item.componente + '</option>'; }).join('');
+    if (valorActual) sel.value = valorActual;
+  }
+
+  function renderCatalogoLista(sistema) {
+    var catalogo = sistema === 'agua' ? catalogoAgua : catalogoAlcantarillado;
+    var listaId = sistema === 'agua' ? 'catalogoListaAgua' : 'catalogoListaAlcant';
+    var lista = document.getElementById(listaId);
+    if (!lista) return;
+    if (catalogo.length === 0) {
+      lista.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;">Sin componentes en el catalogo aun.</div>';
+      return;
+    }
+    lista.innerHTML = catalogo.map(function(item, idx) {
+      var colorSit = item.situacion === 'Operativo' ? '#1a7a4a' : 'var(--rojo)';
+      return '<div class="config-item">' +
+        '<div class="config-item-info">' +
+          '<strong>' + item.componente + '</strong> <span style="color:#7a8fa6;font-weight:400;">(Cant: ' + (item.cantidad || 1) + ')</span>' +
+          '<span class="meta">Cod: ' + (item.codigo || '-') + ' &middot; ' + (item.direccion || '-') + ' &middot; ' + (item.localidad || '-') + '</span>' +
+          '<span class="meta">Norte: ' + (item.norte || '-') + ' &middot; Este: ' + (item.este || '-') + ' &middot; Prog: ' + formatFecha(item.fechaProg) + '</span>' +
+          '<div class="coords" style="color:' + colorSit + ';font-weight:700;">' + item.situacion + (item.observacion && item.observacion !== '-' ? ' &middot; ' + item.observacion : '') + '</div>' +
+        '</div>' +
+        '<div class="config-item-acciones">' +
+          '<button class="btn-config-edit" onclick="editarCatalogo(\'' + sistema + '\', ' + idx + ')" title="Editar">&#9998;</button>' +
+          '<button class="btn-config-del" onclick="eliminarCatalogo(\'' + sistema + '\', ' + idx + ')" title="Quitar">&#128465;</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function guardarCatalogo(sistema) {
+    var prefijo = sistema === 'agua' ? 'catAgua' : 'catAlcant';
+    var componente = document.getElementById(prefijo + 'Componente').value;
+    if (!componente) { alert('Seleccione un componente.'); return; }
+
+    var item = {
+      componente: componente,
+      cantidad: document.getElementById(prefijo + 'Cantidad').value || 1,
+      codigo: document.getElementById(prefijo + 'Codigo').value.trim() || '-',
+      direccion: document.getElementById(prefijo + 'Direccion').value.trim() || '-',
+      norte: document.getElementById(prefijo + 'Norte').value.trim() || '-',
+      este: document.getElementById(prefijo + 'Este').value.trim() || '-',
+      localidad: document.getElementById(prefijo + 'Localidad').value.trim() || '-',
+      fechaProg: document.getElementById(prefijo + 'FechaProg').value || '-',
+      situacion: document.getElementById(prefijo + 'Situacion').value,
+      observacion: document.getElementById(prefijo + 'Observacion').value.trim() || '-'
+    };
+
+    var catalogo = sistema === 'agua' ? catalogoAgua : catalogoAlcantarillado;
+    var idxEdicion = _editandoCatalogoIdx[sistema];
+    if (idxEdicion !== null && idxEdicion !== undefined) {
+      catalogo[idxEdicion] = item;
+      cancelarEdicionCatalogo(sistema);
+    } else {
+      catalogo.push(item);
+      limpiarFormularioCatalogo(sistema);
+    }
+    guardarCatalogoStorage();
+    renderCatalogoLista(sistema);
+  }
+
+  function limpiarFormularioCatalogo(sistema) {
+    var prefijo = sistema === 'agua' ? 'catAgua' : 'catAlcant';
+    document.getElementById(prefijo + 'Componente').value = '';
+    document.getElementById(prefijo + 'Cantidad').value = '';
+    document.getElementById(prefijo + 'Codigo').value = '';
+    document.getElementById(prefijo + 'Direccion').value = '';
+    document.getElementById(prefijo + 'Norte').value = '';
+    document.getElementById(prefijo + 'Este').value = '';
+    document.getElementById(prefijo + 'Localidad').value = '';
+    document.getElementById(prefijo + 'FechaProg').value = '';
+    document.getElementById(prefijo + 'Situacion').value = 'Operativo';
+    document.getElementById(prefijo + 'Observacion').value = '';
+  }
+
+  function editarCatalogo(sistema, idx) {
+    var catalogo = sistema === 'agua' ? catalogoAgua : catalogoAlcantarillado;
+    var item = catalogo[idx];
+    if (!item) return;
+    var prefijo = sistema === 'agua' ? 'catAgua' : 'catAlcant';
+    _editandoCatalogoIdx[sistema] = idx;
+
+    renderSelectComponenteCatalogo(sistema);
+    document.getElementById(prefijo + 'Componente').value = item.componente;
+    document.getElementById(prefijo + 'Cantidad').value = item.cantidad;
+    document.getElementById(prefijo + 'Codigo').value = item.codigo === '-' ? '' : item.codigo;
+    document.getElementById(prefijo + 'Direccion').value = item.direccion === '-' ? '' : item.direccion;
+    document.getElementById(prefijo + 'Norte').value = item.norte === '-' ? '' : item.norte;
+    document.getElementById(prefijo + 'Este').value = item.este === '-' ? '' : item.este;
+    document.getElementById(prefijo + 'Localidad').value = item.localidad === '-' ? '' : item.localidad;
+    document.getElementById(prefijo + 'FechaProg').value = item.fechaProg === '-' ? '' : item.fechaProg;
+    document.getElementById(prefijo + 'Situacion').value = item.situacion;
+    document.getElementById(prefijo + 'Observacion').value = item.observacion === '-' ? '' : item.observacion;
+
+    document.getElementById(prefijo + 'Form').classList.add('editando');
+    document.getElementById(prefijo + 'BtnGuardar').innerHTML = '&#128190; Guardar cambios';
+    document.getElementById(prefijo + 'BtnCancelar').style.display = 'block';
+    document.getElementById(prefijo + 'Form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function cancelarEdicionCatalogo(sistema) {
+    _editandoCatalogoIdx[sistema] = null;
+    var prefijo = sistema === 'agua' ? 'catAgua' : 'catAlcant';
+    limpiarFormularioCatalogo(sistema);
+    document.getElementById(prefijo + 'Form').classList.remove('editando');
+    document.getElementById(prefijo + 'BtnGuardar').innerHTML = '&#10133; Agregar al catalogo';
+    document.getElementById(prefijo + 'BtnCancelar').style.display = 'none';
+  }
+
+  function eliminarCatalogo(sistema, idx) {
+    var catalogo = sistema === 'agua' ? catalogoAgua : catalogoAlcantarillado;
+    var item = catalogo[idx];
+    if (!item) return;
+    if (!confirm('Quitar "' + item.componente + '" (Cod: ' + item.codigo + ') del catalogo?')) return;
+    catalogo.splice(idx, 1);
+    if (_editandoCatalogoIdx[sistema] === idx) { cancelarEdicionCatalogo(sistema); }
+    guardarCatalogoStorage();
+    renderCatalogoLista(sistema);
+  }
+
+  function renderCatalogoTodo() {
+    renderSelectComponenteCatalogo('agua');
+    renderSelectComponenteCatalogo('alcantarillado');
+    renderCatalogoLista('agua');
+    renderCatalogoLista('alcantarillado');
+  }
+
+  // ============================================================
+  // MODULO VIII: SEGUIMIENTO OPERATIVO
+  // ============================================================
+  function renderSeguimiento() {
+    document.getElementById('segCantidadOS').textContent = historial.length;
+    document.getElementById('segCantidadRD').textContent = reportesDiarios.length;
+    document.getElementById('segDetalleWrap').style.display = 'none';
+
+    var porTecnico = {};
+    historial.forEach(function(os) {
+      var nombre = os.tecnico || 'Sin asignar';
+      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0 };
+      porTecnico[nombre].ordenes++;
+    });
+    reportesDiarios.forEach(function(r) {
+      var nombre = r.nombre || 'Sin asignar';
+      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0 };
+      porTecnico[nombre].reportes++;
+    });
+
+    var nombres = Object.keys(porTecnico).sort();
+    var cont = document.getElementById('segChipsTecnicos');
+    if (nombres.length === 0) {
+      cont.innerHTML = '<div style="color:#7a8fa6;font-size:0.82rem;">Aun no hay datos registrados.</div>';
+      return;
+    }
+    cont.innerHTML = nombres.map(function(nombre) {
+      var d = porTecnico[nombre];
+      var totalTxt = [];
+      if (d.ordenes > 0) totalTxt.push(d.ordenes + ' O/S');
+      if (d.reportes > 0) totalTxt.push(d.reportes + ' Rep.');
+      return '<button class="badge-item" style="flex-direction:row;gap:8px;background:white;border:1px solid #dbe9f8;border-radius:24px;padding:10px 18px;cursor:pointer;" onclick="mostrarDetalleTecnico(\'' + nombre.replace(/'/g,"\\'") + '\')">' +
+        '<span style="font-weight:700;color:var(--azul);font-size:0.85rem;">' + nombre + '</span>' +
+        '<span style="background:#eaf2fb;color:#0b4f8a;border-radius:12px;padding:2px 10px;font-size:0.76rem;font-weight:700;">' + totalTxt.join(' &middot; ') + '</span>' +
+        '</button>';
+    }).join('');
+  }
+
+  function mostrarDetalleTecnico(nombre) {
+    var ordenes = historial.filter(function(os) { return (os.tecnico || 'Sin asignar') === nombre; });
+    document.getElementById('segDetalleTitulo').textContent = 'Ordenes de ' + nombre + ' (' + ordenes.length + ')';
+    var tbody = document.getElementById('segDetalleBody');
+    if (ordenes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:16px;">Sin ordenes de servicio registradas.</td></tr>';
+    } else {
+      tbody.innerHTML = ordenes.map(function(os) {
+        var idxReal = historial.indexOf(os);
+        var estadoKey = os.estado.replace(/\s/g,'');
+        return '<tr>' +
+          '<td><strong>' + os.id + '</strong></td>' +
+          '<td>' + os.codigo + '</td>' +
+          '<td>' + formatFecha(os.fecha) + '</td>' +
+          '<td>' + formatFecha(os.fechaProg) + '</td>' +
+          '<td>' + os.componente + '</td>' +
+          '<td>' + os.prioridad + '</td>' +
+          '<td><span class="badge-estado badge-' + estadoKey + '">' + os.estado + '</span></td>' +
+          '<td style="text-align:center"><button class="btn-print-row" onclick="imprimirOS(' + idxReal + ')">PDF</button></td>' +
+          '</tr>';
+      }).join('');
+    }
+    document.getElementById('segDetalleWrap').style.display = 'block';
+    document.getElementById('segDetalleWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cerrarDetalleSeguimiento() {
+    document.getElementById('segDetalleWrap').style.display = 'none';
   }
 
   function verificarURLTarea() {
