@@ -160,7 +160,7 @@
   .badge-evidencia { display: inline-block; background: #d1e7dd; color: #0a3622; border: 1px solid #198754; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 8px; }
   @media print {
     body * { display: none !important; }
-    #printArea { display: block !important; position: fixed; inset: 0; padding: 30px; background: white; z-index: 9999; }
+    #printArea { display: block !important; position: static; padding: 30px; background: white; z-index: 9999; }
     #printArea * { display: revert !important; }
   }
 
@@ -1818,7 +1818,7 @@
     }
 
     var panelFotos =
-      '<div style="background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo</div>' +
+      '<div style="page-break-before:always;break-before:page;background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo</div>' +
       construirGaleria('Fotos de Inicio', evInicio) +
       construirGaleria('Fotos de Fin', evFin);
 
@@ -1866,7 +1866,7 @@
       '<div style="margin-top:4px;font-size:0.72rem;color:#555;">Firma: &nbsp; ______________________</div></td>' +
       '<td style="width:34%;text-align:center;padding:0 12px;border-right:1px dashed #c8d8ec;">' +
       '<div style="height:60px;"></div><div style="border-top:2px solid #1a6fc4;margin:0 10px;"></div>' +
-      '<div style="background:#1a6fc4;color:white;font-weight:700;font-size:0.73rem;padding:5px 6px;text-transform:uppercase;">FIRMA COORDINADOR / SUPERVISOR</div>' +
+      '<div style="background:#1a6fc4;color:white;font-weight:700;font-size:0.73rem;padding:5px 6px;text-transform:uppercase;">FIRMA SUPERVISOR</div>' +
       '<div style="margin-top:7px;font-size:0.72rem;color:#555;">Nombre: ______________________</div>' +
       '<div style="margin-top:4px;font-size:0.72rem;color:#555;">Firma: &nbsp; ______________________</div></td>' +
       '<td style="width:33%;text-align:center;padding:0 0 0 12px;">' +
