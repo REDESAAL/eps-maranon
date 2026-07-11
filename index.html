@@ -141,7 +141,7 @@
   .btn-save:hover { background: var(--azul-claro); }
 
   /* PRINT */
-  #printArea { display: none; }
+  #printArea { display: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
   .upload-area {
     border: 2px dashed #7ac99a; border-radius: 10px; padding: 22px 16px;
     text-align: center; cursor: pointer; background: #f5fdf8;
@@ -161,7 +161,12 @@
   @media print {
     body * { display: none !important; }
     #printArea { display: block !important; position: static; padding: 30px; background: white; z-index: 9999; }
-    #printArea * { display: revert !important; }
+    #printArea * {
+      display: revert !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
   }
 
   @keyframes pulse {
@@ -361,6 +366,12 @@
       </div>
       <div class="badge-label">V<br>Historial de<br>Ordenes de Servicio</div>
     </button>
+    <button class="badge-item" data-sec="ordentrabajo" onclick="mostrarSeccion('ordentrabajo')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </div>
+      <div class="badge-label">VI<br>Orden de<br>Trabajo</div>
+    </button>
   </div>
   </div>
 
@@ -457,6 +468,11 @@
       <button class="btn-export btn-clear" id="btnLimpiarTodo" onclick="limpiarHistorial()">&#128465; Limpiar Todo</button>
     </div>
   </div>
+  <div style="position:relative;max-width:420px;margin-bottom:14px;">
+    <input type="text" id="buscarHistorial" placeholder="Buscar por N Orden, Codigo, Fecha o Componente..." oninput="renderHistorial()"
+           style="width:100%;padding:10px 36px 10px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#f8fbff;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a8fa6" stroke-width="2" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
   <div class="table-wrap">
     <table id="tablaHistorial">
       <thead>
@@ -482,6 +498,13 @@
     </table>
   </div>
 
+</div>
+
+<!-- ORDEN DE TRABAJO -->
+<div id="seccionOrdenTrabajo">
+  <div class="section-title"><span class="num">VI</span> Orden de Trabajo</div>
+  <div id="ordenTrabajoInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+  <div id="ordenTrabajoContenido"></div>
 </div>
 </div>
 
@@ -836,10 +859,10 @@
     verificarURLTarea();
     detectarRed();
 
-    // Vista inicial: el tecnico va directo a su historial (no tiene portada/circulos);
+    // Vista inicial: el tecnico va directo a su Orden de Trabajo (lista de pendientes);
     // Coordinador y Supervisor arrancan en la pantalla de inicio con los circulos.
     if (currentUser && currentUser.rol === 'tecnico') {
-      mostrarSeccion('historial');
+      mostrarSeccion('ordentrabajo');
     } else {
       mostrarSeccion('inicio');
     }
@@ -848,10 +871,13 @@
   // Filtra la vista: 'inicio' muestra la portada + circulos; cualquier otro
   // nombre muestra solo esa seccion como si fuera una pagina aparte.
   function mostrarSeccion(nombre) {
-    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial' };
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo' };
     var pantallaInicio = document.getElementById('pantallaInicio');
     var btnVolver = document.getElementById('btnVolverWrap');
     var esTec = currentUser && currentUser.rol === 'tecnico';
+
+    // El tecnico/operario solo tiene acceso a "VI Orden de Trabajo"
+    if (esTec && nombre !== 'ordentrabajo') { nombre = 'ordentrabajo'; }
 
     if (nombre === 'inicio') {
       if (pantallaInicio) pantallaInicio.style.display = '';
@@ -874,6 +900,7 @@
     document.querySelectorAll('.badge-item').forEach(function(b) { b.classList.remove('badge-active'); });
     var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
     if (btnActivo) btnActivo.classList.add('badge-active');
+    if (nombre === 'ordentrabajo') { renderOrdenTrabajo(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1541,6 +1568,8 @@
         historial = data;
         try { localStorage.setItem(STORE_KEY, JSON.stringify(historial)); } catch(err) {}
         renderHistorial();
+        var secOT = document.getElementById('seccionOrdenTrabajo');
+        if (secOT && secOT.style.display !== 'none') renderOrdenTrabajo();
       }
     });
     _fbDb.ref('usuarios').on('value', function(snap) {
@@ -1702,19 +1731,91 @@
     }
   }
 
+  // ============================================================
+  // MODULO VI: ORDEN DE TRABAJO - lista de pendientes por responsable
+  // ============================================================
+  function renderOrdenTrabajo() {
+    var info = document.getElementById('ordenTrabajoInfo');
+    var cont = document.getElementById('ordenTrabajoContenido');
+    if (!info || !cont || !currentUser) return;
+
+    var pendientes = historial.filter(function(os) { return os.estado !== 'Completado'; });
+
+    if (currentUser.rol === 'tecnico') {
+      var mios = pendientes.filter(function(os) { return os.tecnico === currentUser.nombre; });
+      info.innerHTML = 'Bienvenido/a <strong>' + currentUser.nombre + '</strong>. Aqui recibe sus ordenes de trabajo asignadas y puede completar el formulario de tarea.';
+      if (mios.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No tiene ordenes de trabajo pendientes por el momento.</div>';
+        return;
+      }
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        mios.map(function(os) {
+          var idxReal = historial.indexOf(os);
+          var prioColor = os.prioridad === 'Urgente' ? 'var(--rojo)' : os.prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + prioColor + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+            '<div>' +
+              '<strong style="color:var(--azul);">' + os.id + '</strong> &middot; ' + os.componente + '<br>' +
+              '<span style="font-size:0.78rem;color:#7a8fa6;">' + formatFecha(os.fecha) + ' &middot; Prioridad: <strong style="color:' + prioColor + ';">' + os.prioridad + '</strong> &middot; Estado: ' + os.estado + '</span>' +
+            '</div>' +
+            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirTarea(' + idxReal + ')">Llenar Tarea</button>' +
+          '</div>';
+        }).join('') +
+        '</div>';
+    } else {
+      // Coordinador / Supervisor: tablero agrupado por tecnico
+      var porTecnico = {};
+      pendientes.forEach(function(os) {
+        var nombre = os.tecnico || 'Sin asignar';
+        if (!porTecnico[nombre]) porTecnico[nombre] = [];
+        porTecnico[nombre].push(os);
+      });
+      var nombres = Object.keys(porTecnico).sort();
+      info.innerHTML = 'Vista general de ordenes de trabajo pendientes, agrupadas por tecnico/operario responsable. Total pendientes: <strong>' + pendientes.length + '</strong>.';
+      if (nombres.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No hay ordenes de trabajo pendientes. Todo esta al dia.</div>';
+        return;
+      }
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:18px;">' +
+        nombres.map(function(nombre) {
+          var lista = porTecnico[nombre];
+          return '<div class="config-col" style="padding:16px 20px;">' +
+            '<h4 style="margin-bottom:10px;">' + nombre + ' <span style="color:#7a8fa6;font-weight:400;font-size:0.8rem;">(' + lista.length + ' pendiente' + (lista.length > 1 ? 's' : '') + ')</span></h4>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;">' +
+            lista.map(function(os) {
+              var idxReal = historial.indexOf(os);
+              var prioColor = os.prioridad === 'Urgente' ? 'var(--rojo)' : os.prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;background:#f8fbff;border:1px solid #e0eaf5;border-radius:8px;padding:8px 12px;flex-wrap:wrap;gap:8px;">' +
+                '<span style="font-size:0.85rem;"><strong>' + os.id + '</strong> &middot; ' + os.componente + ' &middot; <span style="color:' + prioColor + ';font-weight:600;">' + os.prioridad + '</span> &middot; ' + os.estado + '</span>' +
+                '<button class="btn-tarea-row" onclick="abrirTarea(' + idxReal + ')">Ver / Llenar</button>' +
+              '</div>';
+            }).join('') +
+            '</div>' +
+          '</div>';
+        }).join('') +
+        '</div>';
+    }
+  }
+
   function renderHistorial() {
     var tbody = document.getElementById('historialBody');
     tbody.innerHTML = '';
     var esTec = currentUser && currentUser.rol === 'tecnico';
 
+    var buscarEl = document.getElementById('buscarHistorial');
+    var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
+
     var filas = [];
     historial.forEach(function(os, idx) {
       if (esTec && os.tecnico !== currentUser.nombre) return;
+      if (busqueda) {
+        var campos = [os.id, os.codigo, formatFecha(os.fecha), os.componente].join(' ').toLowerCase();
+        if (campos.indexOf(busqueda) === -1) return;
+      }
       filas.push({ os: os, idx: idx });
     });
 
     if (filas.length === 0) {
-      var msg = esTec ? 'No tiene ordenes asignadas.' : 'No hay ordenes registradas.';
+      var msg = busqueda ? 'No se encontraron ordenes que coincidan con "' + buscarEl.value.trim() + '".' : (esTec ? 'No tiene ordenes asignadas.' : 'No hay ordenes registradas.');
       tbody.innerHTML = '<tr><td colspan="14"><div class="historial-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/></svg>' + msg + '</div></td></tr>';
       return;
     }
