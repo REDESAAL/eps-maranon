@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-<title>Plan de Mantenimiento Preventivo - EPS Maranon S.A.</title>
+<title>Plan de Mantenimiento Preventivo y/o Correctivo - EPS Maranon S.A.</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -312,7 +312,7 @@
   </div>
   <div class="header-text">
     <h1>EPS Maranon S.A.</h1>
-    <p>Plan de Mantenimiento Preventivo - Sistema de Agua Potable y Alcantarillado</p>
+    <p>Plan de Mantenimiento Preventivo y/o Correctivo - Sistema de Agua Potable y Alcantarillado</p>
   </div>
   <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
     <div style="display:flex;align-items:center;gap:8px;">
@@ -520,14 +520,20 @@
 
 <!-- ORDEN DE TRABAJO -->
 <div id="seccionOrdenTrabajo">
-  <div class="section-title"><span class="num">VI</span> Orden de Trabajo</div>
+  <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <span><span class="num">VI</span> Orden de Trabajo</span>
+    <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('reportediario')">Ir a Reporte Diario &#8594;</a>
+  </div>
   <div id="ordenTrabajoInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
   <div id="ordenTrabajoContenido"></div>
 </div>
 
 <!-- REPORTE DIARIO -->
 <div id="seccionReporteDiario">
-  <div class="section-title"><span class="num">VII</span> Reporte Diario</div>
+  <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <span><span class="num">VII</span> Reporte Diario</span>
+    <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('ordentrabajo')">&#8592; Volver a Orden de Trabajo</a>
+  </div>
   <div class="config-wrap">
     <div class="config-col" style="text-align:center;">
       <h4>1. Agua Potable</h4>
@@ -587,14 +593,18 @@
       <div id="catalogoListaAgua" class="config-lista"></div>
       <div class="config-form" id="catAguaForm">
         <select id="catAguaComponente"><option value="">-- Seleccionar Componente --</option></select>
-        <input type="number" id="catAguaCantidad" placeholder="Cantidad" min="1">
         <input type="text" id="catAguaCodigo" placeholder="N Codigo (ej: DL-2025-001)">
         <input type="text" id="catAguaDireccion" placeholder="Direccion / Ubicacion">
         <div style="display:flex;gap:8px;">
           <input type="text" id="catAguaNorte" placeholder="Coordenada Norte" style="flex:1;">
           <input type="text" id="catAguaEste" placeholder="Coordenada Este" style="flex:1;">
         </div>
-        <input type="text" id="catAguaLocalidad" placeholder="Localidad">
+        <select id="catAguaLocalidad">
+          <option value="">-- Localidad --</option>
+          <option>Jaen</option>
+          <option>Bellavista</option>
+          <option>San Ignacio</option>
+        </select>
         <label class="config-label">Fecha Programada</label>
         <input type="date" id="catAguaFechaProg">
         <label class="config-label">Situacion</label>
@@ -612,14 +622,18 @@
       <div id="catalogoListaAlcant" class="config-lista"></div>
       <div class="config-form" id="catAlcantForm">
         <select id="catAlcantComponente"><option value="">-- Seleccionar Componente --</option></select>
-        <input type="number" id="catAlcantCantidad" placeholder="Cantidad" min="1">
         <input type="text" id="catAlcantCodigo" placeholder="N Codigo (ej: DL-2025-001)">
         <input type="text" id="catAlcantDireccion" placeholder="Direccion / Ubicacion">
         <div style="display:flex;gap:8px;">
           <input type="text" id="catAlcantNorte" placeholder="Coordenada Norte" style="flex:1;">
           <input type="text" id="catAlcantEste" placeholder="Coordenada Este" style="flex:1;">
         </div>
-        <input type="text" id="catAlcantLocalidad" placeholder="Localidad">
+        <select id="catAlcantLocalidad">
+          <option value="">-- Localidad --</option>
+          <option>Jaen</option>
+          <option>Bellavista</option>
+          <option>San Ignacio</option>
+        </select>
         <label class="config-label">Fecha Programada</label>
         <input type="date" id="catAlcantFechaProg">
         <label class="config-label">Situacion</label>
@@ -1007,14 +1021,37 @@
     location.reload();
   }
 
+  // Matriz de permisos por modulo/seccion segun rol
+  var PERMISOS_SECCION = {
+    config: ['coordinador'],
+    agua: ['coordinador', 'supervisor'],
+    alcant: ['coordinador', 'supervisor'],
+    historial: ['coordinador', 'supervisor'],
+    ordentrabajo: ['coordinador', 'tecnico'],
+    reportediario: ['coordinador', 'tecnico'],
+    seguimiento: ['coordinador', 'supervisor'],
+    catalogo: ['coordinador', 'supervisor']
+  };
+
+  function tienePermiso(seccion) {
+    if (!currentUser) return false;
+    var permitidos = PERMISOS_SECCION[seccion];
+    return permitidos ? permitidos.indexOf(currentUser.rol) >= 0 : true;
+  }
+
   function aplicarPermisos() {
     if (!currentUser) return;
     var esTec = currentUser.rol === 'tecnico';
     var esCoord = currentUser.rol === 'coordinador';
 
-    // Solo Coordinador y Supervisor crean ordenes de servicio (secciones III y IV)
-    document.querySelectorAll('.solo-admin').forEach(function(el) {
-      el.style.display = esTec ? 'none' : '';
+    // Mostrar/ocultar cada circulo de navegacion segun el rol
+    var mapaIds = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo' };
+    Object.keys(mapaIds).forEach(function(sec) {
+      var permitido = tienePermiso(sec);
+      var badge = document.querySelector('.badge-item[data-sec="' + sec + '"]');
+      if (badge) badge.style.display = permitido ? '' : 'none';
+      var elSeccion = document.getElementById(mapaIds[sec]);
+      if (elSeccion && !permitido) elSeccion.style.display = 'none';
     });
 
     // Solo Coordinador puede borrar todo el historial
@@ -1024,6 +1061,11 @@
     // Solo Coordinador gestiona usuarios (tecnicos/operarios)
     var panelTec = document.getElementById('panelTecnicos');
     if (panelTec) panelTec.style.display = esCoord ? '' : 'none';
+
+    // Enlaces cruzados de navegacion para el tecnico (VI <-> VII)
+    document.querySelectorAll('.link-nav-tecnico').forEach(function(el) {
+      el.style.display = esTec ? 'inline-block' : 'none';
+    });
 
     // Insignia de usuario en el encabezado
     var badge = document.getElementById('usuarioActualBadge');
@@ -1073,8 +1115,10 @@
     var btnVolver = document.getElementById('btnVolverWrap');
     var esTec = currentUser && currentUser.rol === 'tecnico';
 
-    // El tecnico/operario solo tiene acceso a "VI Orden de Trabajo"
-    if (esTec && nombre !== 'ordentrabajo') { nombre = 'ordentrabajo'; }
+    // Si el rol no tiene permiso para esta seccion, redirige a una segura por defecto
+    if (nombre !== 'inicio' && secciones[nombre] && !tienePermiso(nombre)) {
+      nombre = esTec ? 'ordentrabajo' : 'inicio';
+    }
 
     if (nombre === 'inicio') {
       if (pantallaInicio) pantallaInicio.style.display = '';
@@ -1092,7 +1136,7 @@
     if (btnVolver) btnVolver.style.display = esTec ? 'none' : 'block';
     Object.keys(secciones).forEach(function(key) {
       var el = document.getElementById(secciones[key]);
-      if (el) el.style.display = (key === nombre) ? '' : 'none';
+      if (el) el.style.display = (key === nombre && tienePermiso(key)) ? '' : 'none';
     });
     document.querySelectorAll('.badge-item').forEach(function(b) { b.classList.remove('badge-active'); });
     var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
@@ -2965,7 +3009,7 @@
       var colorSit = item.situacion === 'Operativo' ? '#1a7a4a' : 'var(--rojo)';
       return '<div class="config-item">' +
         '<div class="config-item-info">' +
-          '<strong>' + item.componente + '</strong> <span style="color:#7a8fa6;font-weight:400;">(Cant: ' + (item.cantidad || 1) + ')</span>' +
+          '<strong>' + item.componente + '</strong>' +
           '<span class="meta">Cod: ' + (item.codigo || '-') + ' &middot; ' + (item.direccion || '-') + ' &middot; ' + (item.localidad || '-') + '</span>' +
           '<span class="meta">Norte: ' + (item.norte || '-') + ' &middot; Este: ' + (item.este || '-') + ' &middot; Prog: ' + formatFecha(item.fechaProg) + '</span>' +
           '<div class="coords" style="color:' + colorSit + ';font-weight:700;">' + item.situacion + (item.observacion && item.observacion !== '-' ? ' &middot; ' + item.observacion : '') + '</div>' +
@@ -2985,7 +3029,6 @@
 
     var item = {
       componente: componente,
-      cantidad: document.getElementById(prefijo + 'Cantidad').value || 1,
       codigo: document.getElementById(prefijo + 'Codigo').value.trim() || '-',
       direccion: document.getElementById(prefijo + 'Direccion').value.trim() || '-',
       norte: document.getElementById(prefijo + 'Norte').value.trim() || '-',
@@ -3012,7 +3055,6 @@
   function limpiarFormularioCatalogo(sistema) {
     var prefijo = sistema === 'agua' ? 'catAgua' : 'catAlcant';
     document.getElementById(prefijo + 'Componente').value = '';
-    document.getElementById(prefijo + 'Cantidad').value = '';
     document.getElementById(prefijo + 'Codigo').value = '';
     document.getElementById(prefijo + 'Direccion').value = '';
     document.getElementById(prefijo + 'Norte').value = '';
@@ -3032,7 +3074,6 @@
 
     renderSelectComponenteCatalogo(sistema);
     document.getElementById(prefijo + 'Componente').value = item.componente;
-    document.getElementById(prefijo + 'Cantidad').value = item.cantidad;
     document.getElementById(prefijo + 'Codigo').value = item.codigo === '-' ? '' : item.codigo;
     document.getElementById(prefijo + 'Direccion').value = item.direccion === '-' ? '' : item.direccion;
     document.getElementById(prefijo + 'Norte').value = item.norte === '-' ? '' : item.norte;
