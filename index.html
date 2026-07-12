@@ -390,6 +390,12 @@
       </div>
       <div class="badge-label">IX<br>Catalogo</div>
     </button>
+    <button class="badge-item" data-sec="almacen" onclick="mostrarSeccion('almacen')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M3 9l9-6 9 6v11a1 1 0 01-1 1H4a1 1 0 01-1-1V9z"/><path d="M9 21V12h6v9"/></svg>
+      </div>
+      <div class="badge-label">X<br>Almacen</div>
+    </button>
   </div>
   </div>
 
@@ -648,6 +654,59 @@
     </div>
   </div>
 </div>
+
+<!-- ALMACEN -->
+<div id="seccionAlmacen">
+  <div class="section-title"><span class="num">X</span> Almacen</div>
+
+  <div class="config-col" style="margin-bottom:24px;">
+    <h4 id="almTituloForm">Nuevo Item de Almacen</h4>
+    <div class="config-form" id="almForm" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <input type="text" id="almCodigo" placeholder="N Codigo">
+      <input type="text" id="almNombre" placeholder="Nombre">
+      <input type="text" id="almCategoria" placeholder="Categoria (ej: Herramienta, Repuesto, Equipo)">
+      <input type="text" id="almModelo" placeholder="Modelo">
+      <input type="text" id="almSerie" placeholder="Serie">
+      <select id="almUnidad">
+        <option value="">-- Unidad --</option>
+        <option>Unidad</option>
+        <option>Juego</option>
+        <option>Metro</option>
+        <option>Kilogramo</option>
+        <option>Litro</option>
+        <option>Caja</option>
+        <option>Rollo</option>
+        <option>Par</option>
+      </select>
+      <select id="almEstado">
+        <option value="Operativo">Operativo</option>
+        <option value="En Reparacion">En Reparacion</option>
+        <option value="Inoperativo">Inoperativo</option>
+        <option value="De Baja">De Baja</option>
+      </select>
+      <input type="number" id="almCantidad" placeholder="Cantidad" min="0">
+      <input type="text" id="almUbicacion" placeholder="Ubicacion (ej: Almacen Central, Estante 3)">
+      <select id="almResponsable"><option value="">-- Responsable --</option></select>
+      <input type="date" id="almFechaIngreso">
+      <textarea id="almObservaciones" placeholder="Observaciones" rows="2" style="grid-column: span 2;"></textarea>
+      <button class="btn-config-add" id="almBtnGuardar" style="grid-column: span 2;" onclick="guardarAlmacen()">&#10133; Agregar al almacen</button>
+      <button class="btn-config-cancelar" id="almBtnCancelar" style="display:none;grid-column: span 2;" onclick="cancelarEdicionAlmacen()">Cancelar edicion</button>
+    </div>
+  </div>
+
+  <div style="position:relative;max-width:420px;margin-bottom:14px;">
+    <input type="text" id="buscarAlmacen" placeholder="Buscar por codigo, nombre, categoria o responsable..." oninput="renderAlmacen()"
+           style="width:100%;padding:10px 36px 10px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#f8fbff;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a8fa6" stroke-width="2" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Categoria</th><th>Modelo</th><th>Serie</th><th>Unidad</th><th>Estado</th><th>Cantidad</th><th>Ubicacion</th><th>Responsable</th><th>Fecha Ingreso</th><th>Observaciones</th><th>Acciones</th></tr></thead>
+      <tbody id="almacenBody"></tbody>
+    </table>
+  </div>
+</div>
 </div>
 
 <!-- MODAL ORDEN DE SERVICIO -->
@@ -792,8 +851,8 @@
           <div class="upload-area" id="uploadAreaInicio" onclick="document.getElementById('tareaArchivoInicio').click()">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir fotos de INICIO</div>
-            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 5 archivos &bull; Se comprimen automaticamente</div>
-            <input type="file" id="tareaArchivoInicio" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivos(this, 'inicio')">
+            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">Fotos, PDF, Word, Excel (max. 30MB) &bull; Videos cortos (max. 8MB) &bull; Hasta 5 archivos</div>
+            <input type="file" id="tareaArchivoInicio" accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.3gp,.webm,.doc,.docx,.xls,.xlsx" multiple style="display:none;" onchange="cargarArchivos(this, 'inicio')">
           </div>
           <div id="previewAreaInicio" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;"></div>
           <div id="contadorArchivosInicio" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
@@ -803,8 +862,8 @@
           <div class="upload-area" id="uploadAreaFin" onclick="document.getElementById('tareaArchivoFin').click()">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div style="margin-top:8px;font-size:0.85rem;font-weight:600;color:#1a7a4a;">Haga clic para subir fotos de FIN</div>
-            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 5 archivos &bull; Se comprimen automaticamente</div>
-            <input type="file" id="tareaArchivoFin" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivos(this, 'fin')">
+            <div style="font-size:0.75rem;color:#7a9a8a;margin-top:4px;">Fotos, PDF, Word, Excel (max. 30MB) &bull; Videos cortos (max. 8MB) &bull; Hasta 5 archivos</div>
+            <input type="file" id="tareaArchivoFin" accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.3gp,.webm,.doc,.docx,.xls,.xlsx" multiple style="display:none;" onchange="cargarArchivos(this, 'fin')">
           </div>
           <div id="previewAreaFin" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;"></div>
           <div id="contadorArchivosFin" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
@@ -895,7 +954,7 @@
         <div class="upload-area" id="uploadAreaRdInicio" onclick="document.getElementById('rdArchivoInicio').click()">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir fotos de INICIO</div>
-          <input type="file" id="rdArchivoInicio" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosRD(this, 'inicio')">
+          <input type="file" id="rdArchivoInicio" accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.3gp,.webm,.doc,.docx,.xls,.xlsx" multiple style="display:none;" onchange="cargarArchivosRD(this, 'inicio')">
         </div>
         <div id="previewAreaRdInicio" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
         <div id="contadorArchivosRdInicio" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
@@ -905,7 +964,7 @@
         <div class="upload-area" id="uploadAreaRdFin" onclick="document.getElementById('rdArchivoFin').click()">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir fotos de FIN</div>
-          <input type="file" id="rdArchivoFin" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosRD(this, 'fin')">
+          <input type="file" id="rdArchivoFin" accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.3gp,.webm,.doc,.docx,.xls,.xlsx" multiple style="display:none;" onchange="cargarArchivosRD(this, 'fin')">
         </div>
         <div id="previewAreaRdFin" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
         <div id="contadorArchivosRdFin" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
@@ -1030,7 +1089,8 @@
     ordentrabajo: ['coordinador', 'tecnico'],
     reportediario: ['coordinador', 'tecnico'],
     seguimiento: ['coordinador', 'supervisor'],
-    catalogo: ['coordinador', 'supervisor']
+    catalogo: ['coordinador', 'supervisor'],
+    almacen: ['coordinador', 'supervisor']
   };
 
   function tienePermiso(seccion) {
@@ -1045,7 +1105,7 @@
     var esCoord = currentUser.rol === 'coordinador';
 
     // Mostrar/ocultar cada circulo de navegacion segun el rol
-    var mapaIds = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo' };
+    var mapaIds = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo', almacen: 'seccionAlmacen' };
     Object.keys(mapaIds).forEach(function(sec) {
       var permitido = tienePermiso(sec);
       var badge = document.querySelector('.badge-item[data-sec="' + sec + '"]');
@@ -1084,6 +1144,7 @@
     cargarPlanGuardado();
     cargarReportesGuardados();
     cargarCatalogoGuardado();
+    cargarAlmacenGuardado();
     firebaseCargarPlanInicial(function() {
       renderTodoElPlan();
       irASeccionPorURL();
@@ -1093,6 +1154,9 @@
     });
     firebaseCargarCatalogoInicial(function() {
       renderCatalogoTodo();
+    });
+    firebaseCargarAlmacenInicial(function() {
+      renderAlmacen();
     });
     firebaseEscucharCambios();
     verificarURLTarea();
@@ -1110,7 +1174,7 @@
   // Filtra la vista: 'inicio' muestra la portada + circulos; cualquier otro
   // nombre muestra solo esa seccion como si fuera una pagina aparte.
   function mostrarSeccion(nombre) {
-    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo' };
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo', almacen: 'seccionAlmacen' };
     var pantallaInicio = document.getElementById('pantallaInicio');
     var btnVolver = document.getElementById('btnVolverWrap');
     var esTec = currentUser && currentUser.rol === 'tecnico';
@@ -1144,6 +1208,7 @@
     if (nombre === 'ordentrabajo') { renderOrdenTrabajo(); }
     if (nombre === 'seguimiento') { renderSeguimiento(); }
     if (nombre === 'catalogo') { renderCatalogoTodo(); }
+    if (nombre === 'almacen') { renderAlmacen(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1300,6 +1365,44 @@
           if (Array.isArray(data.agua)) { catalogoAgua = data.agua; }
           if (Array.isArray(data.alcantarillado)) { catalogoAlcantarillado = data.alcantarillado; }
         }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  // ============================================================
+  // MODULO X: ALMACEN
+  // ============================================================
+  var ALMACEN_KEY = 'eps_maranon_almacen';
+  var almacen = [];
+  var _editandoAlmacenIdx = null;
+
+  function cargarAlmacenGuardado() {
+    try {
+      var g = localStorage.getItem(ALMACEN_KEY);
+      if (g) {
+        var data = JSON.parse(g);
+        if (Array.isArray(data)) { almacen = data; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarAlmacenStorage() {
+    try { localStorage.setItem(ALMACEN_KEY, JSON.stringify(almacen)); } catch(e) {}
+    firebaseGuardarAlmacen();
+  }
+
+  function firebaseGuardarAlmacen() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('almacen').set(almacen).catch(function() {});
+  }
+
+  function firebaseCargarAlmacenInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('almacen').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (Array.isArray(data)) { almacen = data; }
         callback();
       })
       .catch(function() { callback(); });
@@ -1931,6 +2034,14 @@
         if (Array.isArray(data.alcantarillado)) { catalogoAlcantarillado = data.alcantarillado; }
         try { localStorage.setItem(CATALOGO_KEY, JSON.stringify({ agua: catalogoAgua, alcantarillado: catalogoAlcantarillado })); } catch(err) {}
         renderCatalogoTodo();
+      }
+    });
+    _fbDb.ref('almacen').on('value', function(snap) {
+      var data = snap.val();
+      if (Array.isArray(data)) {
+        almacen = data;
+        try { localStorage.setItem(ALMACEN_KEY, JSON.stringify(almacen)); } catch(err) {}
+        renderAlmacen();
       }
     });
   }
@@ -2681,8 +2792,8 @@
     var files = [];
     for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
     var MAX = MAX_ARCHIVOS_SECCION;
-    var MAXSIZE = 15 * 1024 * 1024;
-    var allowed = ['jpg','jpeg','png','pdf'];
+    var MAXSIZE = 30 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf','mp4','mov','avi','3gp','webm','doc','docx','xls','xlsx'];
     var suf = seccion === 'inicio' ? 'Inicio' : 'Fin';
     var disponibles = MAX - window._archivosData[seccion].length;
     if (disponibles <= 0) {
@@ -2694,10 +2805,17 @@
       files = files.slice(0, disponibles);
     }
     var errores = [];
+    var extVideo = ['mp4','mov','avi','3gp','webm'];
+    var MAXSIZE_VIDEO = 8 * 1024 * 1024;
     files.forEach(function(file) {
       var ext = file.name.split('.').pop().toLowerCase();
       if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
-      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 15MB'); return; }
+      var esVideo = extVideo.indexOf(ext) >= 0;
+      var limite = esVideo ? MAXSIZE_VIDEO : MAXSIZE;
+      if (file.size > limite) {
+        errores.push(file.name + ': supera ' + (esVideo ? '8MB (videos deben ser cortos, unos segundos)' : '30MB'));
+        return;
+      }
       var reader = new FileReader();
       reader.onload = (function(f) {
         return function(e) {
@@ -2716,6 +2834,7 @@
   function agregarPreview(data, seccion) {
     var suf = seccion === 'inicio' ? 'Inicio' : 'Fin';
     var isImg = data.type.indexOf('image') >= 0;
+    var isVid = data.type.indexOf('video') >= 0;
     var pa = document.getElementById('previewArea' + suf);
     var div = document.createElement('div');
     div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:180px;max-width:240px;text-align:center;';
@@ -2724,6 +2843,12 @@
       div.innerHTML =
         '<img src="' + data.base64 + '" style="width:100%;max-height:220px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
         '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdx(' + pa.children.length + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else if (isVid) {
+      div.innerHTML =
+        '<video src="' + data.base64 + '" controls style="width:100%;max-height:220px;background:#000;border-radius:5px;display:block;"></video>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">&#127909; ' + data.name + '</div>' +
         '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
         '<button onclick="quitarArchivoIdx(' + pa.children.length + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
     } else {
@@ -2822,8 +2947,8 @@
     var files = [];
     for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
     var MAX = MAX_ARCHIVOS_SECCION;
-    var MAXSIZE = 15 * 1024 * 1024;
-    var allowed = ['jpg','jpeg','png','pdf'];
+    var MAXSIZE = 30 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf','mp4','mov','avi','3gp','webm','doc','docx','xls','xlsx'];
     var suf = seccion === 'inicio' ? 'RdInicio' : 'RdFin';
     var disponibles = MAX - window._archivosRD[seccion].length;
     if (disponibles <= 0) {
@@ -2835,10 +2960,17 @@
       files = files.slice(0, disponibles);
     }
     var errores = [];
+    var extVideo = ['mp4','mov','avi','3gp','webm'];
+    var MAXSIZE_VIDEO = 8 * 1024 * 1024;
     files.forEach(function(file) {
       var ext = file.name.split('.').pop().toLowerCase();
       if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
-      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 15MB'); return; }
+      var esVideo = extVideo.indexOf(ext) >= 0;
+      var limite = esVideo ? MAXSIZE_VIDEO : MAXSIZE;
+      if (file.size > limite) {
+        errores.push(file.name + ': supera ' + (esVideo ? '8MB (videos deben ser cortos, unos segundos)' : '30MB'));
+        return;
+      }
       var reader = new FileReader();
       reader.onload = (function(f) {
         return function(e) {
@@ -2857,6 +2989,7 @@
   function agregarPreviewRD(data, seccion) {
     var suf = seccion === 'inicio' ? 'RdInicio' : 'RdFin';
     var isImg = data.type.indexOf('image') >= 0;
+    var isVid = data.type.indexOf('video') >= 0;
     var pa = document.getElementById('previewArea' + suf);
     var div = document.createElement('div');
     div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:150px;max-width:190px;text-align:center;';
@@ -2865,6 +2998,12 @@
       div.innerHTML =
         '<img src="' + data.base64 + '" style="width:100%;max-height:170px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
         '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxRD(' + idxActual + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else if (isVid) {
+      div.innerHTML =
+        '<video src="' + data.base64 + '" controls style="width:100%;max-height:170px;background:#000;border-radius:5px;display:block;"></video>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">&#127909; ' + data.name + '</div>' +
         '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
         '<button onclick="quitarArchivoIdxRD(' + idxActual + ', \'' + seccion + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
     } else {
@@ -3114,6 +3253,151 @@
     renderSelectComponenteCatalogo('alcantarillado');
     renderCatalogoLista('agua');
     renderCatalogoLista('alcantarillado');
+  }
+
+  // ============================================================
+  // MODULO X: ALMACEN
+  // ============================================================
+  function renderSelectResponsableAlmacen() {
+    var sel = document.getElementById('almResponsable');
+    if (!sel) return;
+    var valorActual = sel.value;
+    var nombres = USUARIOS.filter(function(u) { return u.activo !== false; }).map(function(u) { return u.nombre; });
+    sel.innerHTML = '<option value="">-- Responsable --</option>' +
+      nombres.map(function(n) { return '<option>' + n + '</option>'; }).join('');
+    if (valorActual) sel.value = valorActual;
+  }
+
+  function limpiarFormularioAlmacen() {
+    document.getElementById('almCodigo').value = '';
+    document.getElementById('almNombre').value = '';
+    document.getElementById('almCategoria').value = '';
+    document.getElementById('almModelo').value = '';
+    document.getElementById('almSerie').value = '';
+    document.getElementById('almUnidad').value = '';
+    document.getElementById('almEstado').value = 'Operativo';
+    document.getElementById('almCantidad').value = '';
+    document.getElementById('almUbicacion').value = '';
+    document.getElementById('almResponsable').value = '';
+    document.getElementById('almFechaIngreso').value = '';
+    document.getElementById('almObservaciones').value = '';
+  }
+
+  function guardarAlmacen() {
+    var codigo = document.getElementById('almCodigo').value.trim();
+    var nombre = document.getElementById('almNombre').value.trim();
+    if (!codigo || !nombre) { alert('Complete al menos el N Codigo y el Nombre.'); return; }
+
+    var item = {
+      codigo: codigo,
+      nombre: nombre,
+      categoria: document.getElementById('almCategoria').value.trim() || '-',
+      modelo: document.getElementById('almModelo').value.trim() || '-',
+      serie: document.getElementById('almSerie').value.trim() || '-',
+      unidad: document.getElementById('almUnidad').value || '-',
+      estado: document.getElementById('almEstado').value,
+      cantidad: document.getElementById('almCantidad').value || '0',
+      ubicacion: document.getElementById('almUbicacion').value.trim() || '-',
+      responsable: document.getElementById('almResponsable').value || '-',
+      fechaIngreso: document.getElementById('almFechaIngreso').value || '-',
+      observaciones: document.getElementById('almObservaciones').value.trim() || '-'
+    };
+
+    if (_editandoAlmacenIdx !== null && _editandoAlmacenIdx !== undefined) {
+      almacen[_editandoAlmacenIdx] = item;
+      cancelarEdicionAlmacen();
+    } else {
+      almacen.push(item);
+      limpiarFormularioAlmacen();
+    }
+    guardarAlmacenStorage();
+    renderAlmacen();
+  }
+
+  function editarAlmacen(idx) {
+    var item = almacen[idx];
+    if (!item) return;
+    _editandoAlmacenIdx = idx;
+    renderSelectResponsableAlmacen();
+    document.getElementById('almCodigo').value = item.codigo;
+    document.getElementById('almNombre').value = item.nombre;
+    document.getElementById('almCategoria').value = item.categoria === '-' ? '' : item.categoria;
+    document.getElementById('almModelo').value = item.modelo === '-' ? '' : item.modelo;
+    document.getElementById('almSerie').value = item.serie === '-' ? '' : item.serie;
+    document.getElementById('almUnidad').value = item.unidad === '-' ? '' : item.unidad;
+    document.getElementById('almEstado').value = item.estado;
+    document.getElementById('almCantidad').value = item.cantidad;
+    document.getElementById('almUbicacion').value = item.ubicacion === '-' ? '' : item.ubicacion;
+    document.getElementById('almResponsable').value = item.responsable === '-' ? '' : item.responsable;
+    document.getElementById('almFechaIngreso').value = item.fechaIngreso === '-' ? '' : item.fechaIngreso;
+    document.getElementById('almObservaciones').value = item.observaciones === '-' ? '' : item.observaciones;
+
+    document.getElementById('almTituloForm').textContent = 'Editando Item de Almacen';
+    document.getElementById('almBtnGuardar').innerHTML = '&#128190; Guardar cambios';
+    document.getElementById('almBtnCancelar').style.display = 'block';
+    document.getElementById('almForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function cancelarEdicionAlmacen() {
+    _editandoAlmacenIdx = null;
+    limpiarFormularioAlmacen();
+    document.getElementById('almTituloForm').textContent = 'Nuevo Item de Almacen';
+    document.getElementById('almBtnGuardar').innerHTML = '&#10133; Agregar al almacen';
+    document.getElementById('almBtnCancelar').style.display = 'none';
+  }
+
+  function eliminarAlmacen(idx) {
+    var item = almacen[idx];
+    if (!item) return;
+    if (!confirm('Eliminar "' + item.nombre + '" (Cod: ' + item.codigo + ') del almacen?')) return;
+    almacen.splice(idx, 1);
+    if (_editandoAlmacenIdx === idx) { cancelarEdicionAlmacen(); }
+    guardarAlmacenStorage();
+    renderAlmacen();
+  }
+
+  function renderAlmacen() {
+    renderSelectResponsableAlmacen();
+    var tbody = document.getElementById('almacenBody');
+    if (!tbody) return;
+    var buscarEl = document.getElementById('buscarAlmacen');
+    var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
+
+    var filas = almacen.map(function(item, idx) { return { item: item, idx: idx }; });
+    if (busqueda) {
+      filas = filas.filter(function(x) {
+        var campos = [x.item.codigo, x.item.nombre, x.item.categoria, x.item.responsable].join(' ').toLowerCase();
+        return campos.indexOf(busqueda) >= 0;
+      });
+    }
+
+    if (filas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron items que coincidan.' : 'No hay items registrados en el almacen aun.') + '</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filas.map(function(x) {
+      var item = x.item, idx = x.idx;
+      var colorEstado = item.estado === 'Operativo' ? '#1a7a4a' : item.estado === 'En Reparacion' ? '#e8a000' : 'var(--rojo)';
+      return '<tr>' +
+        '<td><strong>' + item.codigo + '</strong></td>' +
+        '<td>' + item.nombre + '</td>' +
+        '<td>' + item.categoria + '</td>' +
+        '<td>' + item.modelo + '</td>' +
+        '<td>' + item.serie + '</td>' +
+        '<td>' + item.unidad + '</td>' +
+        '<td><span style="color:' + colorEstado + ';font-weight:700;">' + item.estado + '</span></td>' +
+        '<td>' + item.cantidad + '</td>' +
+        '<td>' + item.ubicacion + '</td>' +
+        '<td>' + item.responsable + '</td>' +
+        '<td>' + formatFecha(item.fechaIngreso) + '</td>' +
+        '<td>' + item.observaciones + '</td>' +
+        '<td style="text-align:center;white-space:nowrap;">' +
+          '<button class="btn-config-edit" onclick="editarAlmacen(' + idx + ')" title="Editar">&#9998;</button>' +
+          '<button class="btn-config-del" onclick="eliminarAlmacen(' + idx + ')" title="Eliminar">&#128465;</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
   }
 
   // ============================================================
