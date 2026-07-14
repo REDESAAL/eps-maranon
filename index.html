@@ -396,6 +396,18 @@
       </div>
       <div class="badge-label">X<br>Almacen</div>
     </button>
+    <button class="badge-item" data-sec="colaterales" onclick="mostrarSeccion('colaterales')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><circle cx="12" cy="10" r="3"/><path d="M12 21c-4-4-7-7.5-7-11a7 7 0 0114 0c0 3.5-3 7-7 11z"/></svg>
+      </div>
+      <div class="badge-label">XI<br>Colaterales</div>
+    </button>
+    <button class="badge-item" data-sec="factibilidad" onclick="mostrarSeccion('factibilidad')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </div>
+      <div class="badge-label">XII<br>Factibilidad</div>
+    </button>
   </div>
   </div>
 
@@ -528,7 +540,10 @@
 <div id="seccionOrdenTrabajo">
   <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <span><span class="num">VI</span> Orden de Trabajo</span>
-    <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('reportediario')">Ir a Reporte Diario &#8594;</a>
+    <span>
+      <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;margin-right:14px;" onclick="mostrarSeccion('reportediario')">Ir a Reporte Diario &#8594;</a>
+      <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('factibilidad')">Ir a Factibilidad &#8594;</a>
+    </span>
   </div>
   <div id="ordenTrabajoInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
   <div id="ordenTrabajoContenido"></div>
@@ -538,7 +553,10 @@
 <div id="seccionReporteDiario">
   <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <span><span class="num">VII</span> Reporte Diario</span>
-    <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('ordentrabajo')">&#8592; Volver a Orden de Trabajo</a>
+    <span>
+      <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;margin-right:14px;" onclick="mostrarSeccion('ordentrabajo')">&#8592; Orden de Trabajo</a>
+      <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('factibilidad')">Ir a Factibilidad &#8594;</a>
+    </span>
   </div>
   <div class="config-wrap">
     <div class="config-col" style="text-align:center;">
@@ -570,6 +588,16 @@
       <h4>2. Reporte Diario</h4>
       <div id="segCantidadRD" style="font-size:2.4rem;font-weight:800;color:var(--azul);">0</div>
       <div style="font-size:0.8rem;color:#7a8fa6;">reportes diarios registrados</div>
+    </div>
+    <div class="config-col" style="text-align:center;">
+      <h4>3. Inspeccion de Factibilidad</h4>
+      <div id="segCantidadCol" style="font-size:2.4rem;font-weight:800;color:var(--azul);">0</div>
+      <div style="font-size:0.8rem;color:#7a8fa6;">inspecciones derivadas</div>
+    </div>
+    <div class="config-col" style="text-align:center;">
+      <h4>4. Ejecucion de Colaterales</h4>
+      <div id="segCantidadEjec" style="font-size:2.4rem;font-weight:800;color:var(--azul);">0</div>
+      <div style="font-size:0.8rem;color:#7a8fa6;">ejecuciones derivadas</div>
     </div>
   </div>
 
@@ -707,6 +735,79 @@
     </table>
   </div>
 </div>
+
+<!-- COLATERALES -->
+<div id="seccionColaterales">
+  <div class="section-title"><span class="num">XI</span> Colaterales</div>
+
+  <div class="section-title" style="font-size:0.95rem;">1. Inspeccion de Factibilidad</div>
+
+  <div class="config-col" style="margin-bottom:24px;margin-top:14px;">
+    <h4 id="colTituloForm">Nuevo Registro</h4>
+    <div class="config-form" id="colForm" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <input type="text" id="colCodigo" placeholder="N Codigo">
+      <input type="text" id="colNombre" placeholder="Nombre">
+      <input type="text" id="colDireccion" placeholder="Direccion" style="grid-column: span 2;">
+      <input type="text" id="colSector" placeholder="Sector de Abastecimiento">
+      <input type="text" id="colManzana" placeholder="Manzana">
+      <input type="text" id="colLote" placeholder="Lote">
+      <input type="text" id="colConexion" placeholder="N Conexion">
+      <select id="colTecnico"><option value="">-- Derivar a Tecnico/Operario --</option></select>
+      <select id="colEstado">
+        <option value="Pendiente">Pendiente</option>
+        <option value="En Proceso">En Proceso</option>
+        <option value="Completado">Completado</option>
+      </select>
+      <select id="colTecnicoEjecucion"><option value="">-- Derivar Ejecucion a Tecnico/Operario --</option></select>
+      <select id="colEstadoEjecucion">
+        <option value="Pendiente">Ejecucion: Pendiente</option>
+        <option value="En Proceso">Ejecucion: En Proceso</option>
+        <option value="Completado">Ejecucion: Completado</option>
+      </select>
+      <button class="btn-config-add" id="colBtnGuardar" style="grid-column: span 2;" onclick="guardarColateral()">&#10133; Agregar registro</button>
+      <button class="btn-config-cancelar" id="colBtnCancelar" style="display:none;grid-column: span 2;" onclick="cancelarEdicionColateral()">Cancelar edicion</button>
+    </div>
+  </div>
+
+  <div style="position:relative;max-width:420px;margin-bottom:14px;">
+    <input type="text" id="buscarColaterales" placeholder="Buscar por codigo, nombre o direccion..." oninput="renderColaterales()"
+           style="width:100%;padding:10px 36px 10px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#f8fbff;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a8fa6" stroke-width="2" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Insp. Derivado a</th><th>Estado Insp.</th><th>Ejec. Derivado a</th><th>Estado Ejec.</th><th>Acciones</th></tr></thead>
+      <tbody id="colateralesBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FACTIBILIDAD (vista del tecnico) -->
+<div id="seccionFactibilidad">
+  <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <span><span class="num">XII</span> Factibilidad</span>
+    <span>
+      <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;margin-right:14px;" onclick="mostrarSeccion('ordentrabajo')">&#8592; Orden de Trabajo</a>
+      <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('reportediario')">Reporte Diario &#8594;</a>
+    </span>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid #dbe9f8;">
+    <button id="tabBtnInspeccion" onclick="mostrarTabFactibilidad('inspeccion')" style="background:none;border:none;border-bottom:3px solid var(--azul);color:var(--azul);font-weight:700;padding:10px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.88rem;">1. Inspeccion</button>
+    <button id="tabBtnEjecucion" onclick="mostrarTabFactibilidad('ejecucion')" style="background:none;border:none;border-bottom:3px solid transparent;color:#7a8fa6;font-weight:700;padding:10px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.88rem;">2. Ejecucion</button>
+  </div>
+
+  <div id="tabInspeccion">
+    <div id="factibilidadInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+    <div id="factibilidadContenido"></div>
+  </div>
+
+  <div id="tabEjecucion" style="display:none;">
+    <div id="ejecucionInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+    <div id="ejecucionContenido"></div>
+  </div>
+</div>
 </div>
 
 <!-- MODAL ORDEN DE SERVICIO -->
@@ -745,6 +846,17 @@
           </div>
           <div class="os-field full"><label>Observaciones / Instrucciones</label>
             <textarea id="osObs" placeholder="Ingrese observaciones o instrucciones adicionales..."></textarea>
+          </div>
+          <div class="os-field full">
+            <label>Documentacion Adjunta (PDF o Fotografia, opcional)</label>
+            <div class="upload-area" id="uploadAreaOS" onclick="document.getElementById('osArchivo').click()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Haga clic para adjuntar PDF o foto</div>
+              <div style="font-size:0.72rem;color:#7a9a8a;margin-top:4px;">JPG, PNG, PDF &bull; Max. 15MB por archivo &bull; Hasta 5 archivos</div>
+              <input type="file" id="osArchivo" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosOS(this)">
+            </div>
+            <div id="previewAreaOS" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+            <div id="contadorArchivosOS" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
           </div>
         </div>
       </div>
@@ -977,6 +1089,161 @@
   </div>
 </div>
 
+<!-- MODAL FACTIBILIDAD (inspeccion de campo) -->
+<div class="modal-overlay" id="modalFactibilidad">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);">
+      <h3>Inspeccion de Factibilidad</h3>
+      <button class="modal-close" onclick="cerrarFactibilidad()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f8fbff;border:1px solid #e0eaf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;">
+        <strong id="factNombreCliente" style="color:var(--azul);"></strong><br>
+        <span id="factDatosCliente" style="color:#7a8fa6;"></span>
+      </div>
+
+      <div class="section-title" style="font-size:0.88rem;">1. Datos de Conexion de Agua Potable</div>
+      <div class="os-grid">
+        <div class="os-field"><label>Diametro</label><input type="text" id="factAguaDiametro" placeholder="Ej: 1/2 pulg"></div>
+        <div class="os-field"><label>Longitud hacia la Red Matriz</label><input type="text" id="factAguaLongitud" placeholder="Ej: 12 m"></div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field"><label>Profundidad Red Matriz</label><input type="text" id="factAguaProfundidad" placeholder="Ej: 0.80 m"></div>
+        <div class="os-field"><label>Fecha Factibilidad</label><input type="date" id="factAguaFecha"></div>
+      </div>
+      <div class="os-field full"><label>Diametro de la Tuberia Matriz</label><input type="text" id="factAguaDiametroMatriz" placeholder="Ej: 4 pulg"></div>
+
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">2. Factibilidad para la Conexion de Desague</div>
+      <div class="os-grid">
+        <div class="os-field"><label>Diametro</label><input type="text" id="factDesagueDiametro" placeholder="Ej: 4 pulg"></div>
+        <div class="os-field"><label>Longitud hacia la Red Matriz</label><input type="text" id="factDesagueLongitud" placeholder="Ej: 15 m"></div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field"><label>Profundidad Red Matriz</label><input type="text" id="factDesagueProfundidad" placeholder="Ej: 1.20 m"></div>
+        <div class="os-field"><label>Fecha Factibilidad</label><input type="date" id="factDesagueFecha"></div>
+      </div>
+      <div class="os-field full"><label>Diametro de la Tuberia Matriz</label><input type="text" id="factDesagueDiametroMatriz" placeholder="Ej: 8 pulg"></div>
+
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">3. Observacion</div>
+      <div class="os-field full">
+        <textarea id="factObservacion" rows="4" placeholder="Observaciones de la inspeccion..."></textarea>
+      </div>
+
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">4. Evidencias Topograficas</div>
+      <div class="os-field full">
+        <div class="upload-area" id="uploadAreaFact" onclick="document.getElementById('factArchivo').click()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir evidencias topograficas</div>
+          <div style="font-size:0.72rem;color:#7a9a8a;margin-top:4px;">Fotos, PDF (max. 30MB) &bull; Hasta 5 archivos</div>
+          <input type="file" id="factArchivo" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosFact(this)">
+        </div>
+        <div id="previewAreaFact" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="contadorArchivosFact" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarFactibilidad()">Cancelar</button>
+      <button class="btn-save" style="background:#1a7a4a;" onclick="guardarFactibilidad()">Guardar Inspeccion</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EJECUCION (obra derivada desde Colaterales) -->
+<div class="modal-overlay" id="modalEjecucion">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);">
+      <h3>Ejecucion de Colateral</h3>
+      <button class="modal-close" onclick="cerrarEjecucion()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f8fbff;border:1px solid #e0eaf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;">
+        <strong id="ejecNombreCliente" style="color:var(--azul);"></strong><br>
+        <span id="ejecDatosCliente" style="color:#7a8fa6;"></span>
+      </div>
+
+      <div class="section-title" style="font-size:0.88rem;">1. Datos de la Ejecucion</div>
+      <div class="os-grid">
+        <div class="os-field"><label>Fecha de Ejecucion</label><input type="date" id="ejecFecha"></div>
+        <div class="os-field"><label>Cuadrilla / Personal Responsable</label><input type="text" id="ejecPersonal" placeholder="Ej: Cuadrilla 2 - J. Perez"></div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field"><label>Diametro Instalado (Agua)</label><input type="text" id="ejecDiametroAgua" placeholder="Ej: 1/2 pulg"></div>
+        <div class="os-field"><label>Diametro Instalado (Desague)</label><input type="text" id="ejecDiametroDesague" placeholder="Ej: 4 pulg"></div>
+      </div>
+      <div class="os-field full"><label>Materiales e Insumos Utilizados</label><textarea id="ejecMateriales" rows="3" placeholder="Detalle de materiales, cantidad, etc."></textarea></div>
+
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">2. Informacion del Medidor</div>
+      <div class="os-grid">
+        <div class="os-field"><label>N Medidor</label><input type="text" id="ejecMedidorNumero" placeholder="Ej: MD-2026-0451"></div>
+        <div class="os-field"><label>Marca</label><input type="text" id="ejecMedidorMarca" placeholder="Ej: Elster"></div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field"><label>Modelo</label><input type="text" id="ejecMedidorModelo" placeholder="Ej: V-100"></div>
+        <div class="os-field"><label>Diametro</label><input type="text" id="ejecMedidorDiametro" placeholder="Ej: 1/2 pulg"></div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field">
+          <label>Clase Metrologia</label>
+          <select id="ejecMedidorClase">
+            <option value="">-- Seleccionar --</option>
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+            <option>D</option>
+          </select>
+        </div>
+        <div class="os-field"><label>Capacidad</label><input type="text" id="ejecMedidorCapacidad" placeholder="Ej: Qn 1.5 m3/h"></div>
+      </div>
+      <div class="os-field full"><label>Observacion del Medidor</label><textarea id="ejecMedidorObservacion" rows="3" placeholder="Observaciones sobre el medidor instalado..."></textarea></div>
+
+      <div class="os-field full">
+        <label>Evidencia Topografica de Inicio</label>
+        <div class="upload-area" id="uploadAreaMedidorInicio" onclick="document.getElementById('ejecMedidorArchivoInicio').click()">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir evidencia topografica de inicio</div>
+          <div style="font-size:0.72rem;color:#7a9a8a;margin-top:4px;">Fotos, PDF (max. 30MB) &bull; Hasta 5 archivos</div>
+          <input type="file" id="ejecMedidorArchivoInicio" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosMedidor(this, 'inicio')">
+        </div>
+        <div id="previewAreaMedidorInicio" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="contadorArchivosMedidorInicio" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+      </div>
+
+      <div class="os-field full" style="margin-top:14px;">
+        <label>Evidencia Topografica Final</label>
+        <div class="upload-area" id="uploadAreaMedidorFinal" onclick="document.getElementById('ejecMedidorArchivoFinal').click()">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir evidencia topografica final</div>
+          <div style="font-size:0.72rem;color:#7a9a8a;margin-top:4px;">Fotos, PDF (max. 30MB) &bull; Hasta 5 archivos</div>
+          <input type="file" id="ejecMedidorArchivoFinal" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosMedidor(this, 'final')">
+        </div>
+        <div id="previewAreaMedidorFinal" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="contadorArchivosMedidorFinal" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+      </div>
+
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">3. Observacion</div>
+      <div class="os-field full">
+        <textarea id="ejecObservacion" rows="4" placeholder="Observaciones de la ejecucion..."></textarea>
+      </div>
+
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">4. Evidencias Fotograficas de la Obra</div>
+      <div class="os-field full">
+        <div class="upload-area" id="uploadAreaEjec" onclick="document.getElementById('ejecArchivo').click()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir evidencias de la obra ejecutada</div>
+          <div style="font-size:0.72rem;color:#7a9a8a;margin-top:4px;">Fotos, PDF (max. 30MB) &bull; Hasta 5 archivos</div>
+          <input type="file" id="ejecArchivo" accept=".jpg,.jpeg,.png,.pdf" multiple style="display:none;" onchange="cargarArchivosEjec(this)">
+        </div>
+        <div id="previewAreaEjec" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="contadorArchivosEjec" style="font-size:0.75rem;color:#1a7a4a;font-weight:600;margin-top:6px;display:none;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarEjecucion()">Cancelar</button>
+      <button class="btn-save" style="background:#1a7a4a;" onclick="guardarEjecucion()">Guardar Ejecucion</button>
+    </div>
+  </div>
+</div>
+
 <!-- AREA DE IMPRESION -->
 <div id="printArea"></div>
 
@@ -1087,10 +1354,12 @@
     alcant: ['coordinador', 'supervisor'],
     historial: ['coordinador', 'supervisor'],
     ordentrabajo: ['coordinador', 'tecnico'],
+    factibilidad: ['coordinador', 'tecnico'],
     reportediario: ['coordinador', 'tecnico'],
     seguimiento: ['coordinador', 'supervisor'],
     catalogo: ['coordinador', 'supervisor'],
-    almacen: ['coordinador', 'supervisor']
+    almacen: ['coordinador', 'supervisor'],
+    colaterales: ['coordinador', 'supervisor']
   };
 
   function tienePermiso(seccion) {
@@ -1105,7 +1374,7 @@
     var esCoord = currentUser.rol === 'coordinador';
 
     // Mostrar/ocultar cada circulo de navegacion segun el rol
-    var mapaIds = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo', almacen: 'seccionAlmacen' };
+    var mapaIds = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo', almacen: 'seccionAlmacen', colaterales: 'seccionColaterales', factibilidad: 'seccionFactibilidad' };
     Object.keys(mapaIds).forEach(function(sec) {
       var permitido = tienePermiso(sec);
       var badge = document.querySelector('.badge-item[data-sec="' + sec + '"]');
@@ -1145,6 +1414,7 @@
     cargarReportesGuardados();
     cargarCatalogoGuardado();
     cargarAlmacenGuardado();
+    cargarColateralesGuardado();
     firebaseCargarPlanInicial(function() {
       renderTodoElPlan();
       irASeccionPorURL();
@@ -1157,6 +1427,9 @@
     });
     firebaseCargarAlmacenInicial(function() {
       renderAlmacen();
+    });
+    firebaseCargarColateralesInicial(function() {
+      renderColaterales();
     });
     firebaseEscucharCambios();
     verificarURLTarea();
@@ -1174,7 +1447,7 @@
   // Filtra la vista: 'inicio' muestra la portada + circulos; cualquier otro
   // nombre muestra solo esa seccion como si fuera una pagina aparte.
   function mostrarSeccion(nombre) {
-    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo', almacen: 'seccionAlmacen' };
+    var secciones = { config: 'seccionConfig', agua: 'seccionAgua', alcant: 'seccionAlcant', historial: 'seccionHistorial', ordentrabajo: 'seccionOrdenTrabajo', reportediario: 'seccionReporteDiario', seguimiento: 'seccionSeguimiento', catalogo: 'seccionCatalogo', almacen: 'seccionAlmacen', colaterales: 'seccionColaterales', factibilidad: 'seccionFactibilidad' };
     var pantallaInicio = document.getElementById('pantallaInicio');
     var btnVolver = document.getElementById('btnVolverWrap');
     var esTec = currentUser && currentUser.rol === 'tecnico';
@@ -1206,9 +1479,11 @@
     var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
     if (btnActivo) btnActivo.classList.add('badge-active');
     if (nombre === 'ordentrabajo') { renderOrdenTrabajo(); }
+    if (nombre === 'factibilidad') { mostrarTabFactibilidad('inspeccion'); }
     if (nombre === 'seguimiento') { renderSeguimiento(); }
     if (nombre === 'catalogo') { renderCatalogoTodo(); }
     if (nombre === 'almacen') { renderAlmacen(); }
+    if (nombre === 'colaterales') { renderColaterales(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1217,7 +1492,8 @@
     try {
       var params = new URLSearchParams(window.location.search);
       var seccion = params.get('seccion');
-      if (seccion === 'config' || seccion === 'agua' || seccion === 'alcant' || seccion === 'historial' || seccion === 'ordentrabajo' || seccion === 'reportediario') {
+      var validas = ['config', 'agua', 'alcant', 'historial', 'ordentrabajo', 'reportediario', 'seguimiento', 'catalogo', 'almacen', 'colaterales', 'factibilidad'];
+      if (validas.indexOf(seccion) >= 0) {
         mostrarSeccion(seccion);
       }
     } catch(e) {}
@@ -1403,6 +1679,44 @@
       .then(function(snap) {
         var data = snap.val();
         if (Array.isArray(data)) { almacen = data; }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  // ============================================================
+  // MODULO XI: COLATERALES - 1. Inspeccion de Factibilidad
+  // ============================================================
+  var COLATERALES_KEY = 'eps_maranon_colaterales';
+  var colaterales = [];
+  var _editandoColateralIdx = null;
+
+  function cargarColateralesGuardado() {
+    try {
+      var g = localStorage.getItem(COLATERALES_KEY);
+      if (g) {
+        var data = JSON.parse(g);
+        if (Array.isArray(data)) { colaterales = data; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarColateralesStorage() {
+    try { localStorage.setItem(COLATERALES_KEY, JSON.stringify(colaterales)); } catch(e) {}
+    firebaseGuardarColaterales();
+  }
+
+  function firebaseGuardarColaterales() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('colaterales').set(colaterales).catch(function() {});
+  }
+
+  function firebaseCargarColateralesInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('colaterales').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (Array.isArray(data)) { colaterales = data; }
         callback();
       })
       .catch(function() { callback(); });
@@ -2044,6 +2358,20 @@
         renderAlmacen();
       }
     });
+    _fbDb.ref('colaterales').on('value', function(snap) {
+      var data = snap.val();
+      if (Array.isArray(data)) {
+        colaterales = data;
+        try { localStorage.setItem(COLATERALES_KEY, JSON.stringify(colaterales)); } catch(err) {}
+        renderColaterales();
+        var secFact = document.getElementById('seccionFactibilidad');
+        if (secFact && secFact.style.display !== 'none') {
+          var tabEjec = document.getElementById('tabEjecucion');
+          if (tabEjec && tabEjec.style.display !== 'none') { renderEjecucionTecnico(); }
+          else { renderFactibilidadTecnico(); }
+        }
+      }
+    });
   }
 
   var historial = [];
@@ -2088,6 +2416,11 @@
     document.getElementById('osPrioridad').selectedIndex = 0;
     document.getElementById('osEstado').selectedIndex = 0;
     editIndex = -1;
+    window._archivosOS = [];
+    document.getElementById('osArchivo').value = '';
+    document.getElementById('previewAreaOS').innerHTML = '';
+    document.getElementById('contadorArchivosOS').style.display = 'none';
+    document.getElementById('uploadAreaOS').style.display = 'block';
     document.getElementById('modalOSHeader').classList.remove('edit-mode');
     document.getElementById('modalOSTitulo').textContent = 'Orden de Servicio';
     document.getElementById('osId').removeAttribute('readonly');
@@ -2117,6 +2450,15 @@
     setSelectValue('osTecnico', os.tecnico);
     setSelectValue('osPrioridad', os.prioridad);
     setSelectValue('osEstado', os.estado);
+    window._archivosOS = [];
+    document.getElementById('osArchivo').value = '';
+    document.getElementById('previewAreaOS').innerHTML = '';
+    document.getElementById('contadorArchivosOS').style.display = 'none';
+    document.getElementById('uploadAreaOS').style.display = 'block';
+    if (os.documentacion && os.documentacion.length > 0) {
+      os.documentacion.forEach(function(ev) { agregarPreviewOS(ev); });
+      actualizarContadorOS();
+    }
     document.getElementById('modalOSHeader').classList.add('edit-mode');
     document.getElementById('modalOSTitulo').textContent = 'Editar Orden';
     document.getElementById('osId').setAttribute('readonly', true);
@@ -2170,18 +2512,41 @@
       actividad: document.getElementById('osActividad').value || '-',
       obs:       document.getElementById('osObs').value || '-'
     };
-    if (editIndex >= 0) {
-      historial[editIndex] = os;
-      guardarStorage();
-      renderHistorial();
-      cerrarOS();
+    // Conservar adjuntos ya guardados si se esta editando y no se agregaron nuevos
+    if (editIndex >= 0 && historial[editIndex] && historial[editIndex].documentacion) {
+      os.documentacion = historial[editIndex].documentacion;
+    }
+
+    var finalizarGuardadoOS = function() {
+      if (editIndex >= 0) {
+        historial[editIndex] = os;
+        guardarStorage();
+        renderHistorial();
+        cerrarOS();
+      } else {
+        historial.push(os);
+        osCounter++;
+        editIndex = historial.length - 1;
+        guardarStorage();
+        renderHistorial();
+        mostrarPanelWA();
+      }
+    };
+
+    if (window._archivosOS && window._archivosOS.length > 0) {
+      var btn = document.getElementById('btnGuardar');
+      var textoOriginal = btn.textContent;
+      btn.textContent = 'Comprimiendo...';
+      btn.disabled = true;
+      comprimirYGuardar(window._archivosOS.slice(), function(comprimidos) {
+        os.documentacion = comprimidos;
+        window._archivosOS = [];
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
+        finalizarGuardadoOS();
+      });
     } else {
-      historial.push(os);
-      osCounter++;
-      editIndex = historial.length - 1;
-      guardarStorage();
-      renderHistorial();
-      mostrarPanelWA();
+      finalizarGuardadoOS();
     }
   }
 
@@ -2247,6 +2612,641 @@
           '</div>';
         }).join('') +
         '</div>';
+    }
+  }
+
+  // ============================================================
+  // MODULO XII: FACTIBILIDAD (vista y formulario del tecnico)
+  // ============================================================
+  var _factIdxActual = null;
+  window._archivosFact = [];
+
+  function mostrarTabFactibilidad(tab) {
+    var btnInsp = document.getElementById('tabBtnInspeccion');
+    var btnEjec = document.getElementById('tabBtnEjecucion');
+    var tabInsp = document.getElementById('tabInspeccion');
+    var tabEjec = document.getElementById('tabEjecucion');
+    if (tab === 'ejecucion') {
+      tabInsp.style.display = 'none';
+      tabEjec.style.display = '';
+      btnInsp.style.borderBottomColor = 'transparent';
+      btnInsp.style.color = '#7a8fa6';
+      btnEjec.style.borderBottomColor = 'var(--azul)';
+      btnEjec.style.color = 'var(--azul)';
+      renderEjecucionTecnico();
+    } else {
+      tabInsp.style.display = '';
+      tabEjec.style.display = 'none';
+      btnInsp.style.borderBottomColor = 'var(--azul)';
+      btnInsp.style.color = 'var(--azul)';
+      btnEjec.style.borderBottomColor = 'transparent';
+      btnEjec.style.color = '#7a8fa6';
+      renderFactibilidadTecnico();
+    }
+  }
+
+  function renderFactibilidadTecnico() {
+    var info = document.getElementById('factibilidadInfo');
+    var cont = document.getElementById('factibilidadContenido');
+    if (!info || !cont || !currentUser) return;
+
+    if (currentUser.rol === 'tecnico') {
+      var mios = colaterales.filter(function(c) { return c.tecnico === currentUser.nombre; });
+      info.innerHTML = 'Registros de factibilidad derivados a usted. Complete la inspeccion de campo cuando corresponda.';
+      if (mios.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No tiene registros de factibilidad derivados por el momento.</div>';
+        return;
+      }
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        mios.map(function(item) {
+          var idxReal = colaterales.indexOf(item);
+          var estado = item.estado || 'Pendiente';
+          var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+            '<div>' +
+              '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
+              '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+            '</div>' +
+            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver / Editar Inspeccion' : 'Llenar Inspeccion') + '</button>' +
+          '</div>';
+        }).join('') +
+        '</div>';
+    } else {
+      // Coordinador: ve todos los registros derivados, agrupados por tecnico
+      var derivados = colaterales.filter(function(c) { return c.tecnico && c.tecnico !== '-'; });
+      info.innerHTML = 'Vista general de inspecciones de factibilidad derivadas a tecnicos/operarios.';
+      if (derivados.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No hay registros derivados aun.</div>';
+        return;
+      }
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        derivados.map(function(item) {
+          var idxReal = colaterales.indexOf(item);
+          var estado = item.estado || 'Pendiente';
+          var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+            '<div>' +
+              '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
+              '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+            '</div>' +
+            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Sin inspeccion aun') + '</button>' +
+          '</div>';
+        }).join('') +
+        '</div>';
+    }
+  }
+
+  function abrirFactibilidad(idx) {
+    var item = colaterales[idx];
+    if (!item) return;
+    _factIdxActual = idx;
+
+    document.getElementById('factNombreCliente').textContent = item.codigo + ' - ' + item.nombre;
+    document.getElementById('factDatosCliente').textContent = item.direccion + ' | Sector: ' + item.sector + ' | Mz. ' + item.manzana + ' Lt. ' + item.lote + ' | Conexion: ' + item.conexion;
+
+    var insp = item.inspeccion || {};
+    var agua = insp.agua || {};
+    var desague = insp.desague || {};
+    document.getElementById('factAguaDiametro').value = agua.diametro || '';
+    document.getElementById('factAguaLongitud').value = agua.longitud || '';
+    document.getElementById('factAguaProfundidad').value = agua.profundidad || '';
+    document.getElementById('factAguaFecha').value = agua.fecha || '';
+    document.getElementById('factAguaDiametroMatriz').value = agua.diametroMatriz || '';
+    document.getElementById('factDesagueDiametro').value = desague.diametro || '';
+    document.getElementById('factDesagueLongitud').value = desague.longitud || '';
+    document.getElementById('factDesagueProfundidad').value = desague.profundidad || '';
+    document.getElementById('factDesagueFecha').value = desague.fecha || '';
+    document.getElementById('factDesagueDiametroMatriz').value = desague.diametroMatriz || '';
+    document.getElementById('factObservacion').value = insp.observacion || '';
+
+    window._archivosFact = [];
+    document.getElementById('factArchivo').value = '';
+    document.getElementById('previewAreaFact').innerHTML = '';
+    document.getElementById('contadorArchivosFact').style.display = 'none';
+    document.getElementById('uploadAreaFact').style.display = 'block';
+    if (insp.evidencias && insp.evidencias.length > 0) {
+      insp.evidencias.forEach(function(ev) { agregarPreviewFact(ev); });
+      actualizarContadorFact();
+    }
+
+    document.getElementById('modalFactibilidad').classList.add('active');
+  }
+
+  function cerrarFactibilidad() {
+    document.getElementById('modalFactibilidad').classList.remove('active');
+  }
+
+  function cargarArchivosFact(input) {
+    var files = [];
+    for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
+    var MAX = 5;
+    var MAXSIZE = 30 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf'];
+    var disponibles = MAX - window._archivosFact.length;
+    if (disponibles <= 0) {
+      alert('Ya tiene ' + MAX + ' archivos. Quite alguno para agregar mas.');
+      input.value = ''; return;
+    }
+    if (files.length > disponibles) {
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas. Se tomaran los primeros.');
+      files = files.slice(0, disponibles);
+    }
+    var errores = [];
+    files.forEach(function(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
+      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 30MB'); return; }
+      var reader = new FileReader();
+      reader.onload = (function(f) {
+        return function(e) {
+          var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
+          window._archivosFact.push(data);
+          agregarPreviewFact(data);
+          actualizarContadorFact();
+        };
+      })(file);
+      reader.readAsDataURL(file);
+    });
+    if (errores.length) alert('Errores:\n' + errores.join('\n'));
+    input.value = '';
+  }
+
+  function agregarPreviewFact(data) {
+    var isImg = data.type.indexOf('image') >= 0;
+    var pa = document.getElementById('previewAreaFact');
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:150px;max-width:190px;text-align:center;';
+    var idxActual = pa.children.length;
+    if (isImg) {
+      div.innerHTML =
+        '<img src="' + data.base64 + '" style="width:100%;max-height:170px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxFact(' + idxActual + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else {
+      div.innerHTML =
+        '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxFact(' + idxActual + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    }
+    pa.appendChild(div);
+    if (window._archivosFact.length >= 5) {
+      document.getElementById('uploadAreaFact').style.display = 'none';
+    }
+  }
+
+  function actualizarContadorFact() {
+    var n = window._archivosFact.length;
+    var c = document.getElementById('contadorArchivosFact');
+    if (n > 0) {
+      c.style.display = 'block';
+      c.textContent = n + ' de 5 archivo(s) cargado(s)';
+    } else {
+      c.style.display = 'none';
+      document.getElementById('uploadAreaFact').style.display = 'block';
+    }
+  }
+
+  function quitarArchivoIdxFact(idx) {
+    window._archivosFact.splice(idx, 1);
+    var pa = document.getElementById('previewAreaFact');
+    pa.innerHTML = '';
+    window._archivosFact.forEach(function(d) { agregarPreviewFact(d); });
+    actualizarContadorFact();
+    if (window._archivosFact.length < 5) document.getElementById('uploadAreaFact').style.display = 'block';
+  }
+
+  function guardarFactibilidad() {
+    var idx = _factIdxActual;
+    var item = colaterales[idx];
+    if (!item) return;
+
+    var insp = {
+      agua: {
+        diametro: document.getElementById('factAguaDiametro').value.trim() || '-',
+        longitud: document.getElementById('factAguaLongitud').value.trim() || '-',
+        profundidad: document.getElementById('factAguaProfundidad').value.trim() || '-',
+        fecha: document.getElementById('factAguaFecha').value || '-',
+        diametroMatriz: document.getElementById('factAguaDiametroMatriz').value.trim() || '-'
+      },
+      desague: {
+        diametro: document.getElementById('factDesagueDiametro').value.trim() || '-',
+        longitud: document.getElementById('factDesagueLongitud').value.trim() || '-',
+        profundidad: document.getElementById('factDesagueProfundidad').value.trim() || '-',
+        fecha: document.getElementById('factDesagueFecha').value || '-',
+        diametroMatriz: document.getElementById('factDesagueDiametroMatriz').value.trim() || '-'
+      },
+      observacion: document.getElementById('factObservacion').value.trim() || '-'
+    };
+
+    var finalizar = function() {
+      item.inspeccion = insp;
+      item.estado = 'Completado';
+      window._archivosFact = [];
+      guardarColateralesStorage();
+      renderColaterales();
+      renderFactibilidadTecnico();
+      cerrarFactibilidad();
+      alert('Inspeccion de factibilidad guardada correctamente.');
+    };
+
+    if (window._archivosFact && window._archivosFact.length > 0) {
+      var btn = document.querySelector('#modalFactibilidad .btn-save');
+      var textoOriginal = btn.textContent;
+      btn.textContent = 'Comprimiendo...';
+      btn.disabled = true;
+      comprimirYGuardar(window._archivosFact.slice(), function(comprimidos) {
+        insp.evidencias = comprimidos;
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
+        finalizar();
+      });
+    } else {
+      if (item.inspeccion && item.inspeccion.evidencias) { insp.evidencias = item.inspeccion.evidencias; }
+      finalizar();
+    }
+  }
+
+  // ============================================================
+  // MODULO XII: FACTIBILIDAD - 2. EJECUCION (derivada desde Colaterales)
+  // ============================================================
+  var _ejecIdxActual = null;
+  window._archivosEjec = [];
+  window._archivosMedidor = { inicio: [], final: [] };
+
+  function renderEjecucionTecnico() {
+    var info = document.getElementById('ejecucionInfo');
+    var cont = document.getElementById('ejecucionContenido');
+    if (!info || !cont || !currentUser) return;
+
+    if (currentUser.rol === 'tecnico') {
+      var mios = colaterales.filter(function(c) { return c.tecnicoEjecucion === currentUser.nombre; });
+      info.innerHTML = 'Colaterales derivados a usted para ejecucion de obra. Registre los datos una vez culminados los trabajos.';
+      if (mios.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No tiene colaterales derivados para ejecucion por el momento.</div>';
+        return;
+      }
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        mios.map(function(item) {
+          var idxReal = colaterales.indexOf(item);
+          var estado = item.estadoEjecucion || 'Pendiente';
+          var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+            '<div>' +
+              '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
+              '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+            '</div>' +
+            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirEjecucion(' + idxReal + ')">' + (item.ejecucion ? 'Ver / Editar Ejecucion' : 'Registrar Ejecucion') + '</button>' +
+          '</div>';
+        }).join('') +
+        '</div>';
+    } else {
+      // Coordinador: ve todos los colaterales derivados para ejecucion
+      var derivados = colaterales.filter(function(c) { return c.tecnicoEjecucion && c.tecnicoEjecucion !== '-'; });
+      info.innerHTML = 'Vista general de colaterales derivados a tecnicos/operarios para ejecucion de obra.';
+      if (derivados.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No hay colaterales derivados a ejecucion aun.</div>';
+        return;
+      }
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        derivados.map(function(item) {
+          var idxReal = colaterales.indexOf(item);
+          var estado = item.estadoEjecucion || 'Pendiente';
+          var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+            '<div>' +
+              '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnicoEjecucion + '</strong><br>' +
+              '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+            '</div>' +
+            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirEjecucion(' + idxReal + ')">' + (item.ejecucion ? 'Ver Ejecucion' : 'Sin ejecucion aun') + '</button>' +
+          '</div>';
+        }).join('') +
+        '</div>';
+    }
+  }
+
+  function abrirEjecucion(idx) {
+    var item = colaterales[idx];
+    if (!item) return;
+    _ejecIdxActual = idx;
+
+    document.getElementById('ejecNombreCliente').textContent = item.codigo + ' - ' + item.nombre;
+    document.getElementById('ejecDatosCliente').textContent = item.direccion + ' | Sector: ' + item.sector + ' | Mz. ' + item.manzana + ' Lt. ' + item.lote + ' | Conexion: ' + item.conexion;
+
+    var ejec = item.ejecucion || {};
+    document.getElementById('ejecFecha').value = ejec.fecha || '';
+    document.getElementById('ejecPersonal').value = ejec.personal || '';
+    document.getElementById('ejecDiametroAgua').value = ejec.diametroAgua || '';
+    document.getElementById('ejecDiametroDesague').value = ejec.diametroDesague || '';
+    document.getElementById('ejecMateriales').value = ejec.materiales || '';
+    document.getElementById('ejecObservacion').value = ejec.observacion || '';
+
+    var medidor = ejec.medidor || {};
+    document.getElementById('ejecMedidorNumero').value = medidor.numero || '';
+    document.getElementById('ejecMedidorMarca').value = medidor.marca || '';
+    document.getElementById('ejecMedidorModelo').value = medidor.modelo || '';
+    document.getElementById('ejecMedidorDiametro').value = medidor.diametro || '';
+    document.getElementById('ejecMedidorClase').value = medidor.clase || '';
+    document.getElementById('ejecMedidorCapacidad').value = medidor.capacidad || '';
+    document.getElementById('ejecMedidorObservacion').value = medidor.observacion || '';
+
+    window._archivosEjec = [];
+    document.getElementById('ejecArchivo').value = '';
+    document.getElementById('previewAreaEjec').innerHTML = '';
+    document.getElementById('contadorArchivosEjec').style.display = 'none';
+    document.getElementById('uploadAreaEjec').style.display = 'block';
+    if (ejec.evidencias && ejec.evidencias.length > 0) {
+      ejec.evidencias.forEach(function(ev) { agregarPreviewEjec(ev); });
+      actualizarContadorEjec();
+    }
+
+    window._archivosMedidor = { inicio: [], final: [] };
+    document.getElementById('ejecMedidorArchivoInicio').value = '';
+    document.getElementById('previewAreaMedidorInicio').innerHTML = '';
+    document.getElementById('contadorArchivosMedidorInicio').style.display = 'none';
+    document.getElementById('uploadAreaMedidorInicio').style.display = 'block';
+    document.getElementById('ejecMedidorArchivoFinal').value = '';
+    document.getElementById('previewAreaMedidorFinal').innerHTML = '';
+    document.getElementById('contadorArchivosMedidorFinal').style.display = 'none';
+    document.getElementById('uploadAreaMedidorFinal').style.display = 'block';
+    if (medidor.evidenciaInicio && medidor.evidenciaInicio.length > 0) {
+      medidor.evidenciaInicio.forEach(function(ev) { agregarPreviewMedidor(ev, 'inicio'); });
+      actualizarContadorMedidor('inicio');
+    }
+    if (medidor.evidenciaFinal && medidor.evidenciaFinal.length > 0) {
+      medidor.evidenciaFinal.forEach(function(ev) { agregarPreviewMedidor(ev, 'final'); });
+      actualizarContadorMedidor('final');
+    }
+
+    document.getElementById('modalEjecucion').classList.add('active');
+  }
+
+  function cerrarEjecucion() {
+    document.getElementById('modalEjecucion').classList.remove('active');
+  }
+
+  function cargarArchivosEjec(input) {
+    var files = [];
+    for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
+    var MAX = 5;
+    var MAXSIZE = 30 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf'];
+    var disponibles = MAX - window._archivosEjec.length;
+    if (disponibles <= 0) {
+      alert('Ya tiene ' + MAX + ' archivos. Quite alguno para agregar mas.');
+      input.value = ''; return;
+    }
+    if (files.length > disponibles) {
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas. Se tomaran los primeros.');
+      files = files.slice(0, disponibles);
+    }
+    var errores = [];
+    files.forEach(function(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
+      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 30MB'); return; }
+      var reader = new FileReader();
+      reader.onload = (function(f) {
+        return function(e) {
+          var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
+          window._archivosEjec.push(data);
+          agregarPreviewEjec(data);
+          actualizarContadorEjec();
+        };
+      })(file);
+      reader.readAsDataURL(file);
+    });
+    if (errores.length) alert('Errores:\n' + errores.join('\n'));
+    input.value = '';
+  }
+
+  function agregarPreviewEjec(data) {
+    var isImg = data.type.indexOf('image') >= 0;
+    var pa = document.getElementById('previewAreaEjec');
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:150px;max-width:190px;text-align:center;';
+    var idxActual = pa.children.length;
+    if (isImg) {
+      div.innerHTML =
+        '<img src="' + data.base64 + '" style="width:100%;max-height:170px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxEjec(' + idxActual + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else {
+      div.innerHTML =
+        '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxEjec(' + idxActual + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    }
+    pa.appendChild(div);
+    if (window._archivosEjec.length >= 5) {
+      document.getElementById('uploadAreaEjec').style.display = 'none';
+    }
+  }
+
+  function actualizarContadorEjec() {
+    var n = window._archivosEjec.length;
+    var c = document.getElementById('contadorArchivosEjec');
+    if (n > 0) {
+      c.style.display = 'block';
+      c.textContent = n + ' de 5 archivo(s) cargado(s)';
+    } else {
+      c.style.display = 'none';
+      document.getElementById('uploadAreaEjec').style.display = 'block';
+    }
+  }
+
+  function quitarArchivoIdxEjec(idx) {
+    window._archivosEjec.splice(idx, 1);
+    var pa = document.getElementById('previewAreaEjec');
+    pa.innerHTML = '';
+    window._archivosEjec.forEach(function(d) { agregarPreviewEjec(d); });
+    actualizarContadorEjec();
+    if (window._archivosEjec.length < 5) document.getElementById('uploadAreaEjec').style.display = 'block';
+  }
+
+  // ---------- EJECUCION: evidencia topografica del Medidor (Inicio / Final) ----------
+  function cargarArchivosMedidor(input, tipo) {
+    var files = [];
+    for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
+    var MAX = 5;
+    var MAXSIZE = 30 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf'];
+    var suf = tipo === 'inicio' ? 'Inicio' : 'Final';
+    var disponibles = MAX - window._archivosMedidor[tipo].length;
+    if (disponibles <= 0) {
+      alert('Ya tiene ' + MAX + ' archivos en Evidencia ' + suf + ' del medidor. Quite alguno para agregar mas.');
+      input.value = ''; return;
+    }
+    if (files.length > disponibles) {
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas en esta seccion. Se tomaran los primeros.');
+      files = files.slice(0, disponibles);
+    }
+    var errores = [];
+    files.forEach(function(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
+      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 30MB'); return; }
+      var reader = new FileReader();
+      reader.onload = (function(f) {
+        return function(e) {
+          var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
+          window._archivosMedidor[tipo].push(data);
+          agregarPreviewMedidor(data, tipo);
+          actualizarContadorMedidor(tipo);
+        };
+      })(file);
+      reader.readAsDataURL(file);
+    });
+    if (errores.length) alert('Errores:\n' + errores.join('\n'));
+    input.value = '';
+  }
+
+  function agregarPreviewMedidor(data, tipo) {
+    var suf = tipo === 'inicio' ? 'Inicio' : 'Final';
+    var isImg = data.type.indexOf('image') >= 0;
+    var pa = document.getElementById('previewAreaMedidor' + suf);
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:150px;max-width:190px;text-align:center;';
+    var idxActual = pa.children.length;
+    if (isImg) {
+      div.innerHTML =
+        '<img src="' + data.base64 + '" style="width:100%;max-height:170px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxMedidor(' + idxActual + ', \'' + tipo + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else {
+      div.innerHTML =
+        '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxMedidor(' + idxActual + ', \'' + tipo + '\')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    }
+    pa.appendChild(div);
+    if (window._archivosMedidor[tipo].length >= 5) {
+      document.getElementById('uploadAreaMedidor' + suf).style.display = 'none';
+    }
+  }
+
+  function actualizarContadorMedidor(tipo) {
+    var suf = tipo === 'inicio' ? 'Inicio' : 'Final';
+    var n = window._archivosMedidor[tipo].length;
+    var c = document.getElementById('contadorArchivosMedidor' + suf);
+    if (n > 0) {
+      c.style.display = 'block';
+      c.textContent = n + ' de 5 archivo(s) cargado(s)';
+    } else {
+      c.style.display = 'none';
+      document.getElementById('uploadAreaMedidor' + suf).style.display = 'block';
+    }
+  }
+
+  function quitarArchivoIdxMedidor(idx, tipo) {
+    var suf = tipo === 'inicio' ? 'Inicio' : 'Final';
+    window._archivosMedidor[tipo].splice(idx, 1);
+    var pa = document.getElementById('previewAreaMedidor' + suf);
+    pa.innerHTML = '';
+    window._archivosMedidor[tipo].forEach(function(d) { agregarPreviewMedidor(d, tipo); });
+    actualizarContadorMedidor(tipo);
+    if (window._archivosMedidor[tipo].length < 5) document.getElementById('uploadAreaMedidor' + suf).style.display = 'block';
+  }
+
+  function guardarEjecucion() {
+    var idx = _ejecIdxActual;
+    var item = colaterales[idx];
+    if (!item) return;
+
+    var ejec = {
+      fecha: document.getElementById('ejecFecha').value || '-',
+      personal: document.getElementById('ejecPersonal').value.trim() || '-',
+      diametroAgua: document.getElementById('ejecDiametroAgua').value.trim() || '-',
+      diametroDesague: document.getElementById('ejecDiametroDesague').value.trim() || '-',
+      materiales: document.getElementById('ejecMateriales').value.trim() || '-',
+      observacion: document.getElementById('ejecObservacion').value.trim() || '-'
+    };
+
+    var medidor = {
+      numero: document.getElementById('ejecMedidorNumero').value.trim() || '-',
+      marca: document.getElementById('ejecMedidorMarca').value.trim() || '-',
+      modelo: document.getElementById('ejecMedidorModelo').value.trim() || '-',
+      diametro: document.getElementById('ejecMedidorDiametro').value.trim() || '-',
+      clase: document.getElementById('ejecMedidorClase').value || '-',
+      capacidad: document.getElementById('ejecMedidorCapacidad').value.trim() || '-',
+      observacion: document.getElementById('ejecMedidorObservacion').value.trim() || '-'
+    };
+
+    var previoEjec = item.ejecucion || {};
+    var previoMedidor = previoEjec.medidor || {};
+
+    var finalizar = function() {
+      ejec.medidor = medidor;
+      item.ejecucion = ejec;
+      item.estadoEjecucion = 'Completado';
+      window._archivosEjec = [];
+      window._archivosMedidor = { inicio: [], final: [] };
+      guardarColateralesStorage();
+      renderColaterales();
+      renderEjecucionTecnico();
+      cerrarEjecucion();
+      alert('Ejecucion registrada correctamente.');
+    };
+
+    var hayNuevosArchivos = (window._archivosEjec && window._archivosEjec.length > 0) ||
+      (window._archivosMedidor.inicio && window._archivosMedidor.inicio.length > 0) ||
+      (window._archivosMedidor.final && window._archivosMedidor.final.length > 0);
+
+    if (hayNuevosArchivos) {
+      var btn = document.querySelector('#modalEjecucion .btn-save');
+      var textoOriginal = btn.textContent;
+      btn.textContent = 'Comprimiendo...';
+      btn.disabled = true;
+
+      var pendientes = 3;
+      var terminarPaso = function() {
+        pendientes--;
+        if (pendientes === 0) {
+          btn.textContent = textoOriginal;
+          btn.disabled = false;
+          finalizar();
+        }
+      };
+
+      if (window._archivosEjec && window._archivosEjec.length > 0) {
+        comprimirYGuardar(window._archivosEjec.slice(), function(comprimidos) {
+          ejec.evidencias = comprimidos;
+          terminarPaso();
+        });
+      } else {
+        if (previoEjec.evidencias) ejec.evidencias = previoEjec.evidencias;
+        terminarPaso();
+      }
+
+      if (window._archivosMedidor.inicio && window._archivosMedidor.inicio.length > 0) {
+        comprimirYGuardar(window._archivosMedidor.inicio.slice(), function(comprimidos) {
+          medidor.evidenciaInicio = comprimidos;
+          terminarPaso();
+        });
+      } else {
+        if (previoMedidor.evidenciaInicio) medidor.evidenciaInicio = previoMedidor.evidenciaInicio;
+        terminarPaso();
+      }
+
+      if (window._archivosMedidor.final && window._archivosMedidor.final.length > 0) {
+        comprimirYGuardar(window._archivosMedidor.final.slice(), function(comprimidos) {
+          medidor.evidenciaFinal = comprimidos;
+          terminarPaso();
+        });
+      } else {
+        if (previoMedidor.evidenciaFinal) medidor.evidenciaFinal = previoMedidor.evidenciaFinal;
+        terminarPaso();
+      }
+    } else {
+      if (previoEjec.evidencias) ejec.evidencias = previoEjec.evidencias;
+      if (previoMedidor.evidenciaInicio) medidor.evidenciaInicio = previoMedidor.evidenciaInicio;
+      if (previoMedidor.evidenciaFinal) medidor.evidenciaFinal = previoMedidor.evidenciaFinal;
+      finalizar();
     }
   }
 
@@ -2374,6 +3374,7 @@
 
     var panelFotos =
       '<div style="page-break-before:always;break-before:page;background:#eaf2fb;border-left:4px solid #0b4f8a;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;margin-top:22px;">IV. Panel Fotografico - Evidencias del Trabajo</div>' +
+      (os.documentacion && os.documentacion.length > 0 ? construirGaleria('Documentacion Adjunta (al crear la orden)', os.documentacion) : '') +
       construirGaleria('Fotos de Inicio', evInicio) +
       construirGaleria('Fotos de Fin', evFin);
 
@@ -2787,6 +3788,91 @@
     var limpios = resultado.filter(function(r) { return r !== null; });
     callback(limpios);
   }
+
+  // ---------- ORDEN DE SERVICIO: adjuntar documentacion (PDF o foto) ----------
+  window._archivosOS = [];
+
+  function cargarArchivosOS(input) {
+    var files = [];
+    for (var fi = 0; fi < input.files.length; fi++) files.push(input.files[fi]);
+    var MAX = 5;
+    var MAXSIZE = 15 * 1024 * 1024;
+    var allowed = ['jpg','jpeg','png','pdf'];
+    var disponibles = MAX - window._archivosOS.length;
+    if (disponibles <= 0) {
+      alert('Ya tiene ' + MAX + ' archivos adjuntos. Quite alguno para agregar mas.');
+      input.value = ''; return;
+    }
+    if (files.length > disponibles) {
+      alert('Solo puede agregar ' + disponibles + ' archivo(s) mas. Se tomaran los primeros.');
+      files = files.slice(0, disponibles);
+    }
+    var errores = [];
+    files.forEach(function(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.indexOf(ext) < 0) { errores.push(file.name + ': formato no permitido'); return; }
+      if (file.size > MAXSIZE) { errores.push(file.name + ': supera 15MB'); return; }
+      var reader = new FileReader();
+      reader.onload = (function(f) {
+        return function(e) {
+          var data = { name: f.name, size: f.size, type: f.type, base64: e.target.result };
+          window._archivosOS.push(data);
+          agregarPreviewOS(data);
+          actualizarContadorOS();
+        };
+      })(file);
+      reader.readAsDataURL(file);
+    });
+    if (errores.length) alert('Errores:\n' + errores.join('\n'));
+    input.value = '';
+  }
+
+  function agregarPreviewOS(data) {
+    var isImg = data.type.indexOf('image') >= 0;
+    var pa = document.getElementById('previewAreaOS');
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border:1.5px solid #b8e0c8;border-radius:8px;padding:8px;background:#fff;min-width:150px;max-width:190px;text-align:center;';
+    var idxActual = pa.children.length;
+    if (isImg) {
+      div.innerHTML =
+        '<img src="' + data.base64 + '" style="width:100%;max-height:170px;object-fit:contain;background:#f0f4f9;border-radius:5px;display:block;">' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxOS(' + idxActual + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    } else {
+      div.innerHTML =
+        '<div style="font-size:2.5rem;line-height:1.2;">&#128196;</div>' +
+        '<div style="font-size:0.70rem;color:#444;margin-top:5px;word-break:break-all;">' + data.name + '</div>' +
+        '<div style="font-size:0.68rem;color:#7a9a8a;">' + formatBytes(data.size) + '</div>' +
+        '<button onclick="quitarArchivoIdxOS(' + idxActual + ')" style="position:absolute;top:4px;right:4px;background:#c0392b;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;line-height:20px;padding:0;">x</button>';
+    }
+    pa.appendChild(div);
+    if (window._archivosOS.length >= 5) {
+      document.getElementById('uploadAreaOS').style.display = 'none';
+    }
+  }
+
+  function actualizarContadorOS() {
+    var n = window._archivosOS.length;
+    var c = document.getElementById('contadorArchivosOS');
+    if (n > 0) {
+      c.style.display = 'block';
+      c.textContent = n + ' de 5 archivo(s) cargado(s)';
+    } else {
+      c.style.display = 'none';
+      document.getElementById('uploadAreaOS').style.display = 'block';
+    }
+  }
+
+  function quitarArchivoIdxOS(idx) {
+    window._archivosOS.splice(idx, 1);
+    var pa = document.getElementById('previewAreaOS');
+    pa.innerHTML = '';
+    window._archivosOS.forEach(function(d) { agregarPreviewOS(d); });
+    actualizarContadorOS();
+    if (window._archivosOS.length < 5) document.getElementById('uploadAreaOS').style.display = 'block';
+  }
+
 
   function cargarArchivos(input, seccion) {
     var files = [];
@@ -3401,23 +4487,192 @@
   }
 
   // ============================================================
+  // MODULO XI: COLATERALES - 1. Inspeccion de Factibilidad
+  // ============================================================
+  function renderSelectTecnicoColateral() {
+    var sel = document.getElementById('colTecnico');
+    var selEjec = document.getElementById('colTecnicoEjecucion');
+    var nombres = listaNombresTecnicos();
+    if (sel) {
+      var valorActual = sel.value;
+      sel.innerHTML = '<option value="">-- Derivar a Tecnico/Operario --</option>' +
+        nombres.map(function(n) { return '<option>' + n + '</option>'; }).join('');
+      if (valorActual) sel.value = valorActual;
+    }
+    if (selEjec) {
+      var valorActualEjec = selEjec.value;
+      selEjec.innerHTML = '<option value="">-- Derivar Ejecucion a Tecnico/Operario --</option>' +
+        nombres.map(function(n) { return '<option>' + n + '</option>'; }).join('');
+      if (valorActualEjec) selEjec.value = valorActualEjec;
+    }
+  }
+
+  function limpiarFormularioColateral() {
+    document.getElementById('colCodigo').value = '';
+    document.getElementById('colNombre').value = '';
+    document.getElementById('colDireccion').value = '';
+    document.getElementById('colSector').value = '';
+    document.getElementById('colManzana').value = '';
+    document.getElementById('colLote').value = '';
+    document.getElementById('colConexion').value = '';
+    document.getElementById('colTecnico').value = '';
+    document.getElementById('colEstado').value = 'Pendiente';
+    document.getElementById('colTecnicoEjecucion').value = '';
+    document.getElementById('colEstadoEjecucion').value = 'Pendiente';
+  }
+
+  function guardarColateral() {
+    var codigo = document.getElementById('colCodigo').value.trim();
+    var nombre = document.getElementById('colNombre').value.trim();
+    if (!codigo || !nombre) { alert('Complete al menos el N Codigo y el Nombre.'); return; }
+
+    var item = {
+      codigo: codigo,
+      nombre: nombre,
+      direccion: document.getElementById('colDireccion').value.trim() || '-',
+      sector: document.getElementById('colSector').value.trim() || '-',
+      manzana: document.getElementById('colManzana').value.trim() || '-',
+      lote: document.getElementById('colLote').value.trim() || '-',
+      conexion: document.getElementById('colConexion').value.trim() || '-',
+      tecnico: document.getElementById('colTecnico').value || '-',
+      estado: document.getElementById('colEstado').value,
+      tecnicoEjecucion: document.getElementById('colTecnicoEjecucion').value || '-',
+      estadoEjecucion: document.getElementById('colEstadoEjecucion').value
+    };
+
+    if (_editandoColateralIdx !== null && _editandoColateralIdx !== undefined) {
+      // Conservar datos de inspeccion y ejecucion ya registrados al editar
+      var previo = colaterales[_editandoColateralIdx] || {};
+      if (previo.inspeccion) item.inspeccion = previo.inspeccion;
+      if (previo.ejecucion) item.ejecucion = previo.ejecucion;
+      colaterales[_editandoColateralIdx] = item;
+      cancelarEdicionColateral();
+    } else {
+      colaterales.push(item);
+      limpiarFormularioColateral();
+    }
+    guardarColateralesStorage();
+    renderColaterales();
+  }
+
+  function editarColateral(idx) {
+    var item = colaterales[idx];
+    if (!item) return;
+    _editandoColateralIdx = idx;
+    renderSelectTecnicoColateral();
+    document.getElementById('colCodigo').value = item.codigo;
+    document.getElementById('colNombre').value = item.nombre;
+    document.getElementById('colDireccion').value = item.direccion === '-' ? '' : item.direccion;
+    document.getElementById('colSector').value = item.sector === '-' ? '' : item.sector;
+    document.getElementById('colManzana').value = item.manzana === '-' ? '' : item.manzana;
+    document.getElementById('colLote').value = item.lote === '-' ? '' : item.lote;
+    document.getElementById('colConexion').value = item.conexion === '-' ? '' : item.conexion;
+    document.getElementById('colTecnico').value = item.tecnico === '-' ? '' : (item.tecnico || '');
+    document.getElementById('colEstado').value = item.estado || 'Pendiente';
+    document.getElementById('colTecnicoEjecucion').value = item.tecnicoEjecucion === '-' ? '' : (item.tecnicoEjecucion || '');
+    document.getElementById('colEstadoEjecucion').value = item.estadoEjecucion || 'Pendiente';
+
+    document.getElementById('colTituloForm').textContent = 'Editando Registro';
+    document.getElementById('colBtnGuardar').innerHTML = '&#128190; Guardar cambios';
+    document.getElementById('colBtnCancelar').style.display = 'block';
+    document.getElementById('colForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function cancelarEdicionColateral() {
+    _editandoColateralIdx = null;
+    limpiarFormularioColateral();
+    document.getElementById('colTituloForm').textContent = 'Nuevo Registro';
+    document.getElementById('colBtnGuardar').innerHTML = '&#10133; Agregar registro';
+    document.getElementById('colBtnCancelar').style.display = 'none';
+  }
+
+  function eliminarColateral(idx) {
+    var item = colaterales[idx];
+    if (!item) return;
+    if (!confirm('Eliminar el registro "' + item.nombre + '" (Cod: ' + item.codigo + ')?')) return;
+    colaterales.splice(idx, 1);
+    if (_editandoColateralIdx === idx) { cancelarEdicionColateral(); }
+    guardarColateralesStorage();
+    renderColaterales();
+  }
+
+  function renderColaterales() {
+    renderSelectTecnicoColateral();
+    var tbody = document.getElementById('colateralesBody');
+    if (!tbody) return;
+    var buscarEl = document.getElementById('buscarColaterales');
+    var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
+
+    var filas = colaterales.map(function(item, idx) { return { item: item, idx: idx }; });
+    if (busqueda) {
+      filas = filas.filter(function(x) {
+        var campos = [x.item.codigo, x.item.nombre, x.item.direccion, x.item.tecnico].join(' ').toLowerCase();
+        return campos.indexOf(busqueda) >= 0;
+      });
+    }
+
+    if (filas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filas.map(function(x) {
+      var item = x.item, idx = x.idx;
+      var estado = item.estado || 'Pendiente';
+      var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+      var estadoEjec = item.estadoEjecucion || 'Pendiente';
+      var colorEstadoEjec = estadoEjec === 'Completado' ? '#1a7a4a' : estadoEjec === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+      return '<tr>' +
+        '<td><strong>' + item.codigo + '</strong></td>' +
+        '<td>' + item.nombre + '</td>' +
+        '<td>' + item.direccion + '</td>' +
+        '<td>' + item.sector + '</td>' +
+        '<td>' + item.manzana + '</td>' +
+        '<td>' + item.lote + '</td>' +
+        '<td>' + item.conexion + '</td>' +
+        '<td>' + (item.tecnico || '-') + '</td>' +
+        '<td><span style="color:' + colorEstado + ';font-weight:700;">' + estado + '</span></td>' +
+        '<td>' + (item.tecnicoEjecucion && item.tecnicoEjecucion !== '-' ? item.tecnicoEjecucion : '-') + '</td>' +
+        '<td><span style="color:' + colorEstadoEjec + ';font-weight:700;">' + estadoEjec + '</span></td>' +
+        '<td style="text-align:center;white-space:nowrap;">' +
+          '<button class="btn-config-edit" onclick="editarColateral(' + idx + ')" title="Editar">&#9998;</button>' +
+          '<button class="btn-config-del" onclick="eliminarColateral(' + idx + ')" title="Eliminar">&#128465;</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ============================================================
   // MODULO VIII: SEGUIMIENTO OPERATIVO
   // ============================================================
   function renderSeguimiento() {
     document.getElementById('segCantidadOS').textContent = historial.length;
     document.getElementById('segCantidadRD').textContent = reportesDiarios.length;
+    document.getElementById('segCantidadCol').textContent = colaterales.length;
+    document.getElementById('segCantidadEjec').textContent = colaterales.filter(function(c) { return c.tecnicoEjecucion && c.tecnicoEjecucion !== '-'; }).length;
     document.getElementById('segDetalleWrap').style.display = 'none';
 
     var porTecnico = {};
     historial.forEach(function(os) {
       var nombre = os.tecnico || 'Sin asignar';
-      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0 };
+      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0, ejecuciones: 0 };
       porTecnico[nombre].ordenes++;
     });
     reportesDiarios.forEach(function(r) {
       var nombre = r.nombre || 'Sin asignar';
-      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0 };
+      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0, ejecuciones: 0 };
       porTecnico[nombre].reportes++;
+    });
+    colaterales.forEach(function(c) {
+      var nombre = (c.tecnico && c.tecnico !== '-') ? c.tecnico : 'Sin asignar';
+      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0, ejecuciones: 0 };
+      porTecnico[nombre].inspecciones++;
+    });
+    colaterales.forEach(function(c) {
+      if (!c.tecnicoEjecucion || c.tecnicoEjecucion === '-') return;
+      var nombre = c.tecnicoEjecucion;
+      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0, ejecuciones: 0 };
+      porTecnico[nombre].ejecuciones++;
     });
 
     var nombres = Object.keys(porTecnico).sort();
@@ -3431,6 +4686,8 @@
       var totalTxt = [];
       if (d.ordenes > 0) totalTxt.push(d.ordenes + ' O/S');
       if (d.reportes > 0) totalTxt.push(d.reportes + ' Rep.');
+      if (d.inspecciones > 0) totalTxt.push(d.inspecciones + ' Insp.');
+      if (d.ejecuciones > 0) totalTxt.push(d.ejecuciones + ' Ejec.');
       return '<button class="badge-item" style="flex-direction:row;gap:8px;background:white;border:1px solid #dbe9f8;border-radius:24px;padding:10px 18px;cursor:pointer;" onclick="mostrarDetalleTecnico(\'' + nombre.replace(/'/g,"\\'") + '\')">' +
         '<span style="font-weight:700;color:var(--azul);font-size:0.85rem;">' + nombre + '</span>' +
         '<span style="background:#eaf2fb;color:#0b4f8a;border-radius:12px;padding:2px 10px;font-size:0.76rem;font-weight:700;">' + totalTxt.join(' &middot; ') + '</span>' +
@@ -3629,6 +4886,8 @@
   document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
   document.getElementById('modalCuenta').addEventListener('click', function(e) { if (e.target === this) cerrarCuenta(); });
   document.getElementById('modalReporteDiario').addEventListener('click', function(e) { if (e.target === this) cerrarReporteDiario(); });
+  document.getElementById('modalFactibilidad').addEventListener('click', function(e) { if (e.target === this) cerrarFactibilidad(); });
+  document.getElementById('modalEjecucion').addEventListener('click', function(e) { if (e.target === this) cerrarEjecucion(); });
   document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 
   // Verificar si ya hay una sesion activa en este navegador (misma pestana/sesion)
