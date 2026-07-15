@@ -472,6 +472,17 @@
       </div>
     </div>
   </div>
+
+  <div id="panelRespaldo" style="display:none;margin-top:24px;">
+    <div class="config-col" style="text-align:center;">
+      <h4>Respaldo de Datos</h4>
+      <p style="font-size:0.82rem;color:#7a8fa6;margin-bottom:16px;">
+        Descarga una copia completa de todos los datos del sistema (ordenes, reportes, catalogo, almacen, colaterales y usuarios) en un archivo. Guardelo en su computadora, servidor local, o donde prefiera como respaldo adicional.
+      </p>
+      <button class="btn-config-add" onclick="descargarRespaldoCompleto()">&#128190; Descargar Respaldo Completo</button>
+      <div id="respaldoMsg" style="display:none;font-size:0.8rem;margin-top:10px;color:#1a7a4a;font-weight:600;"></div>
+    </div>
+  </div>
   </div>
 
   <!-- AGUA POTABLE -->
@@ -1278,6 +1289,10 @@
     var panelTec = document.getElementById('panelTecnicos');
     if (panelTec) panelTec.style.display = esCoord ? '' : 'none';
 
+    // Solo Coordinador descarga el respaldo completo
+    var panelResp = document.getElementById('panelRespaldo');
+    if (panelResp) panelResp.style.display = esCoord ? '' : 'none';
+
     // Enlaces cruzados de navegacion para el tecnico (VI <-> VII)
     document.querySelectorAll('.link-nav-tecnico').forEach(function(el) {
       el.style.display = esTec ? 'inline-block' : 'none';
@@ -1817,6 +1832,38 @@
     sel.innerHTML = '<option>-- Seleccionar --</option>' +
       tecnicos.map(function(nombre) { return '<option>' + nombre + '</option>'; }).join('');
     if (tecnicos.indexOf(valorActual) >= 0) { sel.value = valorActual; }
+  }
+
+  // Genera y descarga un archivo JSON con una copia completa de todos los datos del sistema
+  function descargarRespaldoCompleto() {
+    var respaldo = {
+      generadoEl: new Date().toISOString(),
+      generadoPor: currentUser ? currentUser.nombre : '-',
+      historial: historial,
+      plan: { agua: planAgua, alcantarillado: planAlcantarillado },
+      usuarios: USUARIOS,
+      reportesDiarios: reportesDiarios,
+      catalogo: { agua: catalogoAgua, alcantarillado: catalogoAlcantarillado },
+      almacen: almacen,
+      colaterales: colaterales
+    };
+    var contenido = JSON.stringify(respaldo, null, 2);
+    var blob = new Blob([contenido], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var fecha = new Date().toISOString().split('T')[0];
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'respaldo_eps_maranon_' + fecha + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+
+    var msg = document.getElementById('respaldoMsg');
+    if (msg) {
+      msg.style.display = 'block';
+      msg.textContent = 'Respaldo descargado: respaldo_eps_maranon_' + fecha + '.json';
+    }
   }
 
   function renderTodoElPlan() {
