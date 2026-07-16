@@ -282,6 +282,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -407,7 +408,7 @@
       <div class="badge-circle">
         <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
       </div>
-      <div class="badge-label">XII<br>Factibilidad</div>
+      <div class="badge-label">XII<br>Expediente</div>
     </button>
   </div>
   </div>
@@ -749,16 +750,31 @@
 
   <div class="section-title" style="font-size:0.95rem;">1. Inspeccion de Factibilidad</div>
 
-  <div class="config-col" style="margin-bottom:24px;margin-top:14px;">
+  <div class="config-col" style="margin-bottom:20px;margin-top:14px;">
+    <h4>Cargar Padron de Datos (Excel o PDF)</h4>
+    <p style="font-size:0.8rem;color:#7a8fa6;margin-bottom:12px;">
+      Suba un archivo Excel (o PDF con formato de tabla) que tenga una relacion de N Codigo, Nombre, Direccion, Manzana y Lote.
+      Luego, al escribir el N Codigo en "Nuevo Registro", el sistema buscara la coincidencia y llenara los demas datos automaticamente.
+    </p>
+    <div class="upload-area" id="uploadAreaPadron" onclick="document.getElementById('padronUpload').click()">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#1a7a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir Excel o PDF con la relacion completa</div>
+      <div style="font-size:0.72rem;color:#7a9a8a;margin-top:4px;">XLSX, XLS, CSV (recomendado) o PDF con tabla</div>
+      <input type="file" id="padronUpload" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" onchange="cargarPadronColaterales(this)">
+    </div>
+    <div id="padronEstado" style="display:none;font-size:0.8rem;margin-top:10px;"></div>
+  </div>
+
+  <div class="config-col" style="margin-bottom:24px;">
     <h4 id="colTituloForm">Nuevo Registro</h4>
     <div class="upload-area" id="uploadAreaColPdf" onclick="document.getElementById('colPdfUpload').click()" style="margin-bottom:14px;">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#1a7a4a" stroke-width="1.8"/><path d="M14 2v6h6" stroke="#1a7a4a" stroke-width="1.8"/></svg>
-      <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir PDF de documentacion (llena Nombre, Direccion, Manzana y Lote automaticamente)</div>
+      <div style="margin-top:6px;font-size:0.82rem;font-weight:600;color:#1a7a4a;">Subir PDF de documentacion individual (llena Nombre, Direccion, Manzana y Lote automaticamente)</div>
       <input type="file" id="colPdfUpload" accept=".pdf" style="display:none;" onchange="procesarPDFColateral(this)">
     </div>
     <div id="colPdfEstado" style="display:none;font-size:0.8rem;margin-bottom:12px;"></div>
     <div class="config-form" id="colForm" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <input type="text" id="colCodigo" placeholder="N Codigo">
+      <input type="text" id="colCodigo" placeholder="N Codigo (buscar en el padron cargado)" oninput="buscarEnPadronColaterales()">
       <input type="text" id="colNombre" placeholder="Nombre">
       <input type="text" id="colDireccion" placeholder="Direccion" style="grid-column: span 2;">
       <input type="text" id="colSector" placeholder="Sector de Abastecimiento">
@@ -784,7 +800,7 @@
 
   <div class="table-wrap">
     <table>
-      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Derivado a</th><th>Estado</th><th>Ejecucion</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Derivado a</th><th>Estado</th><th>Documento</th><th>Ejecucion</th><th>Acciones</th></tr></thead>
       <tbody id="colateralesBody"></tbody>
     </table>
   </div>
@@ -793,14 +809,27 @@
 <!-- FACTIBILIDAD (vista del tecnico) -->
 <div id="seccionFactibilidad">
   <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-    <span><span class="num">XII</span> Factibilidad</span>
+    <span><span class="num">XII</span> Expediente</span>
     <span>
       <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;margin-right:14px;" onclick="mostrarSeccion('ordentrabajo')">&#8592; Orden de Trabajo</a>
       <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('reportediario')">Reporte Diario &#8594;</a>
     </span>
   </div>
-  <div id="factibilidadInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
-  <div id="factibilidadContenido"></div>
+
+  <div style="display:flex;gap:10px;margin-bottom:18px;border-bottom:2px solid #eaf0f8;">
+    <button class="tab-expediente activa" id="tabBtnFactibilidad" onclick="cambiarTabExpediente('factibilidad')" style="background:none;border:none;padding:10px 18px;font-weight:700;font-size:0.85rem;color:var(--azul);cursor:pointer;border-bottom:3px solid var(--azul);">1. Factibilidad</button>
+    <button class="tab-expediente" id="tabBtnEjecucion" onclick="cambiarTabExpediente('ejecucion')" style="background:none;border:none;padding:10px 18px;font-weight:700;font-size:0.85rem;color:#7a8fa6;cursor:pointer;border-bottom:3px solid transparent;">2. Ejecucion</button>
+  </div>
+
+  <div id="tabContenidoFactibilidad">
+    <div id="factibilidadInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+    <div id="factibilidadContenido"></div>
+  </div>
+
+  <div id="tabContenidoEjecucion" style="display:none;">
+    <div id="ejecucionInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+    <div id="ejecucionContenido"></div>
+  </div>
 </div>
 </div>
 
@@ -1317,6 +1346,7 @@
     cargarCatalogoGuardado();
     cargarAlmacenGuardado();
     cargarColateralesGuardado();
+    cargarPadronGuardado();
     firebaseCargarPlanInicial(function() {
       renderTodoElPlan();
       irASeccionPorURL();
@@ -1333,6 +1363,7 @@
     firebaseCargarColateralesInicial(function() {
       renderColaterales();
     });
+    firebaseCargarPadronInicial(function() {});
     firebaseEscucharCambios();
     verificarURLTarea();
     detectarRed();
@@ -1381,7 +1412,7 @@
     var btnActivo = document.querySelector('.badge-item[data-sec="' + nombre + '"]');
     if (btnActivo) btnActivo.classList.add('badge-active');
     if (nombre === 'ordentrabajo') { renderOrdenTrabajo(); }
-    if (nombre === 'factibilidad') { renderFactibilidadTecnico(); }
+    if (nombre === 'factibilidad') { cambiarTabExpediente('factibilidad'); }
     if (nombre === 'seguimiento') { renderSeguimiento(); }
     if (nombre === 'catalogo') { renderCatalogoTodo(); }
     if (nombre === 'almacen') { renderAlmacen(); }
@@ -1618,6 +1649,43 @@
       .then(function(snap) {
         var data = snap.val();
         if (Array.isArray(data)) { colaterales = data; }
+        callback();
+      })
+      .catch(function() { callback(); });
+  }
+
+  // ============================================================
+  // PADRON DE COLATERALES (relacion masiva subida por Excel o PDF)
+  // ============================================================
+  var PADRON_KEY = 'eps_maranon_padron_colaterales';
+  var padronColaterales = [];
+
+  function cargarPadronGuardado() {
+    try {
+      var g = localStorage.getItem(PADRON_KEY);
+      if (g) {
+        var data = JSON.parse(g);
+        if (Array.isArray(data)) { padronColaterales = data; }
+      }
+    } catch(e) {}
+  }
+
+  function guardarPadronStorage() {
+    try { localStorage.setItem(PADRON_KEY, JSON.stringify(padronColaterales)); } catch(e) {}
+    firebaseGuardarPadron();
+  }
+
+  function firebaseGuardarPadron() {
+    if (!_syncActivo || !_fbDb) return;
+    _fbDb.ref('padronColaterales').set(padronColaterales).catch(function() {});
+  }
+
+  function firebaseCargarPadronInicial(callback) {
+    if (!_syncActivo || !_fbDb) { callback(); return; }
+    _fbDb.ref('padronColaterales').once('value')
+      .then(function(snap) {
+        var data = snap.val();
+        if (Array.isArray(data)) { padronColaterales = data; }
         callback();
       })
       .catch(function() { callback(); });
@@ -2556,6 +2624,66 @@
   // ============================================================
   var _factIdxActual = null;
   window._archivosFact = [];
+
+  // Cambia entre las pestanas "1. Factibilidad" y "2. Ejecucion" dentro del modulo Expediente
+  function cambiarTabExpediente(tab) {
+    var btnFact = document.getElementById('tabBtnFactibilidad');
+    var btnEjec = document.getElementById('tabBtnEjecucion');
+    var contFact = document.getElementById('tabContenidoFactibilidad');
+    var contEjec = document.getElementById('tabContenidoEjecucion');
+    if (tab === 'ejecucion') {
+      contFact.style.display = 'none';
+      contEjec.style.display = 'block';
+      btnFact.style.color = '#7a8fa6';
+      btnFact.style.borderBottomColor = 'transparent';
+      btnEjec.style.color = 'var(--azul)';
+      btnEjec.style.borderBottomColor = 'var(--azul)';
+      renderEjecucion();
+    } else {
+      contFact.style.display = 'block';
+      contEjec.style.display = 'none';
+      btnFact.style.color = 'var(--azul)';
+      btnFact.style.borderBottomColor = 'var(--azul)';
+      btnEjec.style.color = '#7a8fa6';
+      btnEjec.style.borderBottomColor = 'transparent';
+      renderFactibilidadTecnico();
+    }
+  }
+
+  // "2. Ejecucion" - relacion de todo lo que ya fue derivado a ejecucion (Orden de Servicio creada)
+  function renderEjecucion() {
+    var info = document.getElementById('ejecucionInfo');
+    var cont = document.getElementById('ejecucionContenido');
+    if (!info || !cont || !currentUser) return;
+
+    var lista = colaterales.filter(function(c) {
+      if (!c.ordenEjecucionId) return false;
+      if (currentUser.rol === 'tecnico') { return c.tecnico === currentUser.nombre; }
+      return true;
+    });
+
+    info.textContent = 'Relacion de expedientes que ya pasaron a ejecucion (Orden de Servicio generada).';
+
+    if (lista.length === 0) {
+      cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">Aun no hay expedientes derivados a ejecucion.</div>';
+      return;
+    }
+
+    cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+      lista.map(function(item) {
+        var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
+        var estadoOS = os ? os.estado : 'Sin datos';
+        var colorEstado = estadoOS === 'Completado' ? '#1a7a4a' : estadoOS === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+        return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+          '<div>' +
+            '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
+            '<span style="font-size:0.78rem;color:#7a8fa6;">Orden: <strong>' + item.ordenEjecucionId + '</strong> &middot; Tecnico: ' + (item.tecnico || '-') + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estadoOS + '</strong></span>' +
+          '</div>' +
+          (os ? '<button class="btn-print-row" onclick="imprimirOS(' + historial.indexOf(os) + ')">Ver PDF</button>' : '') +
+        '</div>';
+      }).join('') +
+      '</div>';
+  }
 
   function renderFactibilidadTecnico() {
     var info = document.getElementById('factibilidadInfo');
@@ -4028,7 +4156,180 @@
     if (valorActual) sel.value = valorActual;
   }
 
+  // ---------- PADRON DE COLATERALES: carga masiva por Excel o PDF ----------
+  function normalizarEncabezado(txt) {
+    return (txt || '').toString().toLowerCase().replace(/[°ºn\.\s]/g, '');
+  }
+
+  function detectarColumnas(filaEncabezado) {
+    var idx = { codigo: -1, nombre: -1, direccion: -1, manzana: -1, lote: -1 };
+    filaEncabezado.forEach(function(celda, i) {
+      var norm = normalizarEncabezado(celda);
+      if (idx.codigo === -1 && (norm.indexOf('codigo') >= 0 || norm === 'cod')) idx.codigo = i;
+      if (idx.nombre === -1 && norm.indexOf('nombre') >= 0) idx.nombre = i;
+      if (idx.direccion === -1 && norm.indexOf('direcci') >= 0) idx.direccion = i;
+      if (idx.manzana === -1 && (norm.indexOf('manzana') >= 0 || norm === 'mz')) idx.manzana = i;
+      if (idx.lote === -1 && (norm.indexOf('lote') >= 0 || norm === 'lt')) idx.lote = i;
+    });
+    return idx;
+  }
+
+  function cargarPadronColaterales(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var estadoEl = document.getElementById('padronEstado');
+    estadoEl.style.display = 'block';
+    estadoEl.style.color = '#7a8fa6';
+    estadoEl.textContent = 'Leyendo el archivo...';
+
+    var ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'pdf') {
+      cargarPadronDesdePDF(file, estadoEl);
+    } else {
+      cargarPadronDesdeExcel(file, estadoEl);
+    }
+  }
+
+  function cargarPadronDesdeExcel(file, estadoEl) {
+    if (typeof XLSX === 'undefined') {
+      estadoEl.style.color = 'var(--rojo)';
+      estadoEl.textContent = 'No se pudo cargar el lector de Excel (revise su conexion a internet).';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+        var hoja = workbook.Sheets[workbook.SheetNames[0]];
+        var filas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '' });
+        if (filas.length < 2) {
+          estadoEl.style.color = 'var(--rojo)';
+          estadoEl.textContent = 'El archivo no tiene datos suficientes.';
+          return;
+        }
+        var cols = detectarColumnas(filas[0]);
+        if (cols.codigo === -1) {
+          estadoEl.style.color = 'var(--rojo)';
+          estadoEl.textContent = 'No se encontro una columna de "N Codigo" en la primera fila. Verifique los encabezados del Excel.';
+          return;
+        }
+        var registros = [];
+        for (var i = 1; i < filas.length; i++) {
+          var fila = filas[i];
+          var codigo = (fila[cols.codigo] || '').toString().trim();
+          if (!codigo) continue;
+          registros.push({
+            codigo: codigo,
+            nombre: cols.nombre >= 0 ? (fila[cols.nombre] || '').toString().trim() : '',
+            direccion: cols.direccion >= 0 ? (fila[cols.direccion] || '').toString().trim() : '',
+            manzana: cols.manzana >= 0 ? (fila[cols.manzana] || '').toString().trim() : '',
+            lote: cols.lote >= 0 ? (fila[cols.lote] || '').toString().trim() : ''
+          });
+        }
+        padronColaterales = registros;
+        guardarPadronStorage();
+        estadoEl.style.color = '#1a7a4a';
+        estadoEl.textContent = 'Padron cargado: ' + registros.length + ' registros disponibles para busqueda por N Codigo.';
+      } catch(err) {
+        estadoEl.style.color = 'var(--rojo)';
+        estadoEl.textContent = 'No se pudo leer el archivo Excel.';
+        console.error(err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function cargarPadronDesdePDF(file, estadoEl) {
+    if (typeof pdfjsLib === 'undefined') {
+      estadoEl.style.color = 'var(--rojo)';
+      estadoEl.textContent = 'No se pudo cargar el lector de PDF (revise su conexion a internet).';
+      return;
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var typedArray = new Uint8Array(e.target.result);
+      pdfjsLib.getDocument({ data: typedArray }).promise.then(function(pdf) {
+        var promesasPaginas = [];
+        for (var i = 1; i <= pdf.numPages; i++) {
+          promesasPaginas.push(
+            pdf.getPage(i).then(function(page) {
+              return page.getTextContent().then(function(content) {
+                // Agrupa por posicion Y aproximada para reconstruir filas de tabla
+                var lineas = {};
+                content.items.forEach(function(it) {
+                  var y = Math.round(it.transform[5]);
+                  if (!lineas[y]) lineas[y] = [];
+                  lineas[y].push(it.str);
+                });
+                return Object.keys(lineas).sort(function(a,b) { return b - a; })
+                  .map(function(y) { return lineas[y].join(' | ').trim(); })
+                  .filter(function(l) { return l; });
+              });
+            })
+          );
+        }
+        Promise.all(promesasPaginas).then(function(lineasPorPagina) {
+          var todasLasLineas = [].concat.apply([], lineasPorPagina);
+          var registros = [];
+          var patron = /([A-Za-z0-9\-\/]{2,20})\s*\|\s*([^\|]{2,60})\s*\|\s*([^\|]{2,80})\s*\|\s*([A-Za-z0-9\-]{1,10})\s*\|\s*([A-Za-z0-9\-]{1,10})/;
+          todasLasLineas.forEach(function(linea) {
+            var m = patron.exec(linea);
+            if (m) {
+              registros.push({ codigo: m[1].trim(), nombre: m[2].trim(), direccion: m[3].trim(), manzana: m[4].trim(), lote: m[5].trim() });
+            }
+          });
+          if (registros.length === 0) {
+            estadoEl.style.color = '#e8a000';
+            estadoEl.textContent = 'No se pudo interpretar el PDF como tabla (formato variable). Para mejores resultados, use un archivo Excel en su lugar.';
+            return;
+          }
+          padronColaterales = registros;
+          guardarPadronStorage();
+          estadoEl.style.color = '#1a7a4a';
+          estadoEl.textContent = 'Padron cargado desde PDF: ' + registros.length + ' registros detectados. Revise que los datos sean correctos (la lectura de PDF no siempre es exacta).';
+        });
+      }).catch(function(err) {
+        estadoEl.style.color = 'var(--rojo)';
+        estadoEl.textContent = 'No se pudo leer el PDF.';
+        console.error(err);
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // Busca el N Codigo escrito en el formulario dentro del padron cargado y autocompleta
+  function buscarEnPadronColaterales() {
+    var codigo = document.getElementById('colCodigo').value.trim().toLowerCase();
+    if (!codigo || padronColaterales.length === 0) return;
+    var match = padronColaterales.filter(function(r) { return r.codigo.toLowerCase() === codigo; })[0];
+    if (match) {
+      if (match.nombre) document.getElementById('colNombre').value = match.nombre;
+      if (match.direccion) document.getElementById('colDireccion').value = match.direccion;
+      if (match.manzana) document.getElementById('colManzana').value = match.manzana;
+      if (match.lote) document.getElementById('colLote').value = match.lote;
+      var estadoEl = document.getElementById('colPdfEstado');
+      estadoEl.style.display = 'block';
+      estadoEl.style.color = '#1a7a4a';
+      estadoEl.textContent = 'Coincidencia encontrada en el padron: datos completados automaticamente.';
+    }
+  }
+
   // Extrae texto de un PDF y llena automaticamente Nombre, Direccion, Manzana y Lote
+  window._colPdfAdjunto = null;
+
+  function arrayBufferToBase64(buffer) {
+    var binary = '';
+    var bytes = new Uint8Array(buffer);
+    var chunkSize = 8192;
+    for (var i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return 'data:application/pdf;base64,' + btoa(binary);
+  }
+
   function procesarPDFColateral(input) {
     var file = input.files[0];
     if (!file) return;
@@ -4047,7 +4348,9 @@
 
     var reader = new FileReader();
     reader.onload = function(e) {
-      var typedArray = new Uint8Array(e.target.result);
+      window._colPdfAdjunto = { name: file.name, size: file.size, base64: arrayBufferToBase64(e.target.result) };
+
+      var typedArray = new Uint8Array(e.target.result.slice(0));
       pdfjsLib.getDocument({ data: typedArray }).promise.then(function(pdf) {
         var promesasPaginas = [];
         for (var i = 1; i <= pdf.numPages; i++) {
@@ -4065,7 +4368,7 @@
         });
       }).catch(function(err) {
         estadoEl.style.color = 'var(--rojo)';
-        estadoEl.textContent = 'No se pudo leer el PDF. Complete los campos manualmente.';
+        estadoEl.textContent = 'PDF adjuntado, pero no se pudo leer el texto para autocompletar. Complete los campos manualmente.';
         console.error(err);
       });
     };
@@ -4091,10 +4394,10 @@
     var estadoEl = document.getElementById('colPdfEstado');
     if (extraidos.length > 0) {
       estadoEl.style.color = '#1a7a4a';
-      estadoEl.textContent = 'Se completaron automaticamente: ' + extraidos.join(', ') + '. Verifique los datos antes de guardar.';
+      estadoEl.textContent = 'Documento adjuntado. Se completaron automaticamente: ' + extraidos.join(', ') + '. Verifique los datos antes de guardar.';
     } else {
-      estadoEl.style.color = 'var(--rojo)';
-      estadoEl.textContent = 'No se pudieron identificar los datos en el PDF. Complete los campos manualmente.';
+      estadoEl.style.color = '#e8a000';
+      estadoEl.textContent = 'Documento adjuntado, pero no se pudieron identificar los datos automaticamente. Complete los campos manualmente.';
     }
   }
 
@@ -4110,6 +4413,7 @@
     document.getElementById('colEstado').value = 'Pendiente';
     document.getElementById('colPdfUpload').value = '';
     document.getElementById('colPdfEstado').style.display = 'none';
+    window._colPdfAdjunto = null;
   }
 
   function guardarColateral() {
@@ -4128,6 +4432,13 @@
       tecnico: document.getElementById('colTecnico').value || '-',
       estado: document.getElementById('colEstado').value
     };
+
+    // Adjuntar el PDF de documentacion (nuevo, o el que ya tenia si se edita sin subir uno nuevo)
+    if (window._colPdfAdjunto) {
+      item.documentoPdf = window._colPdfAdjunto;
+    } else if (_editandoColateralIdx !== null && _editandoColateralIdx !== undefined && colaterales[_editandoColateralIdx] && colaterales[_editandoColateralIdx].documentoPdf) {
+      item.documentoPdf = colaterales[_editandoColateralIdx].documentoPdf;
+    }
 
     if (_editandoColateralIdx !== null && _editandoColateralIdx !== undefined) {
       colaterales[_editandoColateralIdx] = item;
@@ -4155,6 +4466,17 @@
     document.getElementById('colTecnico').value = item.tecnico === '-' ? '' : (item.tecnico || '');
     document.getElementById('colEstado').value = item.estado || 'Pendiente';
 
+    window._colPdfAdjunto = null;
+    document.getElementById('colPdfUpload').value = '';
+    var estadoEl = document.getElementById('colPdfEstado');
+    if (item.documentoPdf) {
+      estadoEl.style.display = 'block';
+      estadoEl.style.color = '#0b4f8a';
+      estadoEl.textContent = 'Ya tiene un documento adjunto: ' + item.documentoPdf.name + '. Suba otro PDF para reemplazarlo, o dejelo asi para conservarlo.';
+    } else {
+      estadoEl.style.display = 'none';
+    }
+
     document.getElementById('colTituloForm').textContent = 'Editando Registro';
     document.getElementById('colBtnGuardar').innerHTML = '&#128190; Guardar cambios';
     document.getElementById('colBtnCancelar').style.display = 'block';
@@ -4181,6 +4503,16 @@
 
   // Convierte un registro de factibilidad ya completado en una Orden de Servicio,
   // con el tecnico y datos ya pre-cargados para su ejecucion.
+  function verDocumentoColateral(idx) {
+    var item = colaterales[idx];
+    if (!item || !item.documentoPdf) return;
+    var w = window.open('');
+    if (w) {
+      w.document.write('<iframe src="' + item.documentoPdf.base64 + '" style="width:100%;height:100%;border:none;"></iframe>');
+      w.document.title = item.documentoPdf.name;
+    }
+  }
+
   function pasarAEjecucion(idx) {
     var item = colaterales[idx];
     if (!item) return;
@@ -4229,7 +4561,7 @@
     }
 
     if (filas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
       return;
     }
 
@@ -4245,6 +4577,9 @@
       } else {
         celdaEjecucion = '<span style="color:#c4d3e0;font-size:0.76rem;">Pendiente inspeccion</span>';
       }
+      var celdaDoc = item.documentoPdf
+        ? '<button class="btn-config-edit" onclick="verDocumentoColateral(' + idx + ')" title="Ver documento adjunto">&#128196;</button>'
+        : '<span style="color:#c4d3e0;font-size:0.76rem;">-</span>';
       return '<tr>' +
         '<td><strong>' + item.codigo + '</strong></td>' +
         '<td>' + item.nombre + '</td>' +
@@ -4255,6 +4590,7 @@
         '<td>' + item.conexion + '</td>' +
         '<td>' + (item.tecnico || '-') + '</td>' +
         '<td><span style="color:' + colorEstado + ';font-weight:700;">' + estado + '</span></td>' +
+        '<td style="text-align:center;">' + celdaDoc + '</td>' +
         '<td style="text-align:center;">' + celdaEjecucion + '</td>' +
         '<td style="text-align:center;white-space:nowrap;">' +
           '<button class="btn-config-edit" onclick="editarColateral(' + idx + ')" title="Editar">&#9998;</button>' +
