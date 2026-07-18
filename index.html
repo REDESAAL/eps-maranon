@@ -1534,8 +1534,13 @@
   }
 
   function firebaseGuardarReportes() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('reportesDiarios').set(reportesDiarios).catch(function() {});
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('reportesDiarios').set(reportesDiarios).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
+      console.error('Error guardando reportes en Firebase:', err);
+      actualizarIndicadorSync(false);
+    });
   }
 
   function firebaseCargarReportesInicial(callback) {
@@ -1574,8 +1579,13 @@
   }
 
   function firebaseGuardarCatalogo() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('catalogo').set({ agua: catalogoAgua, alcantarillado: catalogoAlcantarillado }).catch(function() {});
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('catalogo').set({ agua: catalogoAgua, alcantarillado: catalogoAlcantarillado }).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
+      console.error('Error guardando catalogo en Firebase:', err);
+      actualizarIndicadorSync(false);
+    });
   }
 
   function firebaseCargarCatalogoInicial(callback) {
@@ -1615,8 +1625,13 @@
   }
 
   function firebaseGuardarAlmacen() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('almacen').set(almacen).catch(function() {});
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('almacen').set(almacen).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
+      console.error('Error guardando almacen en Firebase:', err);
+      actualizarIndicadorSync(false);
+    });
   }
 
   function firebaseCargarAlmacenInicial(callback) {
@@ -1653,8 +1668,13 @@
   }
 
   function firebaseGuardarColaterales() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('colaterales').set(colaterales).catch(function() {});
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('colaterales').set(colaterales).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
+      console.error('Error guardando colaterales en Firebase:', err);
+      actualizarIndicadorSync(false);
+    });
   }
 
   function firebaseCargarColateralesInicial(callback) {
@@ -1690,8 +1710,19 @@
   }
 
   function firebaseGuardarPadron() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('padronColaterales').set(padronColaterales).catch(function() {});
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('padronColaterales').set(padronColaterales).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
+      console.error('Error guardando padron en Firebase:', err);
+      actualizarIndicadorSync(false);
+      var estadoEl = document.getElementById('padronEstado');
+      if (estadoEl) {
+        estadoEl.style.display = 'block';
+        estadoEl.style.color = 'var(--rojo)';
+        estadoEl.textContent = 'Se guardo en este dispositivo, pero no se pudo sincronizar con los demas equipos (revise su conexion).';
+      }
+    });
   }
 
   function firebaseCargarPadronInicial(callback) {
@@ -1741,8 +1772,13 @@
   }
 
   function firebaseGuardarPlan() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('plan').set({ agua: planAgua, alcantarillado: planAlcantarillado }).catch(function() {});
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('plan').set({ agua: planAgua, alcantarillado: planAlcantarillado }).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
+      console.error('Error guardando plan en Firebase:', err);
+      actualizarIndicadorSync(false);
+    });
   }
 
   function firebaseCargarPlanInicial(callback) {
@@ -2416,6 +2452,23 @@
         colaterales = data;
         try { localStorage.setItem(COLATERALES_KEY, JSON.stringify(colaterales)); } catch(err) {}
         renderColaterales();
+      }
+    });
+    // NUEVO: el padron de colaterales (subido por Excel o PDF) no se estaba
+    // escuchando en tiempo real, por lo que un archivo subido en un equipo
+    // no aparecia en los otros hasta recargar la pagina. Se agrega el listener
+    // igual que en el resto de las secciones.
+    _fbDb.ref('padronColaterales').on('value', function(snap) {
+      var data = snap.val();
+      if (Array.isArray(data)) {
+        padronColaterales = data;
+        try { localStorage.setItem(PADRON_KEY, JSON.stringify(padronColaterales)); } catch(err) {}
+        var estadoEl = document.getElementById('padronEstado');
+        if (estadoEl) {
+          estadoEl.style.display = 'block';
+          estadoEl.style.color = '#1a7a4a';
+          estadoEl.textContent = 'Padron sincronizado: ' + padronColaterales.length + ' registros disponibles para busqueda por N Codigo.';
+        }
       }
     });
   }
