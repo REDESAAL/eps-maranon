@@ -322,7 +322,10 @@
       <button class="btn-logout" onclick="abrirCuenta()">Mi cuenta</button>
       <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesion</button>
     </div>
-    <div class="header-badge">Vigente 2026</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="syncStatus" style="font-size:0.72rem;font-weight:700;">&#9899; Conectando...</span>
+      <div class="header-badge">Vigente 2026</div>
+    </div>
     <div id="serverStatusBadge" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:4px 10px;font-size:0.70rem;color:white;cursor:pointer;" onclick="mostrarInfoRed()" title="Ver informacion de red">
       <span id="serverDot" style="width:7px;height:7px;border-radius:50%;background:#ffcc00;display:inline-block;animation:pulse 1.5s infinite;"></span>
       <span id="serverStatusText">Detectando...</span>
@@ -823,13 +826,24 @@
 
   <div id="tabContenidoFactibilidad">
     <div id="factibilidadInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+    <div style="position:relative;max-width:420px;margin-bottom:14px;">
+      <input type="text" id="buscarFactibilidad" placeholder="Buscar por codigo, nombre o direccion..." oninput="renderFactibilidadTecnico()"
+             style="width:100%;padding:10px 36px 10px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#f8fbff;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a8fa6" stroke-width="2" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
     <div id="factibilidadContenido"></div>
   </div>
 
   <div id="tabContenidoEjecucion" style="display:none;">
     <div id="ejecucionInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
+    <div style="position:relative;max-width:420px;margin-bottom:14px;">
+      <input type="text" id="buscarEjecucion" placeholder="Buscar por codigo, nombre, orden o tecnico..." oninput="renderEjecucion()"
+             style="width:100%;padding:10px 36px 10px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#f8fbff;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a8fa6" stroke-width="2" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
     <div id="ejecucionContenido"></div>
   </div>
+
 </div>
 </div>
 
@@ -2247,25 +2261,62 @@
       _fbApp = firebase.initializeApp(firebaseConfig);
       firebase.auth().signInAnonymously().catch(function(err) {
         console.warn('No se pudo autenticar con Firebase, se seguira solo en modo local.', err);
+        if (!_fbListo) {
+          _fbListo = true;
+          _syncActivo = false;
+          actualizarIndicadorSync();
+          callback();
+        }
       });
       firebase.auth().onAuthStateChanged(function(user) {
         if (user && !_fbListo) {
           _fbListo = true;
           _fbDb = firebase.database();
-          callback();
-        } else if (!user) {
+          actualizarIndicadorSync();
+          escucharEstadoConexionFirebase();
           callback();
         }
+        // Se ignora deliberadamente el primer aviso con user=null: onAuthStateChanged
+        // se dispara de inmediato al registrarse, antes de que signInAnonymously()
+        // termine. Solo actuamos cuando ya hay usuario autenticado, o cuando
+        // signInAnonymously() realmente fallo (arriba).
       });
     } catch(e) {
       _syncActivo = false;
+      actualizarIndicadorSync();
       callback();
     }
   }
 
+  // Muestra en el encabezado si este dispositivo esta realmente sincronizando con Firebase
+  function actualizarIndicadorSync(conectado) {
+    var el = document.getElementById('syncStatus');
+    if (!el) return;
+    if (conectado === undefined) { conectado = !!_fbDb; }
+    if (conectado) {
+      el.innerHTML = '&#128994; Sincronizado';
+      el.style.color = '#c8f7d8';
+    } else {
+      el.innerHTML = '&#128308; Sin sincronizar (solo local)';
+      el.style.color = '#ffd6d6';
+    }
+  }
+
+  // Escucha el estado real de conexion de Firebase (se actualiza si se pierde
+  // o recupera la conexion durante la sesion, no solo al iniciar)
+  function escucharEstadoConexionFirebase() {
+    if (!_fbDb) return;
+    firebase.database().ref('.info/connected').on('value', function(snap) {
+      actualizarIndicadorSync(snap.val() === true);
+    });
+  }
+
   function firebaseGuardarHistorial() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('historial').set(historial).catch(function() { /* sin conexion: se queda con la copia local */ });
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('historial').set(historial).catch(function(err) {
+      console.error('Error guardando historial en Firebase:', err);
+      actualizarIndicadorSync(false);
+    });
   }
 
   function firebaseGuardarUsuarios() {
@@ -2656,16 +2707,25 @@
     var cont = document.getElementById('ejecucionContenido');
     if (!info || !cont || !currentUser) return;
 
+    var buscarEl = document.getElementById('buscarEjecucion');
+    var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
+
     var lista = colaterales.filter(function(c) {
       if (!c.ordenEjecucionId) return false;
       if (currentUser.rol === 'tecnico') { return c.tecnico === currentUser.nombre; }
       return true;
     });
+    if (busqueda) {
+      lista = lista.filter(function(c) {
+        var campos = [c.codigo, c.nombre, c.ordenEjecucionId, c.tecnico].join(' ').toLowerCase();
+        return campos.indexOf(busqueda) >= 0;
+      });
+    }
 
     info.textContent = 'Relacion de expedientes que ya pasaron a ejecucion (Orden de Servicio generada).';
 
     if (lista.length === 0) {
-      cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">Aun no hay expedientes derivados a ejecucion.</div>';
+      cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">' + (busqueda ? 'No se encontraron expedientes que coincidan.' : 'Aun no hay expedientes derivados a ejecucion.') + '</div>';
       return;
     }
 
@@ -2690,11 +2750,19 @@
     var cont = document.getElementById('factibilidadContenido');
     if (!info || !cont || !currentUser) return;
 
+    var buscarEl = document.getElementById('buscarFactibilidad');
+    var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
+    function coincide(item) {
+      if (!busqueda) return true;
+      var campos = [item.codigo, item.nombre, item.direccion].join(' ').toLowerCase();
+      return campos.indexOf(busqueda) >= 0;
+    }
+
     if (currentUser.rol === 'tecnico') {
-      var mios = colaterales.filter(function(c) { return c.tecnico === currentUser.nombre; });
+      var mios = colaterales.filter(function(c) { return c.tecnico === currentUser.nombre; }).filter(coincide);
       info.innerHTML = 'Registros de factibilidad derivados a usted. Complete la inspeccion de campo cuando corresponda.';
       if (mios.length === 0) {
-        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No tiene registros de factibilidad derivados por el momento.</div>';
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No tiene registros de factibilidad derivados por el momento.') + '</div>';
         return;
       }
       cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
@@ -2713,10 +2781,10 @@
         '</div>';
     } else {
       // Coordinador: ve todos los registros derivados, agrupados por tecnico
-      var derivados = colaterales.filter(function(c) { return c.tecnico && c.tecnico !== '-'; });
+      var derivados = colaterales.filter(function(c) { return c.tecnico && c.tecnico !== '-'; }).filter(coincide);
       info.innerHTML = 'Vista general de inspecciones de factibilidad derivadas a tecnicos/operarios.';
       if (derivados.length === 0) {
-        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No hay registros derivados aun.</div>';
+        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros derivados aun.') + '</div>';
         return;
       }
       cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
