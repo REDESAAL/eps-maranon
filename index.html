@@ -324,6 +324,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="syncStatus" style="font-size:0.72rem;font-weight:700;">&#9899; Conectando...</span>
+      <button onclick="reintentarConexionFirebase()" title="Reintentar conexion" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;border-radius:8px;padding:2px 8px;font-size:0.68rem;cursor:pointer;">&#8635;</button>
       <div class="header-badge">Vigente 2026</div>
     </div>
     <div id="serverStatusBadge" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:4px 10px;font-size:0.70rem;color:white;cursor:pointer;" onclick="mostrarInfoRed()" title="Ver informacion de red">
@@ -2321,6 +2322,39 @@
   };
   var _fbApp = null, _fbDb = null, _syncActivo = true, _fbListo = false;
 
+  // Reintenta la conexion con Firebase manualmente (boton en el encabezado).
+  // Util si un dispositivo quedo atascado sin sincronizar por un problema
+  // de red temporal al momento de iniciar sesion.
+  function reintentarConexionFirebase() {
+    var el = document.getElementById('syncStatus');
+    if (el) { el.innerHTML = '&#9899; Reintentando...'; el.style.color = '#fff3c4'; }
+    if (!_fbApp) {
+      _fbListo = false;
+      _syncActivo = true;
+      firebaseIniciar(function() {
+        firebaseEscucharCambios();
+      });
+      return;
+    }
+    firebase.auth().signInAnonymously().then(function() {
+      _syncActivo = true;
+      if (!_fbDb) { _fbDb = firebase.database(); escucharEstadoConexionFirebase(); firebaseEscucharCambios(); }
+      actualizarIndicadorSync(true);
+      // Re-sincroniza los datos de este dispositivo por si algo quedo sin subir
+      firebaseGuardarHistorial();
+      firebaseGuardarUsuarios();
+      firebaseGuardarPlan();
+      firebaseGuardarReportes();
+      firebaseGuardarCatalogo();
+      firebaseGuardarAlmacen();
+      firebaseGuardarColaterales();
+      firebaseGuardarPadron();
+    }).catch(function(err) {
+      console.error('Reintento de conexion fallido:', err);
+      actualizarIndicadorSync(false);
+    });
+  }
+
   function firebaseIniciar(callback) {
     try {
       _fbApp = firebase.initializeApp(firebaseConfig);
@@ -2369,25 +2403,49 @@
 
   // Escucha el estado real de conexion de Firebase (se actualiza si se pierde
   // o recupera la conexion durante la sesion, no solo al iniciar)
+  var _conectadoAntes = null;
+  var _escuchandoConexion = false;
   function escucharEstadoConexionFirebase() {
-    if (!_fbDb) return;
+    if (!_fbDb || _escuchandoConexion) return;
+    _escuchandoConexion = true;
     firebase.database().ref('.info/connected').on('value', function(snap) {
-      actualizarIndicadorSync(snap.val() === true);
+      var conectado = snap.val() === true;
+      actualizarIndicadorSync(conectado);
+      // Si se reconecta despues de haber estado desconectado (no la primera vez
+      // que carga la pagina), volvemos a subir todo lo que este guardado en este
+      // dispositivo, por si hubo cambios hechos mientras estaba sin conexion.
+      if (conectado && _conectadoAntes === false) {
+        console.log('Conexion restablecida: re-sincronizando datos locales con Firebase...');
+        firebaseGuardarHistorial();
+        firebaseGuardarUsuarios();
+        firebaseGuardarPlan();
+        firebaseGuardarReportes();
+        firebaseGuardarCatalogo();
+        firebaseGuardarAlmacen();
+        firebaseGuardarColaterales();
+        firebaseGuardarPadron();
+      }
+      _conectadoAntes = conectado;
     });
   }
 
   function firebaseGuardarHistorial() {
     if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
-    _fbDb.ref('historial').set(historial).catch(function(err) {
+    _fbDb.ref('historial').set(historial).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
       console.error('Error guardando historial en Firebase:', err);
       actualizarIndicadorSync(false);
     });
   }
 
   function firebaseGuardarUsuarios() {
-    if (!_syncActivo || !_fbDb) return;
-    _fbDb.ref('usuarios').set(USUARIOS).catch(function(err) {
+    if (!_syncActivo || !_fbDb) { actualizarIndicadorSync(false); return; }
+    _fbDb.ref('usuarios').set(USUARIOS).then(function() {
+      actualizarIndicadorSync(true);
+    }).catch(function(err) {
       console.error('Error guardando usuarios en Firebase:', err);
+      actualizarIndicadorSync(false);
       var msgEl = document.getElementById('cfgTecMsg');
       if (msgEl) {
         msgEl.style.color = 'var(--rojo)';
@@ -2420,8 +2478,11 @@
       .catch(function() { callback(); });
   }
 
+  var _escuchandoFirebase = false;
   function firebaseEscucharCambios() {
     if (!_syncActivo || !_fbDb) return;
+    if (_escuchandoFirebase) return; // evita duplicar los listeners si se llama mas de una vez
+    _escuchandoFirebase = true;
     _fbDb.ref('historial').on('value', function(snap) {
       var data = snap.val();
       if (Array.isArray(data)) {
