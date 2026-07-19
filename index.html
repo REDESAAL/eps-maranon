@@ -803,7 +803,7 @@
 
   <div class="table-wrap">
     <table>
-      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Derivado a</th><th>Estado</th><th>Documento</th><th>Ejecucion</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Derivado a</th><th>Estado</th><th>Documento</th><th>Oficina Comercial</th><th>Ejecucion</th><th>Acciones</th></tr></thead>
       <tbody id="colateralesBody"></tbody>
     </table>
   </div>
@@ -1181,6 +1181,35 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="cerrarFactibilidad()">Cancelar</button>
       <button class="btn-save" style="background:#1a7a4a;" onclick="guardarFactibilidad()">Guardar Inspeccion</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OFICINA COMERCIAL -->
+<div class="modal-overlay" id="modalOficinaComercial">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);">
+      <h3>Oficina Comercial</h3>
+      <button class="modal-close" onclick="cerrarOficinaComercial()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f8fbff;border:1px solid #e0eaf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;">
+        <strong id="ofcCodigoRef" style="color:var(--azul);"></strong>
+      </div>
+      <div class="os-field full"><label>Fecha</label><input type="date" id="ofcFecha"></div>
+      <div class="os-field full"><label>Nombre</label><input type="text" id="ofcNombre"></div>
+      <div class="os-field full">
+        <label>Asunto</label>
+        <select id="ofcAsunto">
+          <option value="Presupuesto">Presupuesto</option>
+          <option value="Archivo">Archivo</option>
+          <option value="Devolucion">Devolucion</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarOficinaComercial()">Cancelar</button>
+      <button class="btn-save" onclick="guardarOficinaComercial()">Guardar y Continuar</button>
     </div>
   </div>
 </div>
@@ -4634,11 +4663,55 @@
     }
   }
 
+  // Abre el paso de Oficina Comercial (fecha, nombre editable, asunto) que debe
+  // completarse despues de la inspeccion de factibilidad y antes de la ejecucion.
+  var _ofcIdxActual = null;
+  function abrirOficinaComercial(idx) {
+    var item = colaterales[idx];
+    if (!item) return;
+    if (item.estado !== 'Completado') {
+      alert('Debe completar primero la inspeccion de factibilidad.');
+      return;
+    }
+    _ofcIdxActual = idx;
+    document.getElementById('ofcCodigoRef').textContent = item.codigo + ' - ' + item.nombre;
+    document.getElementById('ofcFecha').value = item.oficinaComercial ? item.oficinaComercial.fecha : new Date().toISOString().split('T')[0];
+    document.getElementById('ofcNombre').value = item.nombre;
+    document.getElementById('ofcAsunto').value = item.oficinaComercial ? item.oficinaComercial.asunto : 'Presupuesto';
+    document.getElementById('modalOficinaComercial').classList.add('active');
+  }
+
+  function cerrarOficinaComercial() {
+    document.getElementById('modalOficinaComercial').classList.remove('active');
+  }
+
+  function guardarOficinaComercial() {
+    var idx = _ofcIdxActual;
+    var item = colaterales[idx];
+    if (!item) return;
+    var nombreNuevo = document.getElementById('ofcNombre').value.trim();
+    if (!nombreNuevo) { alert('El nombre no puede quedar vacio.'); return; }
+
+    item.nombre = nombreNuevo;
+    item.oficinaComercial = {
+      fecha: document.getElementById('ofcFecha').value || new Date().toISOString().split('T')[0],
+      asunto: document.getElementById('ofcAsunto').value
+    };
+    guardarColateralesStorage();
+    renderColaterales();
+    cerrarOficinaComercial();
+    alert('Registrado en Oficina Comercial. El expediente ya puede pasar a Ejecucion.');
+  }
+
   function pasarAEjecucion(idx) {
     var item = colaterales[idx];
     if (!item) return;
     if (item.estado !== 'Completado') {
       alert('Debe completar primero la inspeccion de factibilidad.');
+      return;
+    }
+    if (!item.oficinaComercial) {
+      alert('Debe pasar primero por Oficina Comercial (fecha, nombre y asunto) antes de derivar a ejecucion.');
       return;
     }
     if (item.ordenEjecucionId) {
@@ -4656,6 +4729,7 @@
     var desague = insp.desague || {};
     var resumen = 'Ejecucion de conexion derivada de Factibilidad (Colateral ' + item.codigo + ').\n' +
       'Sector: ' + item.sector + ' | Mz. ' + item.manzana + ' Lt. ' + item.lote + ' | N Conexion: ' + item.conexion + '\n' +
+      'Oficina Comercial - Fecha: ' + formatFecha(item.oficinaComercial.fecha) + ', Asunto: ' + item.oficinaComercial.asunto + '\n' +
       'Agua Potable - Diametro: ' + (agua.diametro || '-') + ', Long. red matriz: ' + (agua.longitud || '-') + ', Prof.: ' + (agua.profundidad || '-') + '\n' +
       'Desague - Diametro: ' + (desague.diametro || '-') + ', Long. red matriz: ' + (desague.longitud || '-') + ', Prof.: ' + (desague.profundidad || '-');
     if (insp.observacion && insp.observacion !== '-') { resumen += '\nObservacion inspeccion: ' + insp.observacion; }
@@ -4682,7 +4756,7 @@
     }
 
     if (filas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
       return;
     }
 
@@ -4690,13 +4764,23 @@
       var item = x.item, idx = x.idx;
       var estado = item.estado || 'Pendiente';
       var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
+
+      var celdaOfc;
+      if (item.oficinaComercial) {
+        celdaOfc = '<span style="color:#1a7a4a;font-weight:700;font-size:0.76rem;" title="' + formatFecha(item.oficinaComercial.fecha) + '">&#10003; ' + item.oficinaComercial.asunto + '</span>';
+      } else if (estado === 'Completado') {
+        celdaOfc = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="abrirOficinaComercial(' + idx + ')">Pase a Of. Comercial</button>';
+      } else {
+        celdaOfc = '<span style="color:#c4d3e0;font-size:0.76rem;">Pendiente inspeccion</span>';
+      }
+
       var celdaEjecucion;
       if (item.ordenEjecucionId) {
         celdaEjecucion = '<span style="color:#1a7a4a;font-weight:700;font-size:0.78rem;">&#10003; ' + item.ordenEjecucionId + '</span>';
-      } else if (estado === 'Completado') {
+      } else if (item.oficinaComercial) {
         celdaEjecucion = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="pasarAEjecucion(' + idx + ')">Pase a Ejecucion</button>';
       } else {
-        celdaEjecucion = '<span style="color:#c4d3e0;font-size:0.76rem;">Pendiente inspeccion</span>';
+        celdaEjecucion = '<span style="color:#c4d3e0;font-size:0.76rem;">Falta Of. Comercial</span>';
       }
       var celdaDoc = item.documentoPdf
         ? '<button class="btn-config-edit" onclick="verDocumentoColateral(' + idx + ')" title="Ver documento adjunto">&#128196;</button>'
@@ -4712,6 +4796,7 @@
         '<td>' + (item.tecnico || '-') + '</td>' +
         '<td><span style="color:' + colorEstado + ';font-weight:700;">' + estado + '</span></td>' +
         '<td style="text-align:center;">' + celdaDoc + '</td>' +
+        '<td style="text-align:center;">' + celdaOfc + '</td>' +
         '<td style="text-align:center;">' + celdaEjecucion + '</td>' +
         '<td style="text-align:center;white-space:nowrap;">' +
           '<button class="btn-config-edit" onclick="editarColateral(' + idx + ')" title="Editar">&#9998;</button>' +
@@ -4958,6 +5043,7 @@
   document.getElementById('modalCuenta').addEventListener('click', function(e) { if (e.target === this) cerrarCuenta(); });
   document.getElementById('modalReporteDiario').addEventListener('click', function(e) { if (e.target === this) cerrarReporteDiario(); });
   document.getElementById('modalFactibilidad').addEventListener('click', function(e) { if (e.target === this) cerrarFactibilidad(); });
+  document.getElementById('modalOficinaComercial').addEventListener('click', function(e) { if (e.target === this) cerrarOficinaComercial(); });
   document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 
   // Verificar si ya hay una sesion activa en este navegador (misma pestana/sesion)
