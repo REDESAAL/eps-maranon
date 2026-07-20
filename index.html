@@ -486,6 +486,16 @@
       </p>
       <button class="btn-config-add" onclick="descargarRespaldoCompleto()">&#128190; Descargar Respaldo Completo</button>
       <div id="respaldoMsg" style="display:none;font-size:0.8rem;margin-top:10px;color:#1a7a4a;font-weight:600;"></div>
+
+      <hr style="margin:22px 0;border:none;border-top:1px solid #e2e8f0;">
+
+      <h4>Actualizar con Respaldo de Otro Equipo</h4>
+      <p style="font-size:0.82rem;color:#7a8fa6;margin-bottom:16px;">
+        Si un equipo (celular, laptop, etc.) trabajo sin conexion y no pudo sincronizar automaticamente, descargue su respaldo en ese equipo y subalo aqui. La informacion del archivo se fusionara con la de este dispositivo: los registros nuevos se agregan y los que ya existan se actualizan con la version del archivo. No se pierde informacion de este equipo que no este en el archivo.
+      </p>
+      <input type="file" id="respaldoUpload" accept=".json" style="display:none;" onchange="leerArchivoRespaldo(this)">
+      <button class="btn-config-add" onclick="document.getElementById('respaldoUpload').click()">&#128228; Cargar y Fusionar Respaldo</button>
+      <div id="respaldoImportMsg" style="display:none;font-size:0.8rem;margin-top:10px;font-weight:600;white-space:pre-line;"></div>
     </div>
   </div>
   </div>
@@ -2014,6 +2024,182 @@
     }
   }
 
+  // ============================================================
+  // Carga/Fusion de un respaldo generado en OTRO equipo (celular, laptop, etc.)
+  // Sirve para actualizar la base de datos de este dispositivo cuando no hubo
+  // sincronizacion automatica por Firebase (por ejemplo, en zonas sin señal):
+  // se descarga el respaldo en el equipo que trabajo sin conexion y se sube
+  // aqui para fusionarlo con la informacion de este equipo.
+  // ============================================================
+
+  // Fusiona un arreglo "nuevo" (del archivo) dentro de un arreglo "local" usando
+  // una clave unica. Si la clave ya existe en local, el registro se ACTUALIZA con
+  // la version del archivo (se asume que es la version mas reciente/editada);
+  // si no existe, se AGREGA como registro nuevo. Nada de lo que ya estaba en
+  // local se elimina.
+  function fusionarPorClave(local, nuevos, clave) {
+    var resultado = { agregados: 0, actualizados: 0 };
+    if (!Array.isArray(nuevos)) return resultado;
+    var indice = {};
+    local.forEach(function(item, i) {
+      if (item && item[clave] !== undefined && item[clave] !== null && item[clave] !== '') {
+        indice[item[clave]] = i;
+      }
+    });
+    nuevos.forEach(function(item) {
+      if (!item) return;
+      var k = item[clave];
+      if (k === undefined || k === null || k === '' || !indice.hasOwnProperty(k)) {
+        local.push(item);
+        if (k !== undefined && k !== null && k !== '') { indice[k] = local.length - 1; }
+        resultado.agregados++;
+      } else {
+        local[indice[k]] = item;
+        resultado.actualizados++;
+      }
+    });
+    return resultado;
+  }
+
+  function leerArchivoRespaldo(inputEl) {
+    var archivo = inputEl.files && inputEl.files[0];
+    if (!archivo) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var datos;
+      try {
+        datos = JSON.parse(e.target.result);
+      } catch (err) {
+        alert('El archivo seleccionado no es un respaldo JSON valido.');
+        inputEl.value = '';
+        return;
+      }
+      fusionarRespaldoCompleto(datos);
+      inputEl.value = '';
+    };
+    reader.onerror = function() {
+      alert('No se pudo leer el archivo seleccionado.');
+      inputEl.value = '';
+    };
+    reader.readAsText(archivo);
+  }
+
+  function fusionarRespaldoCompleto(datos) {
+    if (!datos || typeof datos !== 'object') {
+      alert('El archivo no tiene el formato de respaldo esperado.');
+      return;
+    }
+    var tieneAlgo = datos.historial || datos.usuarios || datos.colaterales || datos.almacen ||
+      datos.reportesDiarios || datos.plan || datos.catalogo;
+    if (!tieneAlgo) {
+      alert('El archivo no contiene datos reconocibles de EPS Maranon.');
+      return;
+    }
+
+    var origen = datos.generadoPor ? (datos.generadoPor + (datos.generadoEl ? ' (' + datos.generadoEl.split('T')[0] + ')' : '')) : 'equipo desconocido';
+    if (!confirm('Se va a fusionar el respaldo generado por: ' + origen + '\n\nLos registros nuevos se agregaran y los que coincidan se actualizaran con la version del archivo. Esta accion no se puede deshacer. Continuar?')) {
+      return;
+    }
+
+    var resumen = [];
+
+    if (Array.isArray(datos.historial)) {
+      var rHist = fusionarPorClave(historial, datos.historial, 'id');
+      if (rHist.agregados || rHist.actualizados) {
+        var nums = historial.map(function(h) { return parseInt((h.id || '').replace('OS-', '')) || 0; });
+        if (nums.length) { osCounter = Math.max.apply(null, nums) + 1; }
+        guardarStorage();
+        renderHistorial();
+        resumen.push('Ordenes de Servicio: ' + rHist.agregados + ' nuevas, ' + rHist.actualizados + ' actualizadas');
+      }
+    }
+
+    if (Array.isArray(datos.usuarios)) {
+      var rUs = fusionarPorClave(USUARIOS, datos.usuarios, 'usuario');
+      if (rUs.agregados || rUs.actualizados) {
+        guardarUsuarios();
+        renderListaTecnicos();
+        resumen.push('Usuarios: ' + rUs.agregados + ' nuevos, ' + rUs.actualizados + ' actualizados');
+      }
+    }
+
+    if (Array.isArray(datos.colaterales)) {
+      var rCol = fusionarPorClave(colaterales, datos.colaterales, 'codigo');
+      if (rCol.agregados || rCol.actualizados) {
+        guardarColateralesStorage();
+        renderColaterales();
+        resumen.push('Colaterales: ' + rCol.agregados + ' nuevos, ' + rCol.actualizados + ' actualizados');
+      }
+    }
+
+    if (Array.isArray(datos.almacen)) {
+      var rAlm = fusionarPorClave(almacen, datos.almacen, 'codigo');
+      if (rAlm.agregados || rAlm.actualizados) {
+        guardarAlmacenStorage();
+        renderAlmacen();
+        resumen.push('Almacen: ' + rAlm.agregados + ' nuevos, ' + rAlm.actualizados + ' actualizados');
+      }
+    }
+
+    if (datos.reportesDiarios && Array.isArray(datos.reportesDiarios)) {
+      var rRep = fusionarPorClave(reportesDiarios, datos.reportesDiarios, 'id');
+      if (rRep.agregados || rRep.actualizados) {
+        var numsRep = reportesDiarios.map(function(r) { return parseInt((r.id || '').replace('RD-', '')) || 0; });
+        if (numsRep.length) { reporteCounter = Math.max.apply(null, numsRep) + 1; }
+        guardarReportes();
+        renderTodosLosReportes();
+        resumen.push('Reportes Diarios: ' + rRep.agregados + ' nuevos, ' + rRep.actualizados + ' actualizados');
+      }
+    }
+
+    if (datos.plan && typeof datos.plan === 'object') {
+      var totalPlan = { agregados: 0, actualizados: 0 };
+      if (Array.isArray(datos.plan.agua)) {
+        var rPa = fusionarPorClave(planAgua, datos.plan.agua, 'componente');
+        totalPlan.agregados += rPa.agregados; totalPlan.actualizados += rPa.actualizados;
+      }
+      if (Array.isArray(datos.plan.alcantarillado)) {
+        var rPb = fusionarPorClave(planAlcantarillado, datos.plan.alcantarillado, 'componente');
+        totalPlan.agregados += rPb.agregados; totalPlan.actualizados += rPb.actualizados;
+      }
+      if (totalPlan.agregados || totalPlan.actualizados) {
+        guardarPlan();
+        renderTodoElPlan();
+        resumen.push('Plan de Mantenimiento: ' + totalPlan.agregados + ' nuevos, ' + totalPlan.actualizados + ' actualizados');
+      }
+    }
+
+    if (datos.catalogo && typeof datos.catalogo === 'object') {
+      var totalCat = { agregados: 0, actualizados: 0 };
+      if (Array.isArray(datos.catalogo.agua)) {
+        var rCa = fusionarPorClave(catalogoAgua, datos.catalogo.agua, 'codigo');
+        totalCat.agregados += rCa.agregados; totalCat.actualizados += rCa.actualizados;
+      }
+      if (Array.isArray(datos.catalogo.alcantarillado)) {
+        var rCb = fusionarPorClave(catalogoAlcantarillado, datos.catalogo.alcantarillado, 'codigo');
+        totalCat.agregados += rCb.agregados; totalCat.actualizados += rCb.actualizados;
+      }
+      if (totalCat.agregados || totalCat.actualizados) {
+        guardarCatalogoStorage();
+        renderCatalogoTodo();
+        resumen.push('Catalogo: ' + totalCat.agregados + ' nuevos, ' + totalCat.actualizados + ' actualizados');
+      }
+    }
+
+    var msg = document.getElementById('respaldoImportMsg');
+    if (msg) {
+      msg.style.display = 'block';
+      if (resumen.length) {
+        msg.style.color = '#1a7a4a';
+        msg.textContent = 'Fusion completada:\n' + resumen.join('\n');
+      } else {
+        msg.style.color = '#7a8fa6';
+        msg.textContent = 'El archivo no tenia registros nuevos para agregar o actualizar.';
+      }
+    }
+    alert(resumen.length ? 'Informacion fusionada correctamente:\n\n' + resumen.join('\n') : 'No se encontraron registros nuevos en el archivo.');
+  }
+
   function renderTodoElPlan() {
     renderPlanTabla('agua');
     renderPlanTabla('alcantarillado');
@@ -2336,22 +2522,52 @@
       });
       return;
     }
+    var yaEstabaConectado = !!_fbDb;
     firebase.auth().signInAnonymously().then(function() {
       _syncActivo = true;
-      if (!_fbDb) { _fbDb = firebase.database(); escucharEstadoConexionFirebase(); firebaseEscucharCambios(); }
+      if (!_fbDb) {
+        _fbDb = firebase.database();
+        escucharEstadoConexionFirebase();
+        firebaseEscucharCambios();
+      }
       actualizarIndicadorSync(true);
-      // Re-sincroniza los datos de este dispositivo por si algo quedo sin subir
-      firebaseGuardarHistorial();
-      firebaseGuardarUsuarios();
-      firebaseGuardarPlan();
-      firebaseGuardarReportes();
-      firebaseGuardarCatalogo();
-      firebaseGuardarAlmacen();
-      firebaseGuardarColaterales();
-      firebaseGuardarPadron();
+      // Solo forzamos subir los datos locales si este dispositivo NUNCA habia
+      // logrado conectarse (yaEstabaConectado=false); en ese caso no hay riesgo
+      // de pisar cambios mas nuevos de otro equipo, porque este dispositivo
+      // jamas recibio ni envio nada. Si ya estaba conectado antes y solo se
+      // reintenta por otra razon, dejamos que los listeners 'on value' traigan
+      // la version mas reciente en vez de forzar un reenvio.
+      if (!yaEstabaConectado) {
+        firebaseGuardarHistorial();
+        firebaseGuardarUsuarios();
+        firebaseGuardarPlan();
+        firebaseGuardarReportes();
+        firebaseGuardarCatalogo();
+        firebaseGuardarAlmacen();
+        firebaseGuardarColaterales();
+        firebaseGuardarPadron();
+      }
     }).catch(function(err) {
       console.error('Reintento de conexion fallido:', err);
       actualizarIndicadorSync(false);
+    });
+  }
+
+  // Genera un numero atomico (sin colisiones entre dispositivos) usando una
+  // transaccion de Firebase sobre un contador compartido. Si no hay conexion,
+  // cae de vuelta al conteo local (menos seguro, pero mantiene la app usable offline).
+  function obtenerNumeroAtomico(tipo, contadorLocalActual, callback) {
+    if (!_syncActivo || !_fbDb) { callback(contadorLocalActual); return; }
+    _fbDb.ref('contadores/' + tipo).transaction(function(actual) {
+      var base = (typeof actual === 'number' && actual >= contadorLocalActual) ? actual : contadorLocalActual;
+      return base + 1;
+    }, function(error, comprometido, snapshot) {
+      if (error || !comprometido) {
+        console.error('No se pudo obtener numero atomico para ' + tipo + ', se usa el conteo local.', error);
+        callback(contadorLocalActual);
+        return;
+      }
+      callback(snapshot.val());
     });
   }
 
@@ -2411,20 +2627,13 @@
     firebase.database().ref('.info/connected').on('value', function(snap) {
       var conectado = snap.val() === true;
       actualizarIndicadorSync(conectado);
-      // Si se reconecta despues de haber estado desconectado (no la primera vez
-      // que carga la pagina), volvemos a subir todo lo que este guardado en este
-      // dispositivo, por si hubo cambios hechos mientras estaba sin conexion.
-      if (conectado && _conectadoAntes === false) {
-        console.log('Conexion restablecida: re-sincronizando datos locales con Firebase...');
-        firebaseGuardarHistorial();
-        firebaseGuardarUsuarios();
-        firebaseGuardarPlan();
-        firebaseGuardarReportes();
-        firebaseGuardarCatalogo();
-        firebaseGuardarAlmacen();
-        firebaseGuardarColaterales();
-        firebaseGuardarPadron();
-      }
+      // Nota: no forzamos un "re-push" de todos los datos locales al reconectar.
+      // El SDK de Firebase ya encola automaticamente los guardados hechos mientras
+      // el dispositivo estaba sin conexion y los envia solo al reconectar (siempre
+      // que la pestana/app se haya mantenido abierta). Forzar un reenvio completo
+      // aqui podria sobrescribir cambios mas recientes hechos por OTRO dispositivo
+      // con una copia local desactualizada. Los listeners 'on value' ya vuelven a
+      // recibir la version mas reciente del servidor automaticamente al reconectar.
       _conectadoAntes = conectado;
     });
   }
@@ -2590,8 +2799,8 @@
 
   function abrirOS(componente, frecuencia) {
     var num = String(osCounter).padStart(3, '0');
-    document.getElementById('osId').value = 'OS-' + num;
-    document.getElementById('osNumero').textContent = 'OS-' + num;
+    document.getElementById('osId').value = 'OS-' + num + ' (tentativo, se confirma al guardar)';
+    document.getElementById('osNumero').textContent = 'OS-' + num + '*';
     document.getElementById('osComponente').value = componente;
     document.getElementById('osFrecuencia').value = frecuencia;
     var hoy = new Date().toISOString().split('T')[0];
@@ -2612,7 +2821,7 @@
     document.getElementById('uploadAreaOS').style.display = 'block';
     document.getElementById('modalOSHeader').classList.remove('edit-mode');
     document.getElementById('modalOSTitulo').textContent = 'Orden de Servicio';
-    document.getElementById('osId').removeAttribute('readonly');
+    document.getElementById('osId').setAttribute('readonly', 'readonly');
     document.getElementById('btnGenerarLink').style.display = 'none';
     document.getElementById('panelFormOS').style.display = 'block';
     document.getElementById('panelWAPost').style.display = 'none';
@@ -2714,20 +2923,23 @@
         renderHistorial();
         cerrarOS();
       } else {
-        historial.push(os);
-        osCounter++;
-        editIndex = historial.length - 1;
-        guardarStorage();
-        renderHistorial();
-        // Si esta O/S viene de "Pase a Ejecucion" en Colaterales, vincularla
-        var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
-        if (colPendiente) {
-          colPendiente.ordenEjecucionId = os.id;
-          delete colPendiente._pendienteVincularOS;
-          guardarColateralesStorage();
-          renderColaterales();
-        }
-        mostrarPanelWA();
+        obtenerNumeroAtomico('os', osCounter, function(numero) {
+          os.id = 'OS-' + String(numero).padStart(3, '0');
+          osCounter = numero + 1;
+          historial.push(os);
+          editIndex = historial.length - 1;
+          guardarStorage();
+          renderHistorial();
+          // Si esta O/S viene de "Pase a Ejecucion" en Colaterales, vincularla
+          var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
+          if (colPendiente) {
+            colPendiente.ordenEjecucionId = os.id;
+            delete colPendiente._pendienteVincularOS;
+            guardarColateralesStorage();
+            renderColaterales();
+          }
+          mostrarPanelWA();
+        });
       }
     };
 
@@ -3866,7 +4078,7 @@
     _rdSistemaActual = sistema;
     var nombreSistema = sistema === 'agua' ? 'Agua Potable' : 'Alcantarillado';
     document.getElementById('rdHeader').querySelector('h3').textContent = 'REPORTE - ' + nombreSistema.toUpperCase();
-    document.getElementById('rdNumero').value = 'RD-' + String(reporteCounter).padStart(3, '0');
+    document.getElementById('rdNumero').value = 'RD-' + String(reporteCounter).padStart(3, '0') + ' (tentativo)';
     document.getElementById('rdFecha').value = formatFecha(new Date().toISOString().split('T')[0]);
     document.getElementById('rdCodigo').value = '';
     document.getElementById('rdDireccion').value = '';
@@ -4002,7 +4214,7 @@
     if (!componente) { alert('Seleccione un componente.'); return; }
 
     var reporte = {
-      id: document.getElementById('rdNumero').value,
+      id: null,
       sistema: _rdSistemaActual,
       nombre: document.getElementById('rdNombre').value,
       fecha: new Date().toISOString().split('T')[0],
@@ -4017,12 +4229,15 @@
     var hayFin = window._archivosRD.fin.length > 0;
 
     var finalizar = function() {
-      reportesDiarios.push(reporte);
-      reporteCounter++;
-      guardarReportes();
-      renderListaReportes(_rdSistemaActual);
-      cerrarReporteDiario();
-      alert('Reporte guardado correctamente: ' + reporte.id);
+      obtenerNumeroAtomico('reportesDiarios', reporteCounter, function(numero) {
+        reporte.id = 'RD-' + String(numero).padStart(3, '0');
+        reporteCounter = numero + 1;
+        reportesDiarios.push(reporte);
+        guardarReportes();
+        renderListaReportes(_rdSistemaActual);
+        cerrarReporteDiario();
+        alert('Reporte guardado correctamente: ' + reporte.id);
+      });
     };
 
     if (hayInicio || hayFin) {
