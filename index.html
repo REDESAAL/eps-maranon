@@ -814,7 +814,7 @@
 
   <div class="table-wrap">
     <table>
-      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Derivado a</th><th>Estado</th><th>Documento</th><th>Oficina Comercial</th><th>Ejecucion</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>N Codigo</th><th>Nombre</th><th>Direccion</th><th>Sector de Abastecimiento</th><th>Manzana</th><th>Lote</th><th>N Conexion</th><th>Derivado a</th><th>Estado</th><th>Documento</th><th>Oficina Comercial</th><th>Ejecucion</th><th>Facturacion</th><th>Acciones</th></tr></thead>
       <tbody id="colateralesBody"></tbody>
     </table>
   </div>
@@ -1221,6 +1221,38 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="cerrarOficinaComercial()">Cancelar</button>
       <button class="btn-save" onclick="guardarOficinaComercial()">Guardar y Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FACTURACION -->
+<div class="modal-overlay" id="modalFacturacion">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#0b6b3a,#1a9e5a);">
+      <h3>&#128179; Pase a Facturacion</h3>
+      <button class="modal-close" onclick="cerrarFacturacion()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f8fbff;border:1px solid #e0eaf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;">
+        <strong id="factCodigoRef" style="color:var(--azul);"></strong>
+        <div id="factOrdenRef" style="font-size:0.78rem;color:#5a7a9a;margin-top:4px;"></div>
+      </div>
+      <div class="os-field full"><label>Fecha de Facturacion</label><input type="date" id="factFecha"></div>
+      <div class="os-field full"><label>N Recibo / Factura</label><input type="text" id="factRecibo" placeholder="Ej: F001-00123"></div>
+      <div class="os-field full">
+        <label>Concepto</label>
+        <select id="factConcepto">
+          <option value="Conexion Domiciliaria de Agua Potable">Conexion Domiciliaria de Agua Potable</option>
+          <option value="Conexion Domiciliaria de Alcantarillado">Conexion Domiciliaria de Alcantarillado</option>
+          <option value="Conexion Domiciliaria Agua y Alcantarillado">Conexion Domiciliaria Agua y Alcantarillado</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="os-field full"><label>Observaciones (opcional)</label><textarea id="factObs" style="min-height:55px;" placeholder="Observaciones adicionales..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarFacturacion()">Cancelar</button>
+      <button class="btn-save" style="background:#1a8a4a;" onclick="guardarFacturacion()">&#10003; Registrar Facturacion</button>
     </div>
   </div>
 </div>
@@ -4979,6 +5011,50 @@
     alert('Registrado en Oficina Comercial. El expediente ya puede pasar a Ejecucion.');
   }
 
+  // ============================================================
+  // FACTURACION (Colaterales - columna costado de Ejecucion)
+  // ============================================================
+  var _factIdxActual = null;
+
+  function abrirFacturacion(idx) {
+    var item = colaterales[idx];
+    if (!item) return;
+    if (!item.ordenEjecucionId) {
+      alert('Debe pasar primero a Ejecucion antes de registrar la facturacion.');
+      return;
+    }
+    _factIdxActual = idx;
+    document.getElementById('factCodigoRef').textContent = item.codigo + ' - ' + item.nombre;
+    document.getElementById('factOrdenRef').textContent = 'Orden de Ejecucion: ' + item.ordenEjecucionId;
+    document.getElementById('factFecha').value = item.facturacion ? item.facturacion.fecha : new Date().toISOString().split('T')[0];
+    document.getElementById('factRecibo').value = item.facturacion ? (item.facturacion.recibo || '') : '';
+    document.getElementById('factConcepto').value = item.facturacion ? (item.facturacion.concepto || 'Conexion Domiciliaria de Agua Potable') : 'Conexion Domiciliaria de Agua Potable';
+    document.getElementById('factObs').value = item.facturacion ? (item.facturacion.obs || '') : '';
+    document.getElementById('modalFacturacion').classList.add('active');
+  }
+
+  function cerrarFacturacion() {
+    document.getElementById('modalFacturacion').classList.remove('active');
+  }
+
+  function guardarFacturacion() {
+    var idx = _factIdxActual;
+    var item = colaterales[idx];
+    if (!item) return;
+    var recibo = document.getElementById('factRecibo').value.trim();
+    if (!recibo) { alert('Ingrese el N de Recibo o Factura.'); return; }
+    item.facturacion = {
+      fecha: document.getElementById('factFecha').value || new Date().toISOString().split('T')[0],
+      recibo: recibo,
+      concepto: document.getElementById('factConcepto').value,
+      obs: document.getElementById('factObs').value.trim()
+    };
+    guardarColateralesStorage();
+    renderColaterales();
+    cerrarFacturacion();
+    alert('Facturacion registrada correctamente para ' + item.codigo + '.');
+  }
+
   function pasarAEjecucion(idx) {
     var item = colaterales[idx];
     if (!item) return;
@@ -5032,7 +5108,7 @@
     }
 
     if (filas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron registros que coincidan.' : 'No hay registros de factibilidad aun.') + '</td></tr>';
       return;
     }
 
@@ -5061,6 +5137,16 @@
       var celdaDoc = item.documentoPdf
         ? '<button class="btn-config-edit" onclick="verDocumentoColateral(' + idx + ')" title="Ver documento adjunto">&#128196;</button>'
         : '<span style="color:#c4d3e0;font-size:0.76rem;">-</span>';
+
+      var celdaFacturacion;
+      if (item.facturacion) {
+        celdaFacturacion = '<span style="color:#1a7a4a;font-weight:700;font-size:0.76rem;" title="' + formatFecha(item.facturacion.fecha) + '">&#10003; ' + (item.facturacion.recibo || 'Facturado') + '</span>';
+      } else if (item.ordenEjecucionId) {
+        celdaFacturacion = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="abrirFacturacion(' + idx + ')">Pase a Facturacion</button>';
+      } else {
+        celdaFacturacion = '<span style="color:#c4d3e0;font-size:0.76rem;">Falta Ejecucion</span>';
+      }
+
       return '<tr>' +
         '<td><strong>' + item.codigo + '</strong></td>' +
         '<td>' + item.nombre + '</td>' +
@@ -5074,6 +5160,7 @@
         '<td style="text-align:center;">' + celdaDoc + '</td>' +
         '<td style="text-align:center;">' + celdaOfc + '</td>' +
         '<td style="text-align:center;">' + celdaEjecucion + '</td>' +
+        '<td style="text-align:center;">' + celdaFacturacion + '</td>' +
         '<td style="text-align:center;white-space:nowrap;">' +
           '<button class="btn-config-edit" onclick="editarColateral(' + idx + ')" title="Editar">&#9998;</button>' +
           '<button class="btn-config-del" onclick="eliminarColateral(' + idx + ')" title="Eliminar">&#128465;</button>' +
@@ -5320,6 +5407,7 @@
   document.getElementById('modalReporteDiario').addEventListener('click', function(e) { if (e.target === this) cerrarReporteDiario(); });
   document.getElementById('modalFactibilidad').addEventListener('click', function(e) { if (e.target === this) cerrarFactibilidad(); });
   document.getElementById('modalOficinaComercial').addEventListener('click', function(e) { if (e.target === this) cerrarOficinaComercial(); });
+  document.getElementById('modalFacturacion').addEventListener('click', function(e) { if (e.target === this) cerrarFacturacion(); });
   document.getElementById('modalRed').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 
   // Verificar si ya hay una sesion activa en este navegador (misma pestana/sesion)
