@@ -347,6 +347,22 @@
   </div>
 
   <!-- INSIGNIAS DE NAVEGACION -->
+  <!-- NAVEGACION EXCLUSIVA PARA TECNICOS/OPERARIOS -->
+  <div id="navOperarios" style="display:none;" class="badges-nav">
+    <button class="badge-item" data-sec="ordentrabajo" onclick="mostrarSeccion('ordentrabajo')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </div>
+      <div class="badge-label">VI<br>Orden de<br>Trabajo</div>
+    </button>
+    <button class="badge-item" data-sec="factibilidad" onclick="mostrarSeccion('factibilidad')">
+      <div class="badge-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b4f8a" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </div>
+      <div class="badge-label">XII<br>Expediente</div>
+    </button>
+  </div>
+
   <div class="solo-admin badges-nav">
     <button class="badge-item" data-sec="config" onclick="mostrarSeccion('config')">
       <div class="badge-circle">
@@ -1413,6 +1429,10 @@
       el.style.display = esTec ? 'inline-block' : 'none';
     });
 
+    // Mostrar navegacion de operarios solo para tecnicos
+    var navOp = document.getElementById('navOperarios');
+    if (navOp) navOp.style.display = esTec ? 'flex' : 'none';
+
     // Insignia de usuario en el encabezado
     var badge = document.getElementById('usuarioActualBadge');
     if (badge) {
@@ -1457,7 +1477,7 @@
     // Vista inicial: el tecnico va directo a su Orden de Trabajo (lista de pendientes);
     // Coordinador y Supervisor arrancan en la pantalla de inicio con los circulos.
     if (currentUser && currentUser.rol === 'tecnico') {
-      mostrarSeccion('ordentrabajo');
+      mostrarSeccion('inicio');
     } else {
       mostrarSeccion('inicio');
     }
@@ -1489,7 +1509,7 @@
     }
 
     if (pantallaInicio) pantallaInicio.style.display = 'none';
-    if (btnVolver) btnVolver.style.display = esTec ? 'none' : 'block';
+    if (btnVolver) btnVolver.style.display = 'block';
     Object.keys(secciones).forEach(function(key) {
       var el = document.getElementById(secciones[key]);
       if (el) el.style.display = (key === nombre && tienePermiso(key)) ? '' : 'none';
@@ -3126,6 +3146,7 @@
             '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
             '<span style="font-size:0.78rem;color:#7a8fa6;">Orden: <strong>' + item.ordenEjecucionId + '</strong> &middot; Tecnico: ' + (item.tecnico || '-') + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estadoOS + '</strong></span>' +
           '</div>' +
+          (os ? '<button class="btn-tarea-row" style="padding:6px 12px;" onclick="abrirTarea(' + historial.indexOf(os) + ')">&#10003; Tarea</button> ' : '') +
           (os ? '<button class="btn-print-row" onclick="imprimirOS(' + historial.indexOf(os) + ')">Ver PDF</button>' : '') +
         '</div>';
       }).join('') +
