@@ -1022,6 +1022,10 @@
         <div class="os-field"><label>Estado</label>
           <select id="tareaEstado"><option>Pendiente</option><option>En Proceso</option><option>Completado</option></select>
         </div>
+        <div class="os-field full" id="campoNroMedidor" style="display:none;">
+          <label>N&#176; de Medidor</label>
+          <input type="text" id="tareaNroMedidor" placeholder="Ej: 12345678">
+        </div>
         <div class="os-field full">
           <label>Fotos de Inicio (antes del trabajo, hasta 5 archivos)</label>
           <div class="upload-area" id="uploadAreaInicio" onclick="document.getElementById('tareaArchivoInicio').click()">
@@ -1168,25 +1172,119 @@
 
       <div class="section-title" style="font-size:0.88rem;">1. Datos de Conexion de Agua Potable</div>
       <div class="os-grid">
-        <div class="os-field"><label>Diametro</label><input type="text" id="factAguaDiametro" placeholder="Ej: 1/2 pulg"></div>
+        <div class="os-field">
+          <label>Asunto</label>
+          <select id="factAguaAsunto" class="coord-select">
+            <option value="">-- Seleccione asunto --</option>
+            <option value="Factible el servicio - Existencia de red matriz">Factible el servicio - Existencia de red matriz</option>
+            <option value="Tiene conexion">Tiene conexion</option>
+            <option value="No hay red matriz frente a su inmueble">No hay red matriz frente a su inmueble</option>
+            <option value="Modificar conexion existente en vereda">Modificar conexion existente en vereda</option>
+            <option value="Cortado conexion">Cortado conexion</option>
+          </select>
+        </div>
+        <div class="os-field">
+          <label>Tipo de terreno de la via</label>
+          <select id="factAguaTipoTerreno" class="coord-select">
+            <option value="">-- Seleccione tipo --</option>
+            <option value="Asfalto">Asfalto</option>
+            <option value="Concreto">Concreto</option>
+            <option value="Afirmado">Afirmado</option>
+            <option value="Tierra">Tierra</option>
+            <option value="Adoquin">Adoquin</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field">
+          <label>Diametro de Conexion</label>
+          <select id="factAguaDiametro" class="coord-select">
+            <option value="">-- Seleccione --</option>
+            <option value='1/2"'>1/2"</option>
+            <option value='3/4"'>3/4"</option>
+            <option value='1"'>1"</option>
+            <option value='2"'>2"</option>
+          </select>
+        </div>
         <div class="os-field"><label>Longitud hacia la Red Matriz</label><input type="text" id="factAguaLongitud" placeholder="Ej: 12 m"></div>
       </div>
       <div class="os-grid">
         <div class="os-field"><label>Profundidad Red Matriz</label><input type="text" id="factAguaProfundidad" placeholder="Ej: 0.80 m"></div>
-        <div class="os-field"><label>Fecha Factibilidad</label><input type="date" id="factAguaFecha"></div>
+        <div class="os-field">
+          <label>Fecha Factibilidad</label>
+          <input type="date" id="factAguaFecha" readonly style="background:#f0f4f9;cursor:default;">
+        </div>
       </div>
-      <div class="os-field full"><label>Diametro de la Tuberia Matriz</label><input type="text" id="factAguaDiametroMatriz" placeholder="Ej: 4 pulg"></div>
+      <div class="os-field full">
+        <label>Diametro de la Tuberia Matriz</label>
+        <select id="factAguaDiametroMatriz" class="coord-select">
+          <option value="">-- Seleccione --</option>
+          <option value="63 mm">63 mm</option>
+          <option value="90 mm">90 mm</option>
+          <option value="110 mm">110 mm</option>
+          <option value="160 mm">160 mm</option>
+        </select>
+      </div>
 
-      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">2. Factibilidad para la Conexion de Desague</div>
+      <div class="section-title" style="font-size:0.88rem;margin-top:18px;">2. Datos de Conexion de Alcantarillado</div>
       <div class="os-grid">
-        <div class="os-field"><label>Diametro</label><input type="text" id="factDesagueDiametro" placeholder="Ej: 4 pulg"></div>
+        <div class="os-field">
+          <label>Asunto</label>
+          <select id="factDesagueAsunto" class="coord-select">
+            <option value="">-- Seleccione asunto --</option>
+            <option value="Factible el servicio - Existencia de red matriz">Factible el servicio - Existencia de red matriz</option>
+            <option value="Tiene conexion">Tiene conexion</option>
+            <option value="Pozo septico">Pozo septico</option>
+            <option value="No hay red matriz frente a su inmueble">No hay red matriz frente a su inmueble</option>
+            <option value="Modificar conexion existente en vereda">Modificar conexion existente en vereda</option>
+          </select>
+        </div>
+        <div class="os-field">
+          <label>Tipo de terreno de la via</label>
+          <select id="factDesagueTipoTerreno" class="coord-select">
+            <option value="">-- Seleccione tipo --</option>
+            <option value="Asfalto">Asfalto</option>
+            <option value="Concreto">Concreto</option>
+            <option value="Afirmado">Afirmado</option>
+            <option value="Tierra">Tierra</option>
+            <option value="Adoquin">Adoquin</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field"><label>Distancia para el corte de terreno</label><input type="text" id="factDesagueDistanciaCorte" placeholder="Ej: 3.50 m"></div>
+        <div class="os-field">
+          <label>Diametro de Conexion</label>
+          <select id="factDesagueDiametro" class="coord-select">
+            <option value="">-- Seleccione --</option>
+            <option value='4"'>4"</option>
+            <option value='6"'>6"</option>
+          </select>
+        </div>
+      </div>
+      <div class="os-grid">
         <div class="os-field"><label>Longitud hacia la Red Matriz</label><input type="text" id="factDesagueLongitud" placeholder="Ej: 15 m"></div>
+        <div class="os-field"><label>Profundidad Red Matriz</label><input type="text" id="factDesagueProfundidad" placeholder="Ej: 1.20 m"></div>
       </div>
       <div class="os-grid">
-        <div class="os-field"><label>Profundidad Red Matriz</label><input type="text" id="factDesagueProfundidad" placeholder="Ej: 1.20 m"></div>
-        <div class="os-field"><label>Fecha Factibilidad</label><input type="date" id="factDesagueFecha"></div>
+        <div class="os-field">
+          <label>Fecha Factibilidad</label>
+          <input type="date" id="factDesagueFecha" readonly style="background:#f0f4f9;cursor:default;">
+        </div>
+        <div class="os-field">
+          <label>Diametro de la Tuberia Matriz</label>
+          <select id="factDesagueDiametroMatriz" class="coord-select">
+            <option value="">-- Seleccione --</option>
+            <option value="160 mm">160 mm</option>
+            <option value="200 mm">200 mm</option>
+            <option value="250 mm">250 mm</option>
+            <option value="315 mm">315 mm</option>
+            <option value="355 mm">355 mm</option>
+          </select>
+        </div>
       </div>
-      <div class="os-field full"><label>Diametro de la Tuberia Matriz</label><input type="text" id="factDesagueDiametroMatriz" placeholder="Ej: 8 pulg"></div>
 
       <div class="section-title" style="font-size:0.88rem;margin-top:18px;">3. Observacion</div>
       <div class="os-field full">
@@ -3223,15 +3321,21 @@
     var insp = item.inspeccion || {};
     var agua = insp.agua || {};
     var desague = insp.desague || {};
+    var hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('factAguaAsunto').value = agua.asunto || '';
+    document.getElementById('factAguaTipoTerreno').value = agua.tipoTerreno || '';
     document.getElementById('factAguaDiametro').value = agua.diametro || '';
     document.getElementById('factAguaLongitud').value = agua.longitud || '';
     document.getElementById('factAguaProfundidad').value = agua.profundidad || '';
-    document.getElementById('factAguaFecha').value = agua.fecha || '';
+    document.getElementById('factAguaFecha').value = agua.fecha || hoy;
     document.getElementById('factAguaDiametroMatriz').value = agua.diametroMatriz || '';
+    document.getElementById('factDesagueAsunto').value = desague.asunto || '';
+    document.getElementById('factDesagueTipoTerreno').value = desague.tipoTerreno || '';
+    document.getElementById('factDesagueDistanciaCorte').value = desague.distanciaCorte || '';
     document.getElementById('factDesagueDiametro').value = desague.diametro || '';
     document.getElementById('factDesagueLongitud').value = desague.longitud || '';
     document.getElementById('factDesagueProfundidad').value = desague.profundidad || '';
-    document.getElementById('factDesagueFecha').value = desague.fecha || '';
+    document.getElementById('factDesagueFecha').value = desague.fecha || hoy;
     document.getElementById('factDesagueDiametroMatriz').value = desague.diametroMatriz || '';
     document.getElementById('factObservacion').value = insp.observacion || '';
 
@@ -3340,6 +3444,8 @@
 
     var insp = {
       agua: {
+        asunto: document.getElementById('factAguaAsunto').value || '-',
+        tipoTerreno: document.getElementById('factAguaTipoTerreno').value || '-',
         diametro: document.getElementById('factAguaDiametro').value.trim() || '-',
         longitud: document.getElementById('factAguaLongitud').value.trim() || '-',
         profundidad: document.getElementById('factAguaProfundidad').value.trim() || '-',
@@ -3347,6 +3453,9 @@
         diametroMatriz: document.getElementById('factAguaDiametroMatriz').value.trim() || '-'
       },
       desague: {
+        asunto: document.getElementById('factDesagueAsunto').value || '-',
+        tipoTerreno: document.getElementById('factDesagueTipoTerreno').value || '-',
+        distanciaCorte: document.getElementById('factDesagueDistanciaCorte').value.trim() || '-',
         diametro: document.getElementById('factDesagueDiametro').value.trim() || '-',
         longitud: document.getElementById('factDesagueLongitud').value.trim() || '-',
         profundidad: document.getElementById('factDesagueProfundidad').value.trim() || '-',
@@ -3782,6 +3891,10 @@
     document.getElementById('tareaObs').value = os.obs && os.obs !== '-' ? os.obs : '';
     document.getElementById('tareaCodigo').value = os.codigo && os.codigo !== '-' ? os.codigo : '';
     setSelectValue('tareaEstado', os.estado);
+    // Campo N° de Medidor: visible solo cuando el componente es "Conexion"
+    var esConexion = os.componente && os.componente.toLowerCase().indexOf('conexi') >= 0;
+    document.getElementById('campoNroMedidor').style.display = esConexion ? 'block' : 'none';
+    document.getElementById('tareaNroMedidor').value = os.nroMedidor && os.nroMedidor !== '-' ? os.nroMedidor : '';
     // Reset file upload (ambas secciones)
     document.getElementById('tareaArchivoInicio').value = '';
     document.getElementById('tareaArchivoFin').value = '';
@@ -3818,6 +3931,9 @@
     historial[idx].obs = document.getElementById('tareaObs').value || '-';
     historial[idx].codigo = document.getElementById('tareaCodigo').value || historial[idx].codigo;
     historial[idx].estado = document.getElementById('tareaEstado').value;
+    if (document.getElementById('campoNroMedidor').style.display !== 'none') {
+      historial[idx].nroMedidor = document.getElementById('tareaNroMedidor').value.trim() || '-';
+    }
 
     var hayInicio = window._archivosData.inicio && window._archivosData.inicio.length > 0;
     var hayFin = window._archivosData.fin && window._archivosData.fin.length > 0;
