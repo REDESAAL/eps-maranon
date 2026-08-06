@@ -899,6 +899,7 @@
       <div id="panelFormOS">
         <div class="os-grid">
           <div class="os-field"><label>N Orden</label><input type="text" id="osId" readonly></div>
+          <input type="hidden" id="osSistema" value="agua">
           <div class="os-field"><label>Fecha de Emision</label><input type="date" id="osFecha"></div>
           <div class="os-field"><label>N Codigo</label><input type="text" id="osCodigo" placeholder="Ej: DL-2025-001"></div>
           <div class="os-field"><label>Direccion / Ubicacion</label><input type="text" id="osDireccion" placeholder="Ej: Jr. Amazonas 245"></div>
@@ -2027,7 +2028,7 @@
         '<td><span class="badge-freq">' + item.frecuencia + '</span></td>' +
         '<td>' + item.actividad + '</td>' +
         '<td><select class="coord-select">' + opciones + '</select></td>' +
-        '<td><button class="os-btn" onclick="abrirOS(\'' + compEsc + '\',\'' + freqEsc + '\')">&#128196; Crear O/S</button></td>' +
+        '<td><button class="os-btn" onclick="abrirOS(\'' + compEsc + '\',\'' + freqEsc + '\',\'' + sistema + '\')">&#128196; Crear O/S</button></td>' +
         '</tr>';
     }).join('');
     if (sistema === 'agua') renderOrdenesAgua();
@@ -2042,28 +2043,22 @@
     var componentesAgua = (planAgua || []).map(function(p) { return p.componente.toLowerCase(); });
     var ordenes = (historial || []).filter(function(os) {
       if (!os || !os.componente) return false;
-      var esAgua = componentesAgua.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
-      if (!esAgua) return true; // si no hay plan aun, mostrar todo
-      if (componentesAgua.length > 0 && !esAgua) return false;
+      // Filtrar por campo sistema (nuevo) o por coincidencia de componente con plan (retrocompatibilidad)
+      var esAgua;
+      if (os.sistema) {
+        esAgua = os.sistema === 'agua';
+      } else if (componentesAgua.length > 0) {
+        esAgua = componentesAgua.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
+      } else {
+        esAgua = true; // sin plan configurado, mostrar todo
+      }
+      if (!esAgua) return false;
       if (busqueda) {
         var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
         return campos.indexOf(busqueda) >= 0;
       }
       return true;
     });
-    // Si hay plan, filtrar solo los de agua
-    if (componentesAgua.length > 0) {
-      ordenes = (historial || []).filter(function(os) {
-        if (!os || !os.componente) return false;
-        var esAgua = componentesAgua.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
-        if (!esAgua) return false;
-        if (busqueda) {
-          var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
-          return campos.indexOf(busqueda) >= 0;
-        }
-        return true;
-      });
-    }
     if (ordenes.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron resultados.' : 'No hay ordenes de servicio de agua potable registradas.') + '</td></tr>';
       return;
@@ -2100,28 +2095,24 @@
     var buscarEl = document.getElementById('buscarOrdenesAlcant');
     var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
     var componentesAlcant = (planAlcantarillado || []).map(function(p) { return p.componente.toLowerCase(); });
-    var ordenes;
-    if (componentesAlcant.length > 0) {
-      ordenes = (historial || []).filter(function(os) {
-        if (!os || !os.componente) return false;
-        var esAlcant = componentesAlcant.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
-        if (!esAlcant) return false;
-        if (busqueda) {
-          var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
-          return campos.indexOf(busqueda) >= 0;
-        }
-        return true;
-      });
-    } else {
-      ordenes = (historial || []).filter(function(os) {
-        if (!os || !os.componente) return false;
-        if (busqueda) {
-          var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
-          return campos.indexOf(busqueda) >= 0;
-        }
-        return true;
-      });
-    }
+    var ordenes = (historial || []).filter(function(os) {
+      if (!os || !os.componente) return false;
+      // Filtrar por campo sistema (nuevo) o por coincidencia de componente con plan (retrocompatibilidad)
+      var esAlcant;
+      if (os.sistema) {
+        esAlcant = os.sistema === 'alcantarillado';
+      } else if (componentesAlcant.length > 0) {
+        esAlcant = componentesAlcant.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
+      } else {
+        esAlcant = false; // sin plan y sin campo sistema, no mostrar en alcantarillado
+      }
+      if (!esAlcant) return false;
+      if (busqueda) {
+        var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
+        return campos.indexOf(busqueda) >= 0;
+      }
+      return true;
+    });
     if (ordenes.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:20px;">' + (busqueda ? 'No se encontraron resultados.' : 'No hay ordenes de servicio de alcantarillado registradas.') + '</td></tr>';
       return;
@@ -2619,6 +2610,7 @@
       fechaProg: '-',
       componente: item.componente,
       frecuencia: item.frecuencia,
+      sistema: sistema,
       direccion: '-',
       tecnico: nombreTecnico,
       prioridad: 'Normal',
@@ -3078,12 +3070,14 @@
     firebaseGuardarHistorial();
   }
 
-  function abrirOS(componente, frecuencia) {
+  function abrirOS(componente, frecuencia, sistema) {
+    sistema = sistema || 'agua'; // default fallback
     var num = String(osCounter).padStart(3, '0');
     document.getElementById('osId').value = 'OS-' + num + ' (tentativo, se confirma al guardar)';
     document.getElementById('osNumero').textContent = 'OS-' + num + '*';
     document.getElementById('osComponente').value = componente;
     document.getElementById('osFrecuencia').value = frecuencia;
+    document.getElementById('osSistema').value = sistema;
     var hoy = new Date().toISOString().split('T')[0];
     document.getElementById('osFecha').value = hoy;
     document.getElementById('osFechaProg').value = '';
@@ -3122,6 +3116,7 @@
     document.getElementById('osDireccion').value = os.direccion === '-' ? '' : os.direccion;
     document.getElementById('osComponente').value = os.componente;
     document.getElementById('osFrecuencia').value = os.frecuencia;
+    document.getElementById('osSistema').value = os.sistema || 'agua';
     document.getElementById('osFecha').value = os.fecha;
     document.getElementById('osFechaProg').value = os.fechaProg === '-' ? '' : os.fechaProg;
     document.getElementById('osActividad').value = os.actividad && os.actividad !== '-' ? os.actividad : '';
@@ -3185,6 +3180,7 @@
       fechaProg: document.getElementById('osFechaProg').value || '-',
       componente:document.getElementById('osComponente').value,
       frecuencia:document.getElementById('osFrecuencia').value,
+      sistema:   document.getElementById('osSistema').value || 'agua',
       direccion: document.getElementById('osDireccion').value || '-',
       tecnico:   tecnico,
       prioridad: document.getElementById('osPrioridad').value,
