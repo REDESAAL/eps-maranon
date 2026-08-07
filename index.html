@@ -1719,6 +1719,7 @@
   var reporteCounter = 1;
   window._archivosRD = { inicio: [], fin: [] };
   var _rdSistemaActual = null;
+  var _rdEditandoIdx = null;
 
   function cargarReportesGuardados() {
     try {
@@ -3372,7 +3373,8 @@
             '<span style="font-size:0.78rem;color:#7a8fa6;">Orden: <strong>' + item.ordenEjecucionId + '</strong> &middot; Tecnico: ' + (item.tecnico || '-') + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estadoOS + '</strong></span>' +
           '</div>' +
           (os ? '<button class="btn-tarea-row" style="padding:6px 12px;" onclick="abrirTarea(' + historial.indexOf(os) + ')">&#10003; Tarea</button> ' : '') +
-          (os ? '<button class="btn-print-row" onclick="imprimirOS(' + historial.indexOf(os) + ')">Ver PDF</button>' : '') +
+          (os ? '<button class="btn-print-row" onclick="imprimirOS(' + historial.indexOf(os) + ')">Ver PDF</button> ' : '') +
+          '<button class="btn-save" style="padding:6px 14px;font-size:0.78rem;background:#c0392b;border:none;border-radius:7px;color:#fff;font-weight:700;cursor:pointer;" onclick="imprimirEjecucion(' + colaterales.indexOf(item) + ')">&#128196; Llenar PDF</button>' +
         '</div>';
       }).join('') +
       '</div>';
@@ -3430,7 +3432,9 @@
               '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
               '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
             '</div>' +
-            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Sin inspeccion aun') + '</button>' +
+            (item.inspeccion
+              ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
+              : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
           '</div>';
         }).join('') +
         '</div>';
@@ -3805,6 +3809,120 @@
       '<div style="margin-top:22px;text-align:center;font-size:0.70rem;color:#aaa;border-top:1px solid #eaf0f8;padding-top:10px;">Documento generado por EPS Maranon S.A. - ' + new Date().toLocaleDateString('es-PE') + '</div>' +
       '</div></div>';
     pa.style.display = 'block';
+    setTimeout(function() { window.print(); pa.style.display = 'none'; }, 200);
+  }
+
+  function imprimirEjecucion(colIdx) {
+    var item = colaterales[colIdx];
+    if (!item) return;
+    var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
+    var pa = document.getElementById('printArea');
+
+    function fila(label, val) {
+      return '<tr>' +
+        '<td style="width:38%;padding:6px 10px;background:#f0f5fb;font-weight:700;font-size:0.78rem;color:#0b4f8a;border:1px solid #c8d8ec;">' + label + '</td>' +
+        '<td style="padding:6px 10px;font-size:0.83rem;color:#1a2a3a;border:1px solid #c8d8ec;">' + (val || '-') + '</td>' +
+        '</tr>';
+    }
+
+    function seccion(titulo) {
+      return '<div style="background:#0b4f8a;color:white;padding:6px 14px;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:18px 0 8px;border-radius:3px;">' + titulo + '</div>';
+    }
+
+    function lineaFirma(titulo, nombre) {
+      return '<div style="flex:1;text-align:center;padding:0 10px;">' +
+        '<div style="height:55px;"></div>' +
+        '<div style="border-top:2px solid #0b4f8a;margin:0 8px;"></div>' +
+        '<div style="background:#0b4f8a;color:white;font-weight:700;font-size:0.70rem;padding:4px 6px;text-transform:uppercase;margin-top:2px;">' + titulo + '</div>' +
+        (nombre ? '<div style="font-size:0.72rem;color:#333;margin-top:5px;">' + nombre + '</div>' : '<div style="font-size:0.72rem;color:#888;margin-top:5px;">Nombre: _______________________</div>') +
+        '</div>';
+    }
+
+    pa.style.display = 'block';
+    pa.innerHTML =
+      '<div style="font-family:Arial,sans-serif;max-width:750px;margin:0 auto;background:#fff;">' +
+
+      // ENCABEZADO
+      '<div style="background:#0b4f8a;color:white;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;">' +
+        '<div>' +
+          '<div style="font-size:1.3rem;font-weight:800;letter-spacing:2px;">EPS Maranon S.A.</div>' +
+          '<div style="font-size:0.78rem;opacity:0.85;margin-top:3px;">Sistema de Agua Potable y Alcantarillado</div>' +
+          '<div style="font-size:0.68rem;opacity:0.7;margin-top:2px;">Oficina de Distribucion y Recoleccion (ODR)</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="background:#c0392b;color:#fff;font-weight:800;font-size:0.88rem;padding:6px 16px;border-radius:6px;">FORMATO DE EJECUCION</div>' +
+          (os ? '<div style="background:#e8a000;color:#fff;font-weight:800;font-size:0.95rem;padding:5px 14px;border-radius:6px;margin-top:6px;">' + os.id + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div style="height:5px;background:linear-gradient(90deg,#c0392b,#e8a000);"></div>' +
+      '<div style="border:1px solid #c8d8ec;border-top:none;border-radius:0 0 8px 8px;padding:24px 28px;">' +
+
+      // I. DATOS DEL EXPEDIENTE
+      seccion('I. Datos del Expediente / Solicitante') +
+      '<table style="width:100%;border-collapse:collapse;">' +
+        fila('N Codigo', item.codigo) +
+        fila('Nombre del Solicitante', item.nombre) +
+        fila('Direccion', item.direccion) +
+        fila('Sector de Abastecimiento', item.sector || '-') +
+        fila('Manzana / Lote', (item.manzana || '-') + ' / ' + (item.lote || '-')) +
+        fila('N Conexion', item.conexion || '-') +
+        fila('Estado del Expediente', item.estado || '-') +
+      '</table>' +
+
+      // II. DATOS DE LA ORDEN DE SERVICIO
+      seccion('II. Orden de Servicio Vinculada') +
+      '<table style="width:100%;border-collapse:collapse;">' +
+        (os ? (
+          fila('N Orden', os.id) +
+          fila('Fecha de Emision', os.fecha ? (function(f){ var p=f.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; })(os.fecha) : '-') +
+          fila('Fecha Programada', os.fechaProg && os.fechaProg !== '-' ? (function(f){ var p=f.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; })(os.fechaProg) : '-') +
+          fila('Componente', os.componente) +
+          fila('Frecuencia', os.frecuencia) +
+          fila('Prioridad', os.prioridad) +
+          fila('Estado de la Orden', os.estado) +
+          fila('Tecnico Responsable', os.tecnico)
+        ) : fila('Orden', 'Sin orden de servicio vinculada')) +
+      '</table>' +
+
+      // III. DESCRIPCION DEL TRABAJO
+      seccion('III. Descripcion del Trabajo / Actividad') +
+      '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;min-height:50px;background:#fafcff;">' + (os && os.actividad && os.actividad !== '-' ? os.actividad : '<span style="color:#aaa;font-style:italic;">Sin descripcion registrada.</span>') + '</div>' +
+
+      // IV. OBSERVACIONES / RESULTADO
+      seccion('IV. Observaciones / Resultado de la Ejecucion') +
+      '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;min-height:60px;background:#fafcff;">' + (os && os.obs && os.obs !== '-' ? os.obs : '<span style="color:#aaa;font-style:italic;">Sin observaciones registradas.</span>') + '</div>' +
+
+      // V. DATOS DE OFICINA COMERCIAL
+      (item.oficinaComercial ? (
+        seccion('V. Registro en Oficina Comercial') +
+        '<table style="width:100%;border-collapse:collapse;">' +
+          fila('Registrado por', item.oficinaComercial.registradoPor || '-') +
+          fila('Fecha de Registro', item.oficinaComercial.fecha || '-') +
+          fila('Observacion', item.oficinaComercial.observacion || '-') +
+        '</table>'
+      ) : (
+        seccion('V. Registro en Oficina Comercial') +
+        '<div style="padding:10px;font-size:0.82rem;color:#aaa;font-style:italic;">Aun no registrado en Oficina Comercial.</div>'
+      )) +
+
+      // VI. FIRMAS
+      '<div style="border-top:2px dashed #c8d8ec;margin:28px 0 20px;"></div>' +
+      '<div style="background:#eaf2fb;padding:6px 14px;font-size:0.78rem;font-weight:800;color:#0b4f8a;text-transform:uppercase;border-radius:3px;margin-bottom:16px;">VI. Firmas de Conformidad</div>' +
+      '<div style="display:flex;gap:10px;justify-content:space-between;margin-top:10px;">' +
+        lineaFirma('Tecnico / Operario', os ? os.tecnico : '') +
+        lineaFirma('Supervisor / Coordinador', '') +
+        lineaFirma('V°B° Jefe ODR', '') +
+      '</div>' +
+
+      // PIE
+      '<div style="border-top:1px solid #c8d8ec;margin-top:24px;padding-top:10px;display:flex;justify-content:space-between;font-size:0.68rem;color:#aaa;">' +
+        '<span>EPS Maranon S.A. - ODR</span>' +
+        '<span>Formato de Ejecucion - Expediente N ' + item.codigo + '</span>' +
+        '<span>Fecha impresion: ' + (new Date().toLocaleDateString('es-PE')) + '</span>' +
+      '</div>' +
+
+      '</div></div>';
+
     setTimeout(function() { window.print(); pa.style.display = 'none'; }, 200);
   }
 
@@ -4400,6 +4518,7 @@
     document.getElementById('uploadAreaRdInicio').style.display = 'block';
     document.getElementById('uploadAreaRdFin').style.display = 'block';
 
+    _rdEditandoIdx = null;
     document.getElementById('modalReporteDiario').classList.add('active');
   }
 
@@ -4526,15 +4645,27 @@
     var hayFin = window._archivosRD.fin.length > 0;
 
     var finalizar = function() {
-      obtenerNumeroAtomico('reportesDiarios', reporteCounter, function(numero) {
-        reporte.id = 'RD-' + String(numero).padStart(3, '0');
-        reporteCounter = numero + 1;
-        reportesDiarios.push(reporte);
+      if (_rdEditandoIdx !== null && reportesDiarios[_rdEditandoIdx]) {
+        // Edicion de reporte existente
+        reporte.id = reportesDiarios[_rdEditandoIdx].id;
+        reportesDiarios[_rdEditandoIdx] = reporte;
         guardarReportes();
         renderListaReportes(_rdSistemaActual);
         cerrarReporteDiario();
-        alert('Reporte guardado correctamente: ' + reporte.id);
-      });
+        alert('Reporte actualizado: ' + reporte.id);
+        _rdEditandoIdx = null;
+      } else {
+        // Nuevo reporte
+        obtenerNumeroAtomico('reportesDiarios', reporteCounter, function(numero) {
+          reporte.id = 'RD-' + String(numero).padStart(3, '0');
+          reporteCounter = numero + 1;
+          reportesDiarios.push(reporte);
+          guardarReportes();
+          renderListaReportes(_rdSistemaActual);
+          cerrarReporteDiario();
+          alert('Reporte guardado correctamente: ' + reporte.id);
+        });
+      }
     };
 
     if (hayInicio || hayFin) {
@@ -4565,22 +4696,94 @@
     var contId = sistema === 'agua' ? 'listaReportesAgua' : 'listaReportesAlcant';
     var cont = document.getElementById(contId);
     if (!cont) return;
-    var lista = reportesDiarios.filter(function(r) { return r.sistema === sistema; }).slice().reverse();
-    if (lista.length === 0) {
+    // Guardar indices reales para editar/eliminar
+    var listaConIdx = [];
+    reportesDiarios.forEach(function(r, idx) {
+      if (r.sistema === sistema) listaConIdx.push({ r: r, idx: idx });
+    });
+    listaConIdx.reverse();
+    if (listaConIdx.length === 0) {
       cont.innerHTML = '<div style="color:#7a8fa6;font-size:0.8rem;text-align:center;">Sin reportes registrados aun.</div>';
       return;
     }
-    cont.innerHTML = lista.map(function(r) {
+    cont.innerHTML = listaConIdx.map(function(item) {
+      var r = item.r;
+      var idx = item.idx;
       var codDir = [];
       if (r.codigo && r.codigo !== '-') codDir.push('Cod: ' + r.codigo);
       if (r.direccion && r.direccion !== '-') codDir.push(r.direccion);
-      return '<div class="config-item">' +
-        '<div class="config-item-info">' +
+      return '<div class="config-item" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+        '<div class="config-item-info" style="flex:1;min-width:0;">' +
           '<strong>' + r.id + ' &middot; ' + r.componente + '</strong>' +
           '<span class="meta">' + formatFecha(r.fecha) + ' &middot; ' + r.nombre + (codDir.length ? ' &middot; ' + codDir.join(' &middot; ') : '') + '</span>' +
         '</div>' +
+        '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+          '<button title="Editar" onclick="editarReporteDiario(' + idx + ')" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.backgroundColor=&apos;#e8f0fb&apos;" onmouseout="this.style.backgroundColor=&apos;transparent&apos;">' +
+            '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+          '</button>' +
+          '<button title="Eliminar" onclick="eliminarReporteDiario(' + idx + ', \'' + sistema + '\')" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.backgroundColor=&apos;#fdecea&apos;" onmouseout="this.style.backgroundColor=&apos;transparent&apos;">' +
+            '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>' +
+          '</button>' +
+        '</div>' +
       '</div>';
     }).join('');
+  }
+
+  function editarReporteDiario(idx) {
+    var r = reportesDiarios[idx];
+    if (!r) return;
+    _rdSistemaActual = r.sistema;
+    _rdEditandoIdx = idx;
+    var nombreSistema = r.sistema === 'agua' ? 'Agua Potable' : 'Alcantarillado';
+    document.getElementById('rdHeader').querySelector('h3').textContent = 'EDITAR REPORTE - ' + nombreSistema.toUpperCase();
+    document.getElementById('rdNumero').value = r.id;
+    document.getElementById('rdFecha').value = formatFecha(r.fecha);
+    document.getElementById('rdCodigo').value = r.codigo !== '-' ? r.codigo : '';
+    document.getElementById('rdDireccion').value = r.direccion !== '-' ? r.direccion : '';
+    document.getElementById('rdNombre').value = r.nombre || '';
+    document.getElementById('rdOcurrencia').value = r.ocurrencia !== '-' ? r.ocurrencia : '';
+    document.getElementById('rdObservacion').value = r.observacion !== '-' ? r.observacion : '';
+    document.getElementById('rdOcurrenciaContador').textContent = '';
+    document.getElementById('rdObsContador').textContent = '';
+
+    var plan = r.sistema === 'agua' ? planAgua : planAlcantarillado;
+    var sel = document.getElementById('rdComponente');
+    sel.innerHTML = '<option value="">-- Seleccionar --</option>' +
+      plan.map(function(item) { return '<option>' + item.componente + '</option>'; }).join('');
+    sel.value = r.componente || '';
+
+    window._archivosRD = { inicio: [], fin: [] };
+    document.getElementById('rdArchivoInicio').value = '';
+    document.getElementById('rdArchivoFin').value = '';
+    document.getElementById('previewAreaRdInicio').innerHTML = '';
+    document.getElementById('previewAreaRdFin').innerHTML = '';
+    document.getElementById('contadorArchivosRdInicio').style.display = 'none';
+    document.getElementById('contadorArchivosRdFin').style.display = 'none';
+    document.getElementById('uploadAreaRdInicio').style.display = 'block';
+    document.getElementById('uploadAreaRdFin').style.display = 'block';
+
+    // Restaurar evidencias previas si existen
+    if (r.evidenciasInicio && r.evidenciasInicio.length) {
+      window._archivosRD.inicio = r.evidenciasInicio.slice();
+      r.evidenciasInicio.forEach(function(d) { agregarPreviewRD(d, 'inicio'); });
+      actualizarContadorRD('inicio');
+    }
+    if (r.evidenciasFin && r.evidenciasFin.length) {
+      window._archivosRD.fin = r.evidenciasFin.slice();
+      r.evidenciasFin.forEach(function(d) { agregarPreviewRD(d, 'fin'); });
+      actualizarContadorRD('fin');
+    }
+
+    document.getElementById('modalReporteDiario').classList.add('active');
+  }
+
+  function eliminarReporteDiario(idx, sistema) {
+    var r = reportesDiarios[idx];
+    if (!r) return;
+    if (!confirm('¿Eliminar el reporte ' + r.id + '? Esta accion no se puede deshacer.')) return;
+    reportesDiarios.splice(idx, 1);
+    guardarReportes();
+    renderListaReportes(sistema);
   }
 
   function renderTodosLosReportes() {
