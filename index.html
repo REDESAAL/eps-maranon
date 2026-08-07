@@ -1069,6 +1069,53 @@
   </div>
 </div>
 
+<!-- MODAL LLENAR EJECUCION -->
+<div class="modal-overlay" id="modalLlenarEjecucion">
+  <div class="modal" style="width:560px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#c0392b,#e74c3c);">
+      <h3>Formulario de Ejecucion</h3>
+      <span class="os-num" id="ejecucionModalCodigo">-</span>
+      <button class="modal-close" onclick="cerrarLlenarEjecucion()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Info resumen del expediente -->
+      <div style="background:#fdf2f2;border:1px solid #f5c6c6;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.83rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#c0392b;font-weight:700;">Solicitante:</span> <span id="ejecModalNombre"></span></div>
+          <div><span style="color:#c0392b;font-weight:700;">Direccion:</span> <span id="ejecModalDireccion"></span></div>
+          <div><span style="color:#c0392b;font-weight:700;">Orden:</span> <span id="ejecModalOrden"></span></div>
+          <div><span style="color:#c0392b;font-weight:700;">Tecnico:</span> <span id="ejecModalTecnico"></span></div>
+        </div>
+      </div>
+      <div class="os-grid">
+        <div class="os-field full"><label>Descripcion / Actividad Realizada</label>
+          <textarea id="ejecModalActividad" placeholder="Describa la actividad o trabajo realizado..." style="min-height:80px;"></textarea>
+        </div>
+        <div class="os-field"><label>Fecha de Ejecucion</label>
+          <input type="date" id="ejecModalFecha">
+        </div>
+        <div class="os-field"><label>Estado</label>
+          <select id="ejecModalEstado">
+            <option>Pendiente</option>
+            <option>En Proceso</option>
+            <option>Completado</option>
+          </select>
+        </div>
+        <div class="os-field full"><label>Observaciones / Resultado</label>
+          <textarea id="ejecModalObs" placeholder="Ingrese observaciones o resultado de la ejecucion..." style="min-height:70px;"></textarea>
+        </div>
+        <div class="os-field full"><label>Materiales / Recursos Utilizados (opcional)</label>
+          <input type="text" id="ejecModalMateriales" placeholder="Ej: Tubo PVC 2&quot;, Codo 90°, Pegamento PVC...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarLlenarEjecucion()">Cancelar</button>
+      <button class="btn-save" style="background:#c0392b;" onclick="guardarLlenarEjecucion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL MI CUENTA -->
 <div class="modal-overlay" id="modalCuenta">
   <div class="modal" style="width:400px;">
@@ -2029,7 +2076,7 @@
         '<td><span class="badge-freq">' + item.frecuencia + '</span></td>' +
         '<td>' + item.actividad + '</td>' +
         '<td><select class="coord-select">' + opciones + '</select></td>' +
-        '<td><button class="os-btn" onclick="abrirOS(\'' + compEsc + '\',\'' + freqEsc + '\',\'' + sistema + '\')">&#128196; Crear O/S</button></td>' +
+        '<td><button class="os-btn" onclick="abrirOSDesdeTabla(this,\'' + compEsc + '\',\'' + freqEsc + '\',\'' + sistema + '\')">&#128196; Crear O/S</button></td>' +
         '</tr>';
     }).join('');
     if (sistema === 'agua') renderOrdenesAgua();
@@ -3071,7 +3118,15 @@
     firebaseGuardarHistorial();
   }
 
-  function abrirOS(componente, frecuencia, sistema) {
+  function abrirOSDesdeTabla(btn, componente, frecuencia, sistema) {
+    // Leer el tecnico seleccionado en el <select> de la misma fila
+    var fila = btn.closest('tr');
+    var sel = fila ? fila.querySelector('.coord-select') : null;
+    var tecnico = sel ? sel.value : '';
+    abrirOS(componente, frecuencia, sistema, tecnico);
+  }
+
+  function abrirOS(componente, frecuencia, sistema, tecnicoPreseleccionado) {
     sistema = sistema || 'agua'; // default fallback
     var num = String(osCounter).padStart(3, '0');
     document.getElementById('osId').value = 'OS-' + num + ' (tentativo, se confirma al guardar)';
@@ -3086,7 +3141,11 @@
     document.getElementById('osCodigo').value = '';
     document.getElementById('osDireccion').value = '';
     document.getElementById('osActividad').value = '';
-    document.getElementById('osTecnico').selectedIndex = 0;
+    if (tecnicoPreseleccionado) {
+      setSelectValue('osTecnico', tecnicoPreseleccionado);
+    } else {
+      document.getElementById('osTecnico').selectedIndex = 0;
+    }
     document.getElementById('osPrioridad').selectedIndex = 0;
     document.getElementById('osEstado').selectedIndex = 0;
     editIndex = -1;
@@ -3374,7 +3433,8 @@
           '</div>' +
           (os ? '<button class="btn-tarea-row" style="padding:6px 12px;" onclick="abrirTarea(' + historial.indexOf(os) + ')">&#10003; Tarea</button> ' : '') +
           (os ? '<button class="btn-print-row" onclick="imprimirOS(' + historial.indexOf(os) + ')">Ver PDF</button> ' : '') +
-          '<button class="btn-save" style="padding:6px 14px;font-size:0.78rem;background:#c0392b;border:none;border-radius:7px;color:#fff;font-weight:700;cursor:pointer;" onclick="imprimirEjecucion(' + colaterales.indexOf(item) + ')">&#128196; Llenar PDF</button>' +
+          '<button class="btn-tarea-row" style="padding:6px 13px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;font-size:0.78rem;" onclick="abrirLlenarEjecucion(' + colaterales.indexOf(item) + ')">&#9998; Llenar</button> ' +
+          '<button class="btn-print-row" style="font-size:0.78rem;" onclick="imprimirEjecucion(' + colaterales.indexOf(item) + ')">&#128196; PDF</button>' +
         '</div>';
       }).join('') +
       '</div>';
@@ -3812,10 +3872,70 @@
     setTimeout(function() { window.print(); pa.style.display = 'none'; }, 200);
   }
 
+  var _ejecucionEditandoIdx = null;
+
+  function abrirLlenarEjecucion(colIdx) {
+    var item = colaterales[colIdx];
+    if (!item) return;
+    var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
+    _ejecucionEditandoIdx = colIdx;
+
+    document.getElementById('ejecucionModalCodigo').textContent = item.codigo || '-';
+    document.getElementById('ejecModalNombre').textContent = item.nombre || '-';
+    document.getElementById('ejecModalDireccion').textContent = item.direccion || '-';
+    document.getElementById('ejecModalOrden').textContent = item.ordenEjecucionId || '-';
+    document.getElementById('ejecModalTecnico').textContent = (os && os.tecnico) ? os.tecnico : (item.tecnico || '-');
+
+    // Precargar datos existentes de la OS o del campo ejecucion del colateral
+    var datos = item.datosEjecucion || {};
+    document.getElementById('ejecModalActividad').value = datos.actividad || (os && os.actividad && os.actividad !== '-' ? os.actividad : '');
+    document.getElementById('ejecModalFecha').value = datos.fecha || (new Date().toISOString().split('T')[0]);
+    document.getElementById('ejecModalEstado').value = datos.estado || (os ? os.estado : 'Pendiente');
+    document.getElementById('ejecModalObs').value = datos.obs || (os && os.obs && os.obs !== '-' ? os.obs : '');
+    document.getElementById('ejecModalMateriales').value = datos.materiales || '';
+
+    document.getElementById('modalLlenarEjecucion').classList.add('active');
+  }
+
+  function cerrarLlenarEjecucion() {
+    document.getElementById('modalLlenarEjecucion').classList.remove('active');
+    _ejecucionEditandoIdx = null;
+  }
+
+  function guardarLlenarEjecucion() {
+    if (_ejecucionEditandoIdx === null) return;
+    var item = colaterales[_ejecucionEditandoIdx];
+    if (!item) return;
+
+    var datos = {
+      actividad:  document.getElementById('ejecModalActividad').value.trim() || '-',
+      fecha:      document.getElementById('ejecModalFecha').value,
+      estado:     document.getElementById('ejecModalEstado').value,
+      obs:        document.getElementById('ejecModalObs').value.trim() || '-',
+      materiales: document.getElementById('ejecModalMateriales').value.trim() || '-'
+    };
+    item.datosEjecucion = datos;
+
+    // Sincronizar estado también en la OS vinculada
+    var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
+    if (os) {
+      os.estado    = datos.estado;
+      os.actividad = datos.actividad;
+      os.obs       = datos.obs;
+      guardarStorage();
+      renderHistorial();
+    }
+    guardarColateralesStorage();
+    renderEjecucion();
+    cerrarLlenarEjecucion();
+    alert('Datos de ejecucion guardados correctamente.');
+  }
+
   function imprimirEjecucion(colIdx) {
     var item = colaterales[colIdx];
     if (!item) return;
     var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
+    var datos = item.datosEjecucion || { actividad: (os && os.actividad) || '-', obs: (os && os.obs) || '-', estado: (os && os.estado) || '-', materiales: '-', fecha: '' };
     var pa = document.getElementById('printArea');
 
     function fila(label, val) {
@@ -3886,11 +4006,17 @@
 
       // III. DESCRIPCION DEL TRABAJO
       seccion('III. Descripcion del Trabajo / Actividad') +
-      '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;min-height:50px;background:#fafcff;">' + (os && os.actividad && os.actividad !== '-' ? os.actividad : '<span style="color:#aaa;font-style:italic;">Sin descripcion registrada.</span>') + '</div>' +
+      '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;min-height:50px;background:#fafcff;">' + (datos.actividad && datos.actividad !== '-' ? datos.actividad : '<span style="color:#aaa;font-style:italic;">Sin descripcion registrada.</span>') + '</div>' +
 
       // IV. OBSERVACIONES / RESULTADO
       seccion('IV. Observaciones / Resultado de la Ejecucion') +
-      '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;min-height:60px;background:#fafcff;">' + (os && os.obs && os.obs !== '-' ? os.obs : '<span style="color:#aaa;font-style:italic;">Sin observaciones registradas.</span>') + '</div>' +
+      '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;min-height:60px;background:#fafcff;">' + (datos.obs && datos.obs !== '-' ? datos.obs : '<span style="color:#aaa;font-style:italic;">Sin observaciones registradas.</span>') + '</div>' +
+
+      // IV-B. MATERIALES
+      (datos.materiales && datos.materiales !== '-' ? (
+        seccion('IV-B. Materiales / Recursos Utilizados') +
+        '<div style="border:1px solid #c8d8ec;border-radius:4px;padding:10px 14px;font-size:0.84rem;background:#fafcff;">' + datos.materiales + '</div>'
+      ) : '') +
 
       // V. DATOS DE OFICINA COMERCIAL
       (item.oficinaComercial ? (
@@ -5871,6 +5997,7 @@
   // INIT
   document.getElementById('modalOS').addEventListener('click', function(e) { if (e.target === this) cerrarOS(); });
   document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
+  document.getElementById('modalLlenarEjecucion').addEventListener('click', function(e) { if (e.target === this) cerrarLlenarEjecucion(); });
   document.getElementById('modalCuenta').addEventListener('click', function(e) { if (e.target === this) cerrarCuenta(); });
   document.getElementById('modalReporteDiario').addEventListener('click', function(e) { if (e.target === this) cerrarReporteDiario(); });
   document.getElementById('modalFactibilidad').addEventListener('click', function(e) { if (e.target === this) cerrarFactibilidad(); });
