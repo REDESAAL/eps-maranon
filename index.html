@@ -654,15 +654,47 @@
   <div id="segChipsTecnicos" style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 24px;"></div>
 
   <div id="segDetalleWrap" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h4 id="segDetalleTitulo" style="color:var(--azul);"></h4>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h4 id="segDetalleTitulo" style="color:var(--azul);font-size:1.05rem;"></h4>
       <button class="btn-config-cancelar" onclick="cerrarDetalleSeguimiento()">Cerrar</button>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>N Orden</th><th>Codigo</th><th>Fecha Emision</th><th>Fecha Programada</th><th>Componente</th><th>Prioridad</th><th>Estado</th><th>PDF</th></tr></thead>
-        <tbody id="segDetalleBody"></tbody>
-      </table>
+    <!-- Resumen de contadores del técnico -->
+    <div id="segDetalleResumen" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;"></div>
+    <!-- SECCION 1: Órdenes de Servicio -->
+    <div id="segSeccionOS" style="margin-bottom:24px;">
+      <div style="background:var(--azul);color:white;padding:7px 16px;border-radius:6px 6px 0 0;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+        <span>&#128203;</span> Órdenes de Servicio <span id="segOSCount" style="background:rgba(255,255,255,0.22);padding:1px 10px;border-radius:10px;font-size:0.75rem;"></span>
+      </div>
+      <div class="table-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0;">
+        <table id="tablaSegOS" style="min-width:860px;">
+          <thead><tr><th>N° Orden</th><th>Código</th><th>Componente</th><th>Fecha Emisión</th><th>Fecha Prog.</th><th>Prioridad</th><th>Estado</th><th style="text-align:center;">Acciones</th></tr></thead>
+          <tbody id="segDetalleBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- SECCION 2: Inspecciones de Factibilidad -->
+    <div id="segSeccionInsp" style="margin-bottom:24px;">
+      <div style="background:#1a6fc4;color:white;padding:7px 16px;border-radius:6px 6px 0 0;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+        <span>&#128270;</span> Inspecciones de Factibilidad <span id="segInspCount" style="background:rgba(255,255,255,0.22);padding:1px 10px;border-radius:10px;font-size:0.75rem;"></span>
+      </div>
+      <div class="table-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0;">
+        <table id="tablaSegInsp" style="min-width:860px;">
+          <thead><tr><th>N° Código</th><th>Solicitante</th><th>Dirección</th><th>Sector</th><th>Mz / Lt</th><th>Estado Insp.</th><th>Oficina Com.</th><th>Orden Ejec.</th></tr></thead>
+          <tbody id="segDetalleInspBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- SECCION 3: Reportes Diarios -->
+    <div id="segSeccionRep" style="margin-bottom:8px;">
+      <div style="background:#1a8a4a;color:white;padding:7px 16px;border-radius:6px 6px 0 0;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+        <span>&#128196;</span> Reportes Diarios <span id="segRepCount" style="background:rgba(255,255,255,0.22);padding:1px 10px;border-radius:10px;font-size:0.75rem;"></span>
+      </div>
+      <div class="table-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0;">
+        <table id="tablaSegRep" style="min-width:700px;">
+          <thead><tr><th>Fecha</th><th>Turno</th><th>Actividades Realizadas</th><th>Personal</th><th>Zona / Sector</th><th>Observaciones</th></tr></thead>
+          <tbody id="segDetalleRepBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -901,8 +933,23 @@
           <div class="os-field"><label>N Orden</label><input type="text" id="osId" readonly></div>
           <input type="hidden" id="osSistema" value="agua">
           <div class="os-field"><label>Fecha de Emision</label><input type="date" id="osFecha"></div>
-          <div class="os-field"><label>N Codigo</label><input type="text" id="osCodigo" placeholder="Ej: DL-2025-001"></div>
+          <div class="os-field"><label>N Codigo</label><input type="text" id="osCodigo" placeholder="Ej: DL-2025-001" oninput="autocompletarDesdeCatalogo(this.value)" autocomplete="off" list="osCodigoSuggestions"><datalist id="osCodigoSuggestions"></datalist></div>
           <div class="os-field"><label>Direccion / Ubicacion</label><input type="text" id="osDireccion" placeholder="Ej: Jr. Amazonas 245"></div>
+          <!-- Panel autocompletado desde catálogo -->
+          <div class="os-field full" id="osCatalogoPanel" style="display:none;">
+            <div style="background:#eaf4ff;border:1.5px solid #b8d8f8;border-radius:8px;padding:12px 16px;">
+              <div style="font-size:0.72rem;font-weight:800;color:#0b4f8a;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">&#128203; Datos del Catálogo</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 16px;font-size:0.82rem;">
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Componente</span><br><strong id="osCatComp" style="color:var(--azul);">—</strong></div>
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Dirección</span><br><span id="osCatDir">—</span></div>
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Localidad</span><br><span id="osCatLoc">—</span></div>
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Coord. Norte</span><br><span id="osCatNorte">—</span></div>
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Coord. Este</span><br><span id="osCatEste">—</span></div>
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Fecha Prog.</span><br><span id="osCatFecha">—</span></div>
+                <div><span style="color:#7a8fa6;font-size:0.75rem;">Situación</span><br><span id="osCatSit" style="font-weight:700;">—</span></div>
+              </div>
+            </div>
+          </div>
           <div class="os-field full"><label>Componente</label><input type="text" id="osComponente" readonly></div>
           <div class="os-field"><label>Frecuencia</label><input type="text" id="osFrecuencia" readonly></div>
           <div class="os-field"><label>Prioridad</label>
@@ -1106,6 +1153,10 @@
         </div>
         <div class="os-field full"><label>Materiales / Recursos Utilizados (opcional)</label>
           <input type="text" id="ejecModalMateriales" placeholder="Ej: Tubo PVC 2&quot;, Codo 90°, Pegamento PVC...">
+        </div>
+        <div class="os-field" id="campoEjecNroMedidor" style="display:none;">
+          <label>N&#176; de Medidor</label>
+          <input type="text" id="ejecModalNroMedidor" placeholder="Ej: 12345678">
         </div>
       </div>
     </div>
@@ -3140,7 +3191,9 @@
     document.getElementById('osObs').value = '';
     document.getElementById('osCodigo').value = '';
     document.getElementById('osDireccion').value = '';
+    document.getElementById('osCatalogoPanel').style.display = 'none';
     document.getElementById('osActividad').value = '';
+    actualizarDatalistCodigos(sistema);
     if (tecnicoPreseleccionado) {
       setSelectValue('osTecnico', tecnicoPreseleccionado);
     } else {
@@ -3184,6 +3237,9 @@
     setSelectValue('osTecnico', os.tecnico);
     setSelectValue('osPrioridad', os.prioridad);
     setSelectValue('osEstado', os.estado);
+    // Autocompletar catálogo si hay código
+    actualizarDatalistCodigos(os.sistema || 'agua');
+    if (os.codigo && os.codigo !== '-') { autocompletarDesdeCatalogo(os.codigo, true); }
     window._archivosOS = [];
     document.getElementById('osArchivo').value = '';
     document.getElementById('previewAreaOS').innerHTML = '';
@@ -3204,6 +3260,67 @@
     document.getElementById('btnGenerarLink').onclick = mostrarPanelWA;
     document.getElementById('shareLinkInput').value = '';
     document.getElementById('modalOS').classList.add('active');
+  }
+
+  function actualizarDatalistCodigos(sistema) {
+    var catalogo = (sistema === 'alcantarillado') ? catalogoAlcantarillado : catalogoAgua;
+    // También buscar en ambos catálogos si no hay sistema definido
+    var todos = catalogoAgua.concat(catalogoAlcantarillado);
+    var dl = document.getElementById('osCodigoSuggestions');
+    if (!dl) return;
+    dl.innerHTML = todos
+      .filter(function(it) { return it.codigo && it.codigo !== '-'; })
+      .map(function(it) {
+        return '<option value="' + it.codigo + '">' + it.codigo + ' — ' + it.componente + ' (' + (it.direccion !== '-' ? it.direccion : it.localidad) + ')</option>';
+      }).join('');
+  }
+
+  function autocompletarDesdeCatalogo(val, silencioso) {
+    val = (val || '').trim().toLowerCase();
+    var panel = document.getElementById('osCatalogoPanel');
+    if (!val) { panel.style.display = 'none'; return; }
+
+    // Buscar en ambos catálogos
+    var todos = catalogoAgua.concat(catalogoAlcantarillado);
+    var item = todos.find(function(it) {
+      return it.codigo && it.codigo.toLowerCase() === val;
+    });
+    // También coincidencia parcial si no hay exacta
+    if (!item) {
+      item = todos.find(function(it) {
+        return it.codigo && it.codigo.toLowerCase().indexOf(val) === 0;
+      });
+    }
+
+    if (!item) { panel.style.display = 'none'; return; }
+
+    // Poblar panel informativo
+    var sitColor = item.situacion === 'Operativo' ? '#1a7a4a' : item.situacion === 'Inoperativo' ? 'var(--rojo)' : '#e8a000';
+    document.getElementById('osCatComp').textContent   = item.componente || '—';
+    document.getElementById('osCatDir').textContent    = item.direccion !== '-' ? item.direccion : '—';
+    document.getElementById('osCatLoc').textContent    = item.localidad !== '-' ? item.localidad : '—';
+    document.getElementById('osCatNorte').textContent  = item.norte !== '-' ? item.norte : '—';
+    document.getElementById('osCatEste').textContent   = item.este !== '-' ? item.este : '—';
+    document.getElementById('osCatFecha').textContent  = item.fechaProg && item.fechaProg !== '-' ? formatFecha(item.fechaProg) : '—';
+    document.getElementById('osCatSit').textContent    = item.situacion || '—';
+    document.getElementById('osCatSit').style.color    = sitColor;
+    panel.style.display = 'block';
+
+    // Autocompletar campos de la OS solo si están vacíos (o si es carga silenciosa al editar)
+    var dir = document.getElementById('osDireccion');
+    if (!dir.value || silencioso) {
+      dir.value = item.direccion !== '-' ? item.direccion : '';
+    }
+    // Si el código coincide exactamente, propagar fecha programada si está vacía
+    var fp = document.getElementById('osFechaProg');
+    if ((!fp.value || silencioso) && item.fechaProg && item.fechaProg !== '-') {
+      fp.value = item.fechaProg;
+    }
+    // Añadir coordenadas a la actividad si aún está vacía
+    var actEl = document.getElementById('osActividad');
+    if (!actEl.value && (item.norte !== '-' || item.este !== '-')) {
+      actEl.value = 'Componente: ' + item.componente + ' | N: ' + item.norte + ' E: ' + item.este;
+    }
   }
 
   function setSelectValue(id, val) {
@@ -3258,6 +3375,15 @@
         historial[editIndex] = os;
         guardarStorage();
         renderHistorial();
+        // Si esta O/S viene de "Pase a Ejecucion" en Colaterales (edicion), vincularla
+        var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
+        if (colPendiente) {
+          colPendiente.ordenEjecucionId = os.id;
+          delete colPendiente._pendienteVincularOS;
+          guardarColateralesStorage();
+          renderColaterales();
+          renderEjecucion();
+        }
         cerrarOS();
       } else {
         obtenerNumeroAtomico('os', osCounter, function(numero) {
@@ -3274,6 +3400,7 @@
             delete colPendiente._pendienteVincularOS;
             guardarColateralesStorage();
             renderColaterales();
+            renderEjecucion();
           }
           mostrarPanelWA();
         });
@@ -3894,6 +4021,12 @@
     document.getElementById('ejecModalObs').value = datos.obs || (os && os.obs && os.obs !== '-' ? os.obs : '');
     document.getElementById('ejecModalMateriales').value = datos.materiales || '';
 
+    // Mostrar campo N° de Medidor solo si el componente es Conexión
+    var esConexion = os && os.componente && os.componente.toLowerCase().indexOf('conexion') >= 0;
+    var campoMedidor = document.getElementById('campoEjecNroMedidor');
+    campoMedidor.style.display = esConexion ? 'block' : 'none';
+    document.getElementById('ejecModalNroMedidor').value = datos.nroMedidor || (os && os.nroMedidor && os.nroMedidor !== '-' ? os.nroMedidor : '');
+
     document.getElementById('modalLlenarEjecucion').classList.add('active');
   }
 
@@ -3912,16 +4045,20 @@
       fecha:      document.getElementById('ejecModalFecha').value,
       estado:     document.getElementById('ejecModalEstado').value,
       obs:        document.getElementById('ejecModalObs').value.trim() || '-',
-      materiales: document.getElementById('ejecModalMateriales').value.trim() || '-'
+      materiales: document.getElementById('ejecModalMateriales').value.trim() || '-',
+      nroMedidor: document.getElementById('campoEjecNroMedidor').style.display !== 'none'
+                    ? (document.getElementById('ejecModalNroMedidor').value.trim() || '-')
+                    : '-'
     };
     item.datosEjecucion = datos;
 
-    // Sincronizar estado también en la OS vinculada
+    // Sincronizar estado y N° de Medidor también en la OS vinculada
     var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
     if (os) {
       os.estado    = datos.estado;
       os.actividad = datos.actividad;
       os.obs       = datos.obs;
+      if (datos.nroMedidor !== '-') os.nroMedidor = datos.nroMedidor;
       guardarStorage();
       renderHistorial();
     }
@@ -4000,7 +4137,8 @@
           fila('Frecuencia', os.frecuencia) +
           fila('Prioridad', os.prioridad) +
           fila('Estado de la Orden', os.estado) +
-          fila('Tecnico Responsable', os.tecnico)
+          fila('Tecnico Responsable', os.tecnico) +
+          (datos.nroMedidor && datos.nroMedidor !== '-' ? fila('N\u00b0 de Medidor Instalado', datos.nroMedidor) : '')
         ) : fila('Orden', 'Sin orden de servicio vinculada')) +
       '</table>' +
 
@@ -5809,27 +5947,102 @@
   }
 
   function mostrarDetalleTecnico(nombre) {
-    var ordenes = historial.filter(function(os) { return (os.tecnico || 'Sin asignar') === nombre; });
-    document.getElementById('segDetalleTitulo').textContent = 'Ordenes de ' + nombre + ' (' + ordenes.length + ')';
-    var tbody = document.getElementById('segDetalleBody');
+    // Filtrar datos del técnico
+    var ordenes     = historial.filter(function(os) { return (os.tecnico || 'Sin asignar') === nombre; });
+    var inspecciones= colaterales.filter(function(c) { return ((c.tecnico && c.tecnico !== '-') ? c.tecnico : 'Sin asignar') === nombre; });
+    var reportes    = reportesDiarios.filter(function(r) { return (r.nombre || 'Sin asignar') === nombre; });
+
+    // Título
+    document.getElementById('segDetalleTitulo').textContent = 'Detalle de actividad: ' + nombre;
+
+    // Resumen de contadores
+    var resumenItems = [
+      { label: 'Órdenes de Servicio', val: ordenes.length,      color: 'var(--azul)',   icon: '&#128203;' },
+      { label: 'Inspecciones',        val: inspecciones.length,  color: '#1a6fc4',       icon: '&#128270;' },
+      { label: 'Reportes Diarios',    val: reportes.length,      color: '#1a8a4a',       icon: '&#128196;' }
+    ];
+    document.getElementById('segDetalleResumen').innerHTML = resumenItems.map(function(it) {
+      return '<div style="flex:1;min-width:160px;background:white;border:1.5px solid #dbe9f8;border-top:4px solid ' + it.color + ';border-radius:10px;padding:14px 18px;text-align:center;">' +
+        '<div style="font-size:1.6rem;font-weight:800;color:' + it.color + ';">' + it.val + '</div>' +
+        '<div style="font-size:0.78rem;color:#7a8fa6;margin-top:2px;">' + it.icon + ' ' + it.label + '</div>' +
+      '</div>';
+    }).join('');
+
+    // ── SECCIÓN 1: Órdenes de Servicio ──────────────────────────
+    document.getElementById('segOSCount').textContent = ordenes.length;
+    var tbodyOS = document.getElementById('segDetalleBody');
     if (ordenes.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:16px;">Sin ordenes de servicio registradas.</td></tr>';
+      tbodyOS.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:16px;font-size:0.85rem;">Sin órdenes de servicio registradas.</td></tr>';
     } else {
-      tbody.innerHTML = ordenes.map(function(os) {
-        var idxReal = historial.indexOf(os);
+      tbodyOS.innerHTML = ordenes.map(function(os) {
+        var idxReal  = historial.indexOf(os);
         var estadoKey = os.estado.replace(/\s/g,'');
+        var prioColor = os.prioridad === 'Urgente' ? 'var(--rojo)' : os.prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
         return '<tr>' +
-          '<td><strong>' + os.id + '</strong></td>' +
-          '<td>' + os.codigo + '</td>' +
+          '<td><strong style="color:var(--azul);">' + os.id + '</strong></td>' +
+          '<td>' + (os.codigo !== '-' ? os.codigo : '<span style="color:#bbb;">—</span>') + '</td>' +
+          '<td style="max-width:180px;white-space:normal;font-size:0.8rem;">' + os.componente + '</td>' +
           '<td>' + formatFecha(os.fecha) + '</td>' +
-          '<td>' + formatFecha(os.fechaProg) + '</td>' +
-          '<td>' + os.componente + '</td>' +
-          '<td>' + os.prioridad + '</td>' +
+          '<td>' + (os.fechaProg && os.fechaProg !== '-' ? formatFecha(os.fechaProg) : '<span style="color:#bbb;">—</span>') + '</td>' +
+          '<td><span style="color:' + prioColor + ';font-weight:700;font-size:0.8rem;">' + os.prioridad + '</span></td>' +
           '<td><span class="badge-estado badge-' + estadoKey + '">' + os.estado + '</span></td>' +
-          '<td style="text-align:center"><button class="btn-print-row" onclick="imprimirOS(' + idxReal + ')">PDF</button></td>' +
-          '</tr>';
+          '<td style="text-align:center;white-space:nowrap;">' +
+            '<button class="btn-edit-row" style="margin-right:4px;" onclick="editarOS(' + idxReal + ')">&#9998; Editar</button>' +
+            '<button class="btn-print-row" onclick="imprimirOS(' + idxReal + ')">&#128196; PDF</button>' +
+          '</td>' +
+        '</tr>';
       }).join('');
     }
+
+    // ── SECCIÓN 2: Inspecciones de Factibilidad ──────────────────
+    document.getElementById('segInspCount').textContent = inspecciones.length;
+    var tbodyInsp = document.getElementById('segDetalleInspBody');
+    if (inspecciones.length === 0) {
+      tbodyInsp.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:16px;font-size:0.85rem;">Sin inspecciones de factibilidad registradas.</td></tr>';
+    } else {
+      tbodyInsp.innerHTML = inspecciones.map(function(c) {
+        var estadoColor = c.estado === 'Completado' ? '#1a7a4a' : c.estado === 'En Proceso' ? '#e8a000' : '#c0392b';
+        return '<tr>' +
+          '<td><strong style="color:var(--azul);">' + (c.codigo || '-') + '</strong></td>' +
+          '<td style="max-width:160px;white-space:normal;font-size:0.8rem;">' + (c.nombre || '-') + '</td>' +
+          '<td style="max-width:160px;white-space:normal;font-size:0.8rem;">' + (c.direccion || '-') + '</td>' +
+          '<td>' + (c.sector || '-') + '</td>' +
+          '<td>' + (c.manzana || '-') + ' / ' + (c.lote || '-') + '</td>' +
+          '<td><span style="color:' + estadoColor + ';font-weight:700;font-size:0.78rem;">' + (c.estado || 'Pendiente') + '</span></td>' +
+          '<td style="font-size:0.78rem;">' + (c.oficinaComercial ? '<span style="color:#1a7a4a;font-weight:700;">&#10003; Registrado</span>' : '<span style="color:#bbb;">—</span>') + '</td>' +
+          '<td style="font-size:0.78rem;">' + (c.ordenEjecucionId ? '<strong style="color:var(--azul);">' + c.ordenEjecucionId + '</strong>' : '<span style="color:#bbb;">—</span>') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // ── SECCIÓN 3: Reportes Diarios ───────────────────────────────
+    document.getElementById('segRepCount').textContent = reportes.length;
+    var tbodyRep = document.getElementById('segDetalleRepBody');
+    if (reportes.length === 0) {
+      tbodyRep.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#7a8fa6;padding:16px;font-size:0.85rem;">Sin reportes diarios registrados.</td></tr>';
+    } else {
+      // Mostrar más recientes primero
+      var repOrdenados = reportes.slice().sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
+      tbodyRep.innerHTML = repOrdenados.map(function(r) {
+        var actTexto = '';
+        if (Array.isArray(r.actividades)) {
+          actTexto = r.actividades.map(function(a){ return typeof a === 'object' ? (a.descripcion || a.actividad || JSON.stringify(a)) : a; }).join('; ');
+        } else if (typeof r.actividades === 'string') {
+          actTexto = r.actividades;
+        } else {
+          actTexto = r.actividad || r.descripcion || '-';
+        }
+        return '<tr>' +
+          '<td style="white-space:nowrap;">' + formatFecha(r.fecha) + '</td>' +
+          '<td>' + (r.turno || '-') + '</td>' +
+          '<td style="max-width:240px;white-space:normal;font-size:0.8rem;">' + (actTexto || '-') + '</td>' +
+          '<td style="font-size:0.8rem;">' + (r.nombre || '-') + '</td>' +
+          '<td>' + (r.zona || r.sector || '-') + '</td>' +
+          '<td style="max-width:180px;white-space:normal;font-size:0.79rem;color:#5a7a9a;">' + (r.observaciones || r.obs || '-') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
     document.getElementById('segDetalleWrap').style.display = 'block';
     document.getElementById('segDetalleWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
