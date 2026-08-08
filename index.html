@@ -1205,55 +1205,113 @@
 <!-- MODAL MI CUENTA -->
 <!-- MODAL DERIVACION A EJECUCION -->
 <div class="modal-overlay" id="modalDerivacionEjecucion">
-  <div class="modal-box" style="max-width:480px;">
-    <div class="modal-header" style="background:linear-gradient(135deg,#1a6fc4,#0b4f8a);">
-      <h3 style="display:flex;align-items:center;gap:10px;">
-        <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;">&#128101;</span>
-        Derivación a Ejecución
-      </h3>
-      <button class="modal-close" onclick="cerrarDerivacionEjecucion()">&#10005;</button>
-    </div>
-    <div class="modal-body">
-      <!-- Info del expediente -->
-      <div id="derivExpedienteInfo" style="background:#f0f7ff;border:1.5px solid #b8d8f8;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.83rem;"></div>
+  <div class="modal-box" style="max-width:520px;">
 
-      <!-- Técnico inspector (1ra derivación - solo lectura) -->
-      <div style="margin-bottom:14px;">
-        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:6px;">1&#170; Derivación — Técnico Inspector (Factibilidad)</label>
-        <div id="derivTecnicoInspector" style="background:#f8f9fb;border:1px solid #dbe9f8;border-radius:7px;padding:10px 14px;font-size:0.88rem;color:var(--texto);display:flex;align-items:center;gap:8px;">
-          <span style="color:#1a7a4a;font-size:1rem;">&#10003;</span>
-          <span id="derivTecInspNombre" style="font-weight:600;"></span>
-          <span style="color:#7a8fa6;font-size:0.78rem;margin-left:4px;">— Inspección completada</span>
+    <!-- Encabezado formal -->
+    <div style="background:var(--azul);padding:0;border-radius:12px 12px 0 0;overflow:hidden;">
+      <!-- Franja institucional superior -->
+      <div style="background:#0b3d6b;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="color:rgba(255,255,255,0.7);font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;">EPS Marañón S.A. — ODR</span>
+        <button class="modal-close" onclick="cerrarDerivacionEjecucion()" style="color:rgba(255,255,255,0.7);background:none;border:none;font-size:1.2rem;cursor:pointer;line-height:1;">&#10005;</button>
+      </div>
+      <!-- Título del documento -->
+      <div style="padding:16px 22px 18px;text-align:center;">
+        <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;">Documento de Derivación</div>
+        <div style="font-size:1.15rem;font-weight:800;color:white;letter-spacing:0.5px;">HOJA DE DERIVACIÓN A EJECUCIÓN</div>
+        <div id="derivNumeroDoc" style="margin-top:6px;display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 16px;font-size:0.78rem;color:rgba(255,255,255,0.9);font-weight:600;"></div>
+      </div>
+    </div>
+
+    <div class="modal-body" style="padding:0;">
+
+      <!-- Sección I: Datos del Expediente -->
+      <div style="border-bottom:1px solid #e8eef5;">
+        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
+          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">I. Datos del Expediente</span>
+        </div>
+        <div id="derivExpedienteInfo" style="padding:14px 20px;font-size:0.83rem;"></div>
+      </div>
+
+      <!-- Sección II: Cadena de Derivación -->
+      <div style="border-bottom:1px solid #e8eef5;">
+        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
+          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">II. Cadena de Derivación del Personal Técnico</span>
+        </div>
+        <div style="padding:16px 20px;">
+
+          <!-- 1ra derivación -->
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+            <div style="min-width:28px;height:28px;background:#1a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:800;flex-shrink:0;margin-top:2px;">1°</div>
+            <div style="flex:1;">
+              <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7a8fa6;margin-bottom:4px;">Técnico Inspector — Inspección de Factibilidad</div>
+              <div style="background:#f0fff4;border:1.5px solid #a8e6c0;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:10px;">
+                <span style="color:#1a7a4a;font-size:1.1rem;">&#10003;</span>
+                <div>
+                  <div id="derivTecInspNombre" style="font-weight:700;color:#1a3a2a;font-size:0.88rem;"></div>
+                  <div style="font-size:0.73rem;color:#1a7a4a;margin-top:1px;">Inspección completada y derivada a Of. Comercial</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flecha -->
+          <div style="display:flex;align-items:center;gap:8px;margin:0 0 14px 40px;">
+            <div style="width:2px;height:22px;background:linear-gradient(to bottom,#1a7a4a,#1a6fc4);border-radius:2px;"></div>
+            <span style="font-size:0.7rem;color:#7a8fa6;font-style:italic;">Derivado a ejecución por ODR</span>
+          </div>
+
+          <!-- 2da derivación -->
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="min-width:28px;height:28px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:800;flex-shrink:0;margin-top:2px;">2°</div>
+            <div style="flex:1;">
+              <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0b4f8a;margin-bottom:4px;">Técnico / Operario Ejecutor <span style="color:var(--rojo);">*</span></div>
+              <select id="derivTecnicoEjecutor" style="width:100%;border:2px solid var(--azul);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#fff;cursor:pointer;box-sizing:border-box;">
+                <option value="">— Seleccione operario ejecutor —</option>
+              </select>
+              <div style="font-size:0.72rem;color:#7a8fa6;margin-top:4px;">Recibirá la Orden de Trabajo en su módulo de pendientes.</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Técnico ejecutor (2da derivación - seleccionable) -->
-      <div style="margin-bottom:6px;">
-        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#0b4f8a;display:block;margin-bottom:6px;">
-          2&#170; Derivación — Técnico / Operario Ejecutor <span style="color:var(--rojo);">*</span>
-        </label>
-        <select id="derivTecnicoEjecutor" style="width:100%;border:2px solid var(--azul);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto);background:#fff;cursor:pointer;">
-          <option value="">-- Seleccione técnico/operario ejecutor --</option>
-        </select>
-        <div style="font-size:0.75rem;color:#7a8fa6;margin-top:5px;">&#128161; Este operario recibirá la Orden de Trabajo para ejecutar la conexión.</div>
+      <!-- Sección III: Programación -->
+      <div style="border-bottom:1px solid #e8eef5;">
+        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
+          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">III. Programación de Ejecución</span>
+        </div>
+        <div style="padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:5px;">Fecha Programada</label>
+            <input type="date" id="derivFechaEjecucion" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:7px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:5px;">Prioridad</label>
+            <select id="derivPrioridad" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:7px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);background:#fff;box-sizing:border-box;cursor:pointer;">
+              <option value="Normal">Normal</option>
+              <option value="Alta">Alta</option>
+              <option value="Urgente">Urgente</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <!-- Fecha programada de ejecución -->
-      <div style="margin-top:14px;">
-        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#0b4f8a;display:block;margin-bottom:6px;">Fecha Programada de Ejecución</label>
-        <input type="date" id="derivFechaEjecucion" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);box-sizing:border-box;">
+      <!-- Sección IV: Instrucciones -->
+      <div>
+        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
+          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">IV. Instrucciones / Observaciones al Ejecutor</span>
+        </div>
+        <div style="padding:14px 20px;">
+          <textarea id="derivObservaciones" rows="3" placeholder="Indicaciones técnicas, materiales requeridos, acceso al predio, precauciones especiales..." style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.84rem;resize:vertical;box-sizing:border-box;color:var(--texto);"></textarea>
+        </div>
       </div>
 
-      <!-- Observaciones de derivación -->
-      <div style="margin-top:14px;">
-        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:6px;">Instrucciones / Observaciones para el Ejecutor</label>
-        <textarea id="derivObservaciones" rows="3" placeholder="Indicaciones especiales para el operario ejecutor..." style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;"></textarea>
-      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="cerrarDerivacionEjecucion()">Cancelar</button>
-      <button class="btn-save" style="background:linear-gradient(135deg,#1a6fc4,#0b4f8a);display:flex;align-items:center;gap:8px;" onclick="confirmarDerivacionEjecucion()">
-        <span>&#128101;</span> Derivar y Crear O/S
+
+    <!-- Pie del modal -->
+    <div class="modal-footer" style="border-top:2px solid #dbe9f8;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn-cancel" onclick="cerrarDerivacionEjecucion()" style="font-size:0.85rem;">Cancelar</button>
+      <button onclick="confirmarDerivacionEjecucion()" style="background:var(--azul);color:white;border:none;border-radius:8px;padding:11px 24px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;letter-spacing:0.3px;">
+        &#128190; Guardar Ejecución
       </button>
     </div>
   </div>
@@ -1427,6 +1485,10 @@
           <option value="160 mm">160 mm</option>
         </select>
       </div>
+      <div class="os-grid">
+        <div class="os-field"><label>Distancia de Corte de Pavimento</label><input type="text" id="factAguaDistPavimento" placeholder="Ej: 2.50 m"></div>
+        <div class="os-field"><label>Corte de Vereda</label><input type="text" id="factAguaCorteVereda" placeholder="Ej: 1.20 m"></div>
+      </div>
 
       <div class="section-title" style="font-size:0.88rem;margin-top:18px;">2. Datos de Conexion de Alcantarillado</div>
       <div class="os-grid">
@@ -1455,7 +1517,10 @@
         </div>
       </div>
       <div class="os-grid">
-        <div class="os-field"><label>Distancia para el corte de terreno</label><input type="text" id="factDesagueDistanciaCorte" placeholder="Ej: 3.50 m"></div>
+        <div class="os-field"><label>Distancia de Corte de Pavimento</label><input type="text" id="factDesagueDistanciaCorte" placeholder="Ej: 3.50 m"></div>
+        <div class="os-field"><label>Corte de Vereda</label><input type="text" id="factDesagueCorteVereda" placeholder="Ej: 1.20 m"></div>
+      </div>
+      <div class="os-grid">
         <div class="os-field">
           <label>Diametro de Conexion</label>
           <select id="factDesagueDiametro" class="coord-select">
@@ -3161,6 +3226,8 @@
         historial = data;
         try { localStorage.setItem(STORE_KEY, JSON.stringify(historial)); } catch(err) {}
         renderHistorial();
+        renderOrdenesAgua();
+        renderOrdenesAlcant();
         var secOT = document.getElementById('seccionOrdenTrabajo');
         if (secOT && secOT.style.display !== 'none') renderOrdenTrabajo();
       }
@@ -3251,6 +3318,8 @@
           osCounter = Math.max.apply(null, nums) + 1;
         }
         renderHistorial();
+        renderOrdenesAgua();
+        renderOrdenesAlcant();
       }
     } catch(e) { historial = []; }
   }
@@ -3354,16 +3423,21 @@
   }
 
   function actualizarDatalistCodigos(sistema) {
-    var catalogo = (sistema === 'alcantarillado') ? catalogoAlcantarillado : catalogoAgua;
-    // También buscar en ambos catálogos si no hay sistema definido
-    var todos = catalogoAgua.concat(catalogoAlcantarillado);
     var dl = document.getElementById('osCodigoSuggestions');
     if (!dl) return;
-    dl.innerHTML = todos
-      .filter(function(it) { return it.codigo && it.codigo !== '-'; })
-      .map(function(it) {
-        return '<option value="' + it.codigo + '">' + it.codigo + ' — ' + it.componente + ' (' + (it.direccion !== '-' ? it.direccion : it.localidad) + ')</option>';
-      }).join('');
+    // Filtrar solo por componente que coincida con la OS actual
+    var compOS = (document.getElementById('osComponente').value || '').trim().toLowerCase();
+    var todos = catalogoAgua.concat(catalogoAlcantarillado);
+    var filtrados = compOS
+      ? todos.filter(function(it) {
+          return it.codigo && it.codigo !== '-' &&
+                 it.componente && it.componente.toLowerCase() === compOS;
+        })
+      : todos.filter(function(it) { return it.codigo && it.codigo !== '-'; });
+    dl.innerHTML = filtrados.map(function(it) {
+      var loc = it.direccion !== '-' ? it.direccion : it.localidad;
+      return '<option value="' + it.codigo + '">' + it.codigo + ' — ' + it.componente + ' (' + loc + ')</option>';
+    }).join('');
   }
 
   function autocompletarDesdeCatalogo(val, silencioso) {
@@ -3371,19 +3445,21 @@
     var panel = document.getElementById('osCatalogoPanel');
     if (!val) { panel.style.display = 'none'; return; }
 
-    // Buscar en ambos catálogos
+    // Componente asignado a la OS para validar coincidencia
+    var compOS = (document.getElementById('osComponente').value || '').trim().toLowerCase();
     var todos = catalogoAgua.concat(catalogoAlcantarillado);
-    var item = todos.find(function(it) {
-      return it.codigo && it.codigo.toLowerCase() === val;
-    });
-    // También coincidencia parcial si no hay exacta
-    if (!item) {
-      item = todos.find(function(it) {
-        return it.codigo && it.codigo.toLowerCase().indexOf(val) === 0;
-      });
-    }
+
+    // Coincidencia exacta primero, luego parcial
+    var item = todos.find(function(it) { return it.codigo && it.codigo.toLowerCase() === val; });
+    if (!item) { item = todos.find(function(it) { return it.codigo && it.codigo.toLowerCase().indexOf(val) === 0; }); }
 
     if (!item) { panel.style.display = 'none'; return; }
+
+    // REGLA: solo mostrar si el componente del catálogo coincide con el de la OS
+    if (compOS && item.componente && item.componente.toLowerCase() !== compOS) {
+      panel.style.display = 'none';
+      return;
+    }
 
     // Poblar panel informativo
     var sitColor = item.situacion === 'Operativo' ? '#1a7a4a' : item.situacion === 'Inoperativo' ? 'var(--rojo)' : '#e8a000';
@@ -3397,17 +3473,11 @@
     document.getElementById('osCatSit').style.color    = sitColor;
     panel.style.display = 'block';
 
-    // Autocompletar campos de la OS solo si están vacíos (o si es carga silenciosa al editar)
+    // Autocompletar campos vacíos (o carga silenciosa al editar)
     var dir = document.getElementById('osDireccion');
-    if (!dir.value || silencioso) {
-      dir.value = item.direccion !== '-' ? item.direccion : '';
-    }
-    // Si el código coincide exactamente, propagar fecha programada si está vacía
+    if (!dir.value || silencioso) { dir.value = item.direccion !== '-' ? item.direccion : ''; }
     var fp = document.getElementById('osFechaProg');
-    if ((!fp.value || silencioso) && item.fechaProg && item.fechaProg !== '-') {
-      fp.value = item.fechaProg;
-    }
-    // Añadir coordenadas a la actividad si aún está vacía
+    if ((!fp.value || silencioso) && item.fechaProg && item.fechaProg !== '-') { fp.value = item.fechaProg; }
     var actEl = document.getElementById('osActividad');
     if (!actEl.value && (item.norte !== '-' || item.este !== '-')) {
       actEl.value = 'Componente: ' + item.componente + ' | N: ' + item.norte + ' E: ' + item.este;
@@ -3467,6 +3537,8 @@
         guardarStorage();
         renderHistorial();
         renderOrdenTrabajo();
+        renderOrdenesAgua();
+        renderOrdenesAlcant();
         // Si esta O/S viene de "Pase a Ejecucion" en Colaterales (edicion), vincularla
         var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
         if (colPendiente) {
@@ -3486,6 +3558,8 @@
           guardarStorage();
           renderHistorial();
           renderOrdenTrabajo();
+          renderOrdenesAgua();
+          renderOrdenesAlcant();
           // Si esta O/S viene de "Pase a Ejecucion" en Colaterales, vincularla
           var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
           if (colPendiente) {
@@ -3822,9 +3896,12 @@
     document.getElementById('factAguaProfundidad').value = agua.profundidad || '';
     document.getElementById('factAguaFecha').value = agua.fecha || hoy;
     document.getElementById('factAguaDiametroMatriz').value = agua.diametroMatriz || '';
+    document.getElementById('factAguaDistPavimento').value = agua.distPavimento || '';
+    document.getElementById('factAguaCorteVereda').value = agua.corteVereda || '';
     document.getElementById('factDesagueAsunto').value = desague.asunto || '';
     document.getElementById('factDesagueTipoTerreno').value = desague.tipoTerreno || '';
     document.getElementById('factDesagueDistanciaCorte').value = desague.distanciaCorte || '';
+    document.getElementById('factDesagueCorteVereda').value = desague.corteVereda || '';
     document.getElementById('factDesagueDiametro').value = desague.diametro || '';
     document.getElementById('factDesagueLongitud').value = desague.longitud || '';
     document.getElementById('factDesagueProfundidad').value = desague.profundidad || '';
@@ -3943,12 +4020,15 @@
         longitud: document.getElementById('factAguaLongitud').value.trim() || '-',
         profundidad: document.getElementById('factAguaProfundidad').value.trim() || '-',
         fecha: document.getElementById('factAguaFecha').value || '-',
-        diametroMatriz: document.getElementById('factAguaDiametroMatriz').value.trim() || '-'
+        diametroMatriz: document.getElementById('factAguaDiametroMatriz').value.trim() || '-',
+        distPavimento: document.getElementById('factAguaDistPavimento').value.trim() || '-',
+        corteVereda: document.getElementById('factAguaCorteVereda').value.trim() || '-'
       },
       desague: {
         asunto: document.getElementById('factDesagueAsunto').value || '-',
         tipoTerreno: document.getElementById('factDesagueTipoTerreno').value || '-',
         distanciaCorte: document.getElementById('factDesagueDistanciaCorte').value.trim() || '-',
+        corteVereda: document.getElementById('factDesagueCorteVereda').value.trim() || '-',
         diametro: document.getElementById('factDesagueDiametro').value.trim() || '-',
         longitud: document.getElementById('factDesagueLongitud').value.trim() || '-',
         profundidad: document.getElementById('factDesagueProfundidad').value.trim() || '-',
@@ -4050,12 +4130,19 @@
     historial.splice(idx, 1);
     guardarStorage();
     renderHistorial();
+    renderOrdenesAgua();
+    renderOrdenesAlcant();
+    renderOrdenTrabajo();
   }
 
   function limpiarHistorial() {
     if (!confirm('Eliminar todo el historial?')) return;
     historial = []; osCounter = 1;
-    guardarStorage(); renderHistorial();
+    guardarStorage();
+    renderHistorial();
+    renderOrdenesAgua();
+    renderOrdenesAlcant();
+    renderOrdenTrabajo();
   }
 
   function exportarCSV() {
@@ -4209,23 +4296,26 @@
 
     var actAgua = '';
     var partes = [];
-    if (val(agua.asunto))         partes.push('Asunto AP: '        + agua.asunto);
-    if (val(agua.diametro))       partes.push('Diám. conexión AP: '+ agua.diametro);
-    if (val(agua.longitud))       partes.push('Long. red AP: '     + agua.longitud);
-    if (val(agua.profundidad))    partes.push('Prof. red AP: '     + agua.profundidad);
-    if (val(agua.diametroMatriz)) partes.push('Diám. matriz AP: '  + agua.diametroMatriz);
-    if (val(agua.tipoTerreno))    partes.push('Terreno AP: '       + agua.tipoTerreno);
+    if (val(agua.asunto))         partes.push('Asunto AP: '           + agua.asunto);
+    if (val(agua.diametro))       partes.push('Diám. conexión AP: '  + agua.diametro);
+    if (val(agua.longitud))       partes.push('Long. red AP: '        + agua.longitud);
+    if (val(agua.profundidad))    partes.push('Prof. red AP: '        + agua.profundidad);
+    if (val(agua.diametroMatriz)) partes.push('Diám. matriz AP: '     + agua.diametroMatriz);
+    if (val(agua.tipoTerreno))    partes.push('Terreno AP: '          + agua.tipoTerreno);
+    if (val(agua.distPavimento))  partes.push('Corte pavimento AP: '  + agua.distPavimento);
+    if (val(agua.corteVereda))    partes.push('Corte vereda AP: '     + agua.corteVereda);
     if (partes.length) actAgua = 'AGUA POTABLE: ' + partes.join(' | ');
 
     var actDes = '';
     var partesD = [];
-    if (val(desague.asunto))          partesD.push('Asunto Alc: '         + desague.asunto);
-    if (val(desague.diametro))        partesD.push('Diám. conexión Alc: ' + desague.diametro);
-    if (val(desague.longitud))        partesD.push('Long. red Alc: '      + desague.longitud);
-    if (val(desague.profundidad))     partesD.push('Prof. red Alc: '      + desague.profundidad);
-    if (val(desague.diametroMatriz))  partesD.push('Diám. matriz Alc: '   + desague.diametroMatriz);
-    if (val(desague.distanciaCorte))  partesD.push('Dist. corte: '        + desague.distanciaCorte);
-    if (val(desague.tipoTerreno))     partesD.push('Terreno Alc: '        + desague.tipoTerreno);
+    if (val(desague.asunto))          partesD.push('Asunto Alc: '          + desague.asunto);
+    if (val(desague.diametro))        partesD.push('Diám. conexión Alc: '  + desague.diametro);
+    if (val(desague.longitud))        partesD.push('Long. red Alc: '        + desague.longitud);
+    if (val(desague.profundidad))     partesD.push('Prof. red Alc: '        + desague.profundidad);
+    if (val(desague.diametroMatriz))  partesD.push('Diám. matriz Alc: '     + desague.diametroMatriz);
+    if (val(desague.distanciaCorte))  partesD.push('Corte pavimento Alc: '  + desague.distanciaCorte);
+    if (val(desague.corteVereda))     partesD.push('Corte vereda Alc: '     + desague.corteVereda);
+    if (val(desague.tipoTerreno))     partesD.push('Terreno Alc: '          + desague.tipoTerreno);
     if (partesD.length) actDes = 'ALCANTARILLADO: ' + partesD.join(' | ');
 
     var actividadDesdeInsp = [actAgua, actDes].filter(Boolean).join('\n');
@@ -6048,7 +6138,10 @@
 
     _derivacionIdx = idx;
 
-    // Info del expediente
+    // Número de documento (formato HD-YYYYMMDD-código)
+    var hoy = new Date();
+    var numDoc = 'HD-' + hoy.getFullYear() + String(hoy.getMonth()+1).padStart(2,'0') + String(hoy.getDate()).padStart(2,'0') + '-' + item.codigo;
+    document.getElementById('derivNumeroDoc').textContent = numDoc;
     document.getElementById('derivExpedienteInfo').innerHTML =
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">' +
         '<div><span style="color:#0b4f8a;font-weight:700;">Código:</span> ' + item.codigo + '</div>' +
@@ -6090,12 +6183,14 @@
 
     var fechaProg     = document.getElementById('derivFechaEjecucion').value;
     var obsDerivacion = document.getElementById('derivObservaciones').value.trim();
+    var prioridad     = document.getElementById('derivPrioridad').value || 'Normal';
 
     // Guardar datos de derivación en el colateral
     item.derivacion = {
       tecnicoInspector: item.tecnico || '-',
       tecnicoEjecutor:  tecEjecutor,
       fechaProg:        fechaProg,
+      prioridad:        prioridad,
       obs:              obsDerivacion || '-',
       fecha:            new Date().toISOString().split('T')[0]
     };
@@ -6121,6 +6216,7 @@
     document.getElementById('osDireccion').value       = item.direccion !== '-' ? item.direccion : '';
     document.getElementById('osCodigo').value          = item.codigo;
     setSelectValue('osTecnico', tecEjecutor);
+    setSelectValue('osPrioridad', prioridad);
     if (fechaProg) { document.getElementById('osFechaProg').value = fechaProg; }
     document.getElementById('osActividad').value       = resumen;
 
