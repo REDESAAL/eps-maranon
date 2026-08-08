@@ -1150,6 +1150,16 @@
           <div><span style="color:#c0392b;font-weight:700;">Tecnico:</span> <span id="ejecModalTecnico"></span></div>
         </div>
       </div>
+      <!-- 2da derivación -->
+      <div id="ejecPanel2daDerivacion" style="display:none;background:#fff8e1;border:1.5px solid #ffe082;border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:0.81rem;">
+        <div style="font-size:0.72rem;font-weight:800;color:#7a5800;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">&#128101; Cadena de Derivación</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="text-align:center;"><div style="font-size:0.7rem;color:#7a8fa6;">1&#170; Inspector</div><strong id="ejecDerivInspector" style="color:#0b4f8a;font-size:0.83rem;"></strong></div>
+          <div style="font-size:1.2rem;color:#e8a000;">&#8594;</div>
+          <div style="text-align:center;"><div style="font-size:0.7rem;color:#7a8fa6;">2&#170; Ejecutor</div><strong id="ejecDerivEjecutor" style="color:#1a6fc4;font-size:0.83rem;"></strong></div>
+          <div id="ejecDerivFecha" style="font-size:0.75rem;color:#7a8fa6;margin-left:8px;"></div>
+        </div>
+      </div>
       <!-- Resumen de Inspección de Factibilidad (precarga) -->
       <div id="ejecPanelInspeccion" style="display:none;background:#f0f7ff;border:1.5px solid #b8d8f8;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:0.81rem;">
         <div style="font-size:0.72rem;font-weight:800;color:#0b4f8a;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">&#128270; Datos de Inspección de Factibilidad</div>
@@ -1193,6 +1203,62 @@
 </div>
 
 <!-- MODAL MI CUENTA -->
+<!-- MODAL DERIVACION A EJECUCION -->
+<div class="modal-overlay" id="modalDerivacionEjecucion">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a6fc4,#0b4f8a);">
+      <h3 style="display:flex;align-items:center;gap:10px;">
+        <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;">&#128101;</span>
+        Derivación a Ejecución
+      </h3>
+      <button class="modal-close" onclick="cerrarDerivacionEjecucion()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Info del expediente -->
+      <div id="derivExpedienteInfo" style="background:#f0f7ff;border:1.5px solid #b8d8f8;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.83rem;"></div>
+
+      <!-- Técnico inspector (1ra derivación - solo lectura) -->
+      <div style="margin-bottom:14px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:6px;">1&#170; Derivación — Técnico Inspector (Factibilidad)</label>
+        <div id="derivTecnicoInspector" style="background:#f8f9fb;border:1px solid #dbe9f8;border-radius:7px;padding:10px 14px;font-size:0.88rem;color:var(--texto);display:flex;align-items:center;gap:8px;">
+          <span style="color:#1a7a4a;font-size:1rem;">&#10003;</span>
+          <span id="derivTecInspNombre" style="font-weight:600;"></span>
+          <span style="color:#7a8fa6;font-size:0.78rem;margin-left:4px;">— Inspección completada</span>
+        </div>
+      </div>
+
+      <!-- Técnico ejecutor (2da derivación - seleccionable) -->
+      <div style="margin-bottom:6px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#0b4f8a;display:block;margin-bottom:6px;">
+          2&#170; Derivación — Técnico / Operario Ejecutor <span style="color:var(--rojo);">*</span>
+        </label>
+        <select id="derivTecnicoEjecutor" style="width:100%;border:2px solid var(--azul);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto);background:#fff;cursor:pointer;">
+          <option value="">-- Seleccione técnico/operario ejecutor --</option>
+        </select>
+        <div style="font-size:0.75rem;color:#7a8fa6;margin-top:5px;">&#128161; Este operario recibirá la Orden de Trabajo para ejecutar la conexión.</div>
+      </div>
+
+      <!-- Fecha programada de ejecución -->
+      <div style="margin-top:14px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#0b4f8a;display:block;margin-bottom:6px;">Fecha Programada de Ejecución</label>
+        <input type="date" id="derivFechaEjecucion" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);box-sizing:border-box;">
+      </div>
+
+      <!-- Observaciones de derivación -->
+      <div style="margin-top:14px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:6px;">Instrucciones / Observaciones para el Ejecutor</label>
+        <textarea id="derivObservaciones" rows="3" placeholder="Indicaciones especiales para el operario ejecutor..." style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarDerivacionEjecucion()">Cancelar</button>
+      <button class="btn-save" style="background:linear-gradient(135deg,#1a6fc4,#0b4f8a);display:flex;align-items:center;gap:8px;" onclick="confirmarDerivacionEjecucion()">
+        <span>&#128101;</span> Derivar y Crear O/S
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalCuenta">
   <div class="modal" style="width:400px;">
     <div class="modal-header" style="background:linear-gradient(135deg,var(--azul),var(--azul-claro));">
@@ -4122,6 +4188,17 @@
     document.getElementById('ejecModalOrden').textContent = item.ordenEjecucionId || '-';
     document.getElementById('ejecModalTecnico').textContent = (os && os.tecnico) ? os.tecnico : (item.tecnico || '-');
 
+    // ── Panel de cadena de derivación ─────────────────────────────
+    var panelDeriv = document.getElementById('ejecPanel2daDerivacion');
+    if (item.derivacion && item.derivacion.tecnicoEjecutor) {
+      panelDeriv.style.display = 'block';
+      document.getElementById('ejecDerivInspector').textContent = item.derivacion.tecnicoInspector || '-';
+      document.getElementById('ejecDerivEjecutor').textContent  = item.derivacion.tecnicoEjecutor;
+      document.getElementById('ejecDerivFecha').textContent     = item.derivacion.fechaProg ? '📅 Prog: ' + formatFecha(item.derivacion.fechaProg) : '';
+    } else {
+      panelDeriv.style.display = 'none';
+    }
+
     // ── Datos de inspección de factibilidad ──────────────────────
     var insp   = item.inspeccion || {};
     var agua   = insp.agua   || {};
@@ -5950,41 +6027,105 @@
     alert('Facturacion registrada correctamente para ' + item.codigo + '.');
   }
 
+  // ─── DERIVACIÓN A EJECUCIÓN (2da derivación técnica) ─────────
+  var _derivacionIdx = -1;
+
   function pasarAEjecucion(idx) {
     var item = colaterales[idx];
     if (!item) return;
     if (item.estado !== 'Completado') {
-      alert('Debe completar primero la inspeccion de factibilidad.');
+      alert('Debe completar primero la inspección de factibilidad.');
       return;
     }
     if (!item.oficinaComercial) {
-      alert('Debe pasar primero por Oficina Comercial (fecha, nombre y asunto) antes de derivar a ejecucion.');
+      alert('Debe pasar primero por Oficina Comercial antes de derivar a ejecución.');
       return;
     }
     if (item.ordenEjecucionId) {
-      alert('Este registro ya fue pasado a ejecucion como la orden ' + item.ordenEjecucionId + '.');
+      alert('Este registro ya fue pasado a ejecución como la orden ' + item.ordenEjecucionId + '.');
       return;
     }
-    if (!confirm('Crear una Orden de Servicio para ejecutar la conexion de "' + item.nombre + '" (Cod: ' + item.codigo + ')?')) return;
 
-    abrirOS('Conexion Domiciliaria - ' + item.codigo, 'Ejecucion');
-    document.getElementById('osDireccion').value = item.direccion !== '-' ? item.direccion : '';
-    document.getElementById('osCodigo').value = item.codigo;
-    if (item.tecnico && item.tecnico !== '-') { setSelectValue('osTecnico', item.tecnico); }
-    var insp = item.inspeccion || {};
-    var agua = insp.agua || {};
+    _derivacionIdx = idx;
+
+    // Info del expediente
+    document.getElementById('derivExpedienteInfo').innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">' +
+        '<div><span style="color:#0b4f8a;font-weight:700;">Código:</span> ' + item.codigo + '</div>' +
+        '<div><span style="color:#0b4f8a;font-weight:700;">Solicitante:</span> ' + item.nombre + '</div>' +
+        '<div><span style="color:#0b4f8a;font-weight:700;">Dirección:</span> ' + item.direccion + '</div>' +
+        '<div><span style="color:#0b4f8a;font-weight:700;">Sector:</span> ' + item.sector + ' Mz.' + item.manzana + ' Lt.' + item.lote + '</div>' +
+        (item.oficinaComercial ? '<div style="grid-column:1/-1;"><span style="color:#0b4f8a;font-weight:700;">Of. Comercial:</span> ' + item.oficinaComercial.asunto + ' — ' + formatFecha(item.oficinaComercial.fecha) + '</div>' : '') +
+      '</div>';
+
+    // 1ra derivación: técnico inspector
+    document.getElementById('derivTecInspNombre').textContent = item.tecnico && item.tecnico !== '-' ? item.tecnico : 'Sin asignar';
+
+    // Poblar select técnico ejecutor
+    var sel = document.getElementById('derivTecnicoEjecutor');
+    var tecnicos = listaNombresTecnicos();
+    sel.innerHTML = '<option value="">-- Seleccione técnico/operario ejecutor --</option>' +
+      tecnicos.map(function(n) {
+        return '<option value="' + n + '"' + (n === item.tecnico ? ' selected' : '') + '>' + n + '</option>';
+      }).join('');
+
+    document.getElementById('derivFechaEjecucion').value = new Date().toISOString().split('T')[0];
+    document.getElementById('derivObservaciones').value  = '';
+    document.getElementById('modalDerivacionEjecucion').classList.add('active');
+  }
+
+  function cerrarDerivacionEjecucion() {
+    document.getElementById('modalDerivacionEjecucion').classList.remove('active');
+    _derivacionIdx = -1;
+  }
+
+  function confirmarDerivacionEjecucion() {
+    var tecEjecutor = document.getElementById('derivTecnicoEjecutor').value;
+    if (!tecEjecutor) {
+      alert('Seleccione el técnico/operario ejecutor para la 2da derivación.');
+      return;
+    }
+    var item = colaterales[_derivacionIdx];
+    if (!item) return;
+
+    var fechaProg     = document.getElementById('derivFechaEjecucion').value;
+    var obsDerivacion = document.getElementById('derivObservaciones').value.trim();
+
+    // Guardar datos de derivación en el colateral
+    item.derivacion = {
+      tecnicoInspector: item.tecnico || '-',
+      tecnicoEjecutor:  tecEjecutor,
+      fechaProg:        fechaProg,
+      obs:              obsDerivacion || '-',
+      fecha:            new Date().toISOString().split('T')[0]
+    };
+
+    cerrarDerivacionEjecucion();
+
+    // Construir resumen de actividad para la OS
+    var insp    = item.inspeccion || {};
+    var agua    = insp.agua    || {};
     var desague = insp.desague || {};
     var resumen = 'Ejecucion de conexion derivada de Factibilidad (Colateral ' + item.codigo + ').\n' +
-      'Sector: ' + item.sector + ' | Mz. ' + item.manzana + ' Lt. ' + item.lote + ' | N Conexion: ' + item.conexion + '\n' +
+      'Sector: ' + item.sector + ' | Mz. ' + item.manzana + ' Lt. ' + item.lote + ' | N Conexion: ' + (item.conexion || '-') + '\n' +
       'Oficina Comercial - Fecha: ' + formatFecha(item.oficinaComercial.fecha) + ', Asunto: ' + item.oficinaComercial.asunto + '\n' +
-      'Agua Potable - Diametro: ' + (agua.diametro || '-') + ', Long. red matriz: ' + (agua.longitud || '-') + ', Prof.: ' + (agua.profundidad || '-') + '\n' +
-      'Desague - Diametro: ' + (desague.diametro || '-') + ', Long. red matriz: ' + (desague.longitud || '-') + ', Prof.: ' + (desague.profundidad || '-');
-    if (insp.observacion && insp.observacion !== '-') { resumen += '\nObservacion inspeccion: ' + insp.observacion; }
-    document.getElementById('osActividad').value = resumen;
+      '1\u00aa Derivacion (Inspector): ' + (item.tecnico || '-') + '\n' +
+      '2\u00aa Derivacion (Ejecutor): ' + tecEjecutor + '\n' +
+      'Agua Potable - Diametro: ' + (agua.diametro || '-') + ', Long. red: ' + (agua.longitud || '-') + ', Prof.: ' + (agua.profundidad || '-') + '\n' +
+      'Desague - Diametro: ' + (desague.diametro || '-') + ', Long. red: ' + (desague.longitud || '-') + ', Prof.: ' + (desague.profundidad || '-');
+    if (obsDerivacion) { resumen += '\nInstrucciones al ejecutor: ' + obsDerivacion; }
+    if (insp.observacion && insp.observacion !== '-') { resumen += '\nObs. inspeccion: ' + insp.observacion; }
 
-    // Al guardarse la OS (guardarOS), el numero definitivo se conoce ahi; lo
-    // enlazamos aqui mismo usando el proximo numero de OS que se generara.
+    // Abrir modal OS con datos prellenados
+    abrirOS('Conexion Domiciliaria - ' + item.codigo, 'Ejecucion');
+    document.getElementById('osDireccion').value       = item.direccion !== '-' ? item.direccion : '';
+    document.getElementById('osCodigo').value          = item.codigo;
+    setSelectValue('osTecnico', tecEjecutor);
+    if (fechaProg) { document.getElementById('osFechaProg').value = fechaProg; }
+    document.getElementById('osActividad').value       = resumen;
+
     item._pendienteVincularOS = true;
+    guardarColateralesStorage();
   }
 
   function renderColaterales() {
@@ -6373,6 +6514,7 @@
   // INIT
   document.getElementById('modalOS').addEventListener('click', function(e) { if (e.target === this) cerrarOS(); });
   document.getElementById('modalTarea').addEventListener('click', function(e) { if (e.target === this) cerrarTarea(); });
+  document.getElementById('modalDerivacionEjecucion').addEventListener('click', function(e) { if (e.target === this) cerrarDerivacionEjecucion(); });
   document.getElementById('modalLlenarEjecucion').addEventListener('click', function(e) { if (e.target === this) cerrarLlenarEjecucion(); });
   document.getElementById('modalCuenta').addEventListener('click', function(e) { if (e.target === this) cerrarCuenta(); });
   document.getElementById('modalReporteDiario').addEventListener('click', function(e) { if (e.target === this) cerrarReporteDiario(); });
