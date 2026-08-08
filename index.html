@@ -599,6 +599,22 @@
       <a href="javascript:void(0)" class="link-nav-tecnico" style="display:none;color:var(--azul);font-weight:600;font-size:0.82rem;" onclick="mostrarSeccion('factibilidad')">Ir a Factibilidad &#8594;</a>
     </span>
   </div>
+  <!-- Barra de búsqueda + filtros -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+    <input type="text" id="buscarOT" placeholder="&#128269; Buscar por N° orden, técnico, componente, código, prioridad..." oninput="renderOrdenTrabajo()" style="flex:1;min-width:220px;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);">
+    <select id="filtroEstadoOT" onchange="renderOrdenTrabajo()" style="border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);background:#fff;cursor:pointer;">
+      <option value="">Todos los estados</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="En Proceso">En Proceso</option>
+    </select>
+    <select id="filtroPrioridadOT" onchange="renderOrdenTrabajo()" style="border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);background:#fff;cursor:pointer;">
+      <option value="">Todas las prioridades</option>
+      <option value="Urgente">Urgente</option>
+      <option value="Alta">Alta</option>
+      <option value="Normal">Normal</option>
+    </select>
+    <button onclick="document.getElementById('buscarOT').value='';document.getElementById('filtroEstadoOT').value='';document.getElementById('filtroPrioridadOT').value='';renderOrdenTrabajo();" style="border:1.5px solid #dbe9f8;border-radius:8px;padding:9px 14px;background:#f5f9ff;color:var(--azul);font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">&#10005; Limpiar</button>
+  </div>
   <div id="ordenTrabajoInfo" style="font-size:0.85rem;color:#7a8fa6;margin-bottom:16px;"></div>
   <div id="ordenTrabajoContenido"></div>
 </div>
@@ -1126,12 +1142,21 @@
     </div>
     <div class="modal-body">
       <!-- Info resumen del expediente -->
-      <div style="background:#fdf2f2;border:1px solid #f5c6c6;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.83rem;">
+      <div style="background:#fdf2f2;border:1px solid #f5c6c6;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:0.83rem;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
           <div><span style="color:#c0392b;font-weight:700;">Solicitante:</span> <span id="ejecModalNombre"></span></div>
           <div><span style="color:#c0392b;font-weight:700;">Direccion:</span> <span id="ejecModalDireccion"></span></div>
           <div><span style="color:#c0392b;font-weight:700;">Orden:</span> <span id="ejecModalOrden"></span></div>
           <div><span style="color:#c0392b;font-weight:700;">Tecnico:</span> <span id="ejecModalTecnico"></span></div>
+        </div>
+      </div>
+      <!-- Resumen de Inspección de Factibilidad (precarga) -->
+      <div id="ejecPanelInspeccion" style="display:none;background:#f0f7ff;border:1.5px solid #b8d8f8;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:0.81rem;">
+        <div style="font-size:0.72rem;font-weight:800;color:#0b4f8a;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">&#128270; Datos de Inspección de Factibilidad</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
+          <div id="ejecInspAgua" style="grid-column:1/-1;"></div>
+          <div id="ejecInspDesague" style="grid-column:1/-1;"></div>
+          <div id="ejecInspObs" style="grid-column:1/-1;margin-top:4px;"></div>
         </div>
       </div>
       <div class="os-grid">
@@ -3375,6 +3400,7 @@
         historial[editIndex] = os;
         guardarStorage();
         renderHistorial();
+        renderOrdenTrabajo();
         // Si esta O/S viene de "Pase a Ejecucion" en Colaterales (edicion), vincularla
         var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
         if (colPendiente) {
@@ -3393,6 +3419,7 @@
           editIndex = historial.length - 1;
           guardarStorage();
           renderHistorial();
+          renderOrdenTrabajo();
           // Si esta O/S viene de "Pase a Ejecucion" en Colaterales, vincularla
           var colPendiente = colaterales.filter(function(c) { return c._pendienteVincularOS; })[0];
           if (colPendiente) {
@@ -3432,54 +3459,136 @@
     var cont = document.getElementById('ordenTrabajoContenido');
     if (!info || !cont || !currentUser) return;
 
-    var pendientes = historial.filter(function(os) { return os.estado !== 'Completado'; });
+    // Leer filtros
+    var busqEl   = document.getElementById('buscarOT');
+    var estadoEl = document.getElementById('filtroEstadoOT');
+    var prioEl   = document.getElementById('filtroPrioridadOT');
+    var busqueda = busqEl   ? busqEl.value.trim().toLowerCase()   : '';
+    var filtEst  = estadoEl ? estadoEl.value                      : '';
+    var filtPrio = prioEl   ? prioEl.value                        : '';
 
+    // Pendientes = todo lo que NO está Completado
+    var base = historial.filter(function(os) { return os.estado !== 'Completado'; });
+
+    // Aplicar filtros de estado y prioridad
+    if (filtEst)  base = base.filter(function(os){ return os.estado    === filtEst;  });
+    if (filtPrio) base = base.filter(function(os){ return os.prioridad === filtPrio; });
+
+    // Aplicar búsqueda de texto
+    if (busqueda) {
+      base = base.filter(function(os) {
+        var haystack = [os.id, os.codigo, os.componente, os.tecnico, os.prioridad, os.estado, os.direccion, os.actividad].join(' ').toLowerCase();
+        return haystack.indexOf(busqueda) >= 0;
+      });
+    }
+
+    function prioColor(p) { return p === 'Urgente' ? 'var(--rojo)' : p === 'Alta' ? '#e8a000' : '#1a7a4a'; }
+    function prioIcon(p)  { return p === 'Urgente' ? '🔴' : p === 'Alta' ? '🟡' : '🟢'; }
+    function estadoBadge(e) {
+      var k = (e||'').replace(/\s/g,'');
+      return '<span class="badge-estado badge-' + k + '">' + e + '</span>';
+    }
+
+    // ── Vista TÉCNICO ────────────────────────────────────────────
     if (currentUser.rol === 'tecnico') {
-      var mios = pendientes.filter(function(os) { return os.tecnico === currentUser.nombre; });
-      info.innerHTML = 'Bienvenido/a <strong>' + currentUser.nombre + '</strong>. Aqui recibe sus ordenes de trabajo asignadas y puede completar el formulario de tarea.';
+      var mios = base.filter(function(os) { return os.tecnico === currentUser.nombre; });
+      info.innerHTML = 'Bienvenido/a <strong>' + currentUser.nombre + '</strong>. Tus órdenes de trabajo asignadas.';
       if (mios.length === 0) {
-        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No tiene ordenes de trabajo pendientes por el momento.</div>';
+        cont.innerHTML = '<div class="historial-empty" style="padding:40px;text-align:center;color:#7a8fa6;">' +
+          (busqueda || filtEst || filtPrio ? '&#128270; Sin resultados para la búsqueda aplicada.' : '&#10003; No tiene órdenes de trabajo pendientes por el momento.') +
+          '</div>';
         return;
       }
       cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
         mios.map(function(os) {
           var idxReal = historial.indexOf(os);
-          var prioColor = os.prioridad === 'Urgente' ? 'var(--rojo)' : os.prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
-          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + prioColor + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
-            '<div>' +
-              '<strong style="color:var(--azul);">' + os.id + '</strong> &middot; ' + os.componente + '<br>' +
-              '<span style="font-size:0.78rem;color:#7a8fa6;">' + formatFecha(os.fecha) + ' &middot; Prioridad: <strong style="color:' + prioColor + ';">' + os.prioridad + '</strong> &middot; Estado: ' + os.estado + '</span>' +
+          var pc = prioColor(os.prioridad);
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:5px solid ' + pc + ';border-radius:10px;padding:16px 18px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">' +
+              '<div>' +
+                '<div style="margin-bottom:4px;">' +
+                  '<strong style="color:var(--azul);font-size:1rem;">' + os.id + '</strong>' +
+                  (os.codigo && os.codigo !== '-' ? ' <span style="background:#eaf2fb;color:#0b4f8a;border-radius:10px;padding:2px 9px;font-size:0.75rem;font-weight:700;">' + os.codigo + '</span>' : '') +
+                '</div>' +
+                '<div style="font-size:0.88rem;color:var(--texto);margin-bottom:3px;">&#128203; ' + os.componente + '</div>' +
+                (os.direccion && os.direccion !== '-' ? '<div style="font-size:0.78rem;color:#7a8fa6;">&#128205; ' + os.direccion + '</div>' : '') +
+                '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;align-items:center;">' +
+                  estadoBadge(os.estado) +
+                  '<span style="font-size:0.78rem;color:' + pc + ';font-weight:700;">' + prioIcon(os.prioridad) + ' ' + os.prioridad + '</span>' +
+                  (os.fechaProg && os.fechaProg !== '-' ? '<span style="font-size:0.78rem;color:#7a8fa6;">&#128197; Prog: ' + formatFecha(os.fechaProg) + '</span>' : '') +
+                  '<span style="font-size:0.78rem;color:#7a8fa6;">Emisión: ' + formatFecha(os.fecha) + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<button class="btn-tarea-row" style="padding:9px 18px;white-space:nowrap;" onclick="abrirTarea(' + idxReal + ')">&#9998; Llenar Tarea</button>' +
             '</div>' +
-            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirTarea(' + idxReal + ')">Llenar Tarea</button>' +
+            (os.actividad && os.actividad !== '-' ? '<div style="margin-top:10px;border-top:1px solid #eaf0f8;padding-top:8px;font-size:0.78rem;color:#5a7a9a;line-height:1.5;">' + os.actividad.substring(0,200) + (os.actividad.length > 200 ? '…' : '') + '</div>' : '') +
           '</div>';
         }).join('') +
         '</div>';
+
+    // ── Vista COORDINADOR / SUPERVISOR ───────────────────────────
     } else {
-      // Coordinador / Supervisor: tablero agrupado por tecnico
+      var totalBase = base.length;
+      var totalSinFiltro = historial.filter(function(os){ return os.estado !== 'Completado'; }).length;
+
+      info.innerHTML = 'Vista general de órdenes pendientes agrupadas por técnico. ' +
+        (busqueda || filtEst || filtPrio
+          ? '<strong style="color:var(--azul);">' + totalBase + ' resultado' + (totalBase !== 1 ? 's' : '') + '</strong> de ' + totalSinFiltro + ' pendientes totales.'
+          : 'Total pendientes: <strong>' + totalSinFiltro + '</strong>.');
+
+      if (base.length === 0) {
+        cont.innerHTML = '<div class="historial-empty" style="padding:40px;text-align:center;color:#7a8fa6;">' +
+          (busqueda || filtEst || filtPrio ? '&#128270; Sin resultados para los filtros aplicados.' : '&#10003; No hay órdenes de trabajo pendientes. Todo al día.') +
+          '</div>';
+        return;
+      }
+
+      // Agrupar por técnico
       var porTecnico = {};
-      pendientes.forEach(function(os) {
+      base.forEach(function(os) {
         var nombre = os.tecnico || 'Sin asignar';
         if (!porTecnico[nombre]) porTecnico[nombre] = [];
         porTecnico[nombre].push(os);
       });
+
+      // Ordenar: urgentes primero dentro de cada técnico
+      var ordenPrio = { 'Urgente': 0, 'Alta': 1, 'Normal': 2 };
       var nombres = Object.keys(porTecnico).sort();
-      info.innerHTML = 'Vista general de ordenes de trabajo pendientes, agrupadas por tecnico/operario responsable. Total pendientes: <strong>' + pendientes.length + '</strong>.';
-      if (nombres.length === 0) {
-        cont.innerHTML = '<div class="historial-empty" style="padding:30px;text-align:center;color:#7a8fa6;">No hay ordenes de trabajo pendientes. Todo esta al dia.</div>';
-        return;
-      }
-      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:18px;">' +
+
+      cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px;">' +
         nombres.map(function(nombre) {
-          var lista = porTecnico[nombre];
-          return '<div class="config-col" style="padding:16px 20px;">' +
-            '<h4 style="margin-bottom:10px;">' + nombre + ' <span style="color:#7a8fa6;font-weight:400;font-size:0.8rem;">(' + lista.length + ' pendiente' + (lista.length > 1 ? 's' : '') + ')</span></h4>' +
-            '<div style="display:flex;flex-direction:column;gap:8px;">' +
+          var lista = porTecnico[nombre].slice().sort(function(a,b){ return (ordenPrio[a.prioridad]||2)-(ordenPrio[b.prioridad]||2); });
+          var tieneUrgente = lista.some(function(o){ return o.prioridad === 'Urgente'; });
+          var headerColor = tieneUrgente ? 'var(--rojo)' : 'var(--azul)';
+          return '<div class="config-col" style="padding:0;overflow:hidden;">' +
+            // Cabecera del técnico
+            '<div style="background:' + headerColor + ';color:white;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;">' +
+              '<span style="font-weight:800;font-size:0.88rem;text-transform:uppercase;letter-spacing:1px;">' + nombre + '</span>' +
+              '<span style="background:rgba(255,255,255,0.22);border-radius:20px;padding:2px 12px;font-size:0.8rem;font-weight:700;">' + lista.length + ' pendiente' + (lista.length !== 1 ? 's' : '') + '</span>' +
+            '</div>' +
+            // Lista de órdenes
+            '<div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">' +
             lista.map(function(os) {
               var idxReal = historial.indexOf(os);
-              var prioColor = os.prioridad === 'Urgente' ? 'var(--rojo)' : os.prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
-              return '<div style="display:flex;justify-content:space-between;align-items:center;background:#f8fbff;border:1px solid #e0eaf5;border-radius:8px;padding:8px 12px;flex-wrap:wrap;gap:8px;">' +
-                '<span style="font-size:0.85rem;"><strong>' + os.id + '</strong> &middot; ' + os.componente + ' &middot; <span style="color:' + prioColor + ';font-weight:600;">' + os.prioridad + '</span> &middot; ' + os.estado + '</span>' +
-                '<button class="btn-tarea-row" onclick="abrirTarea(' + idxReal + ')">Ver / Llenar</button>' +
+              var pc = prioColor(os.prioridad);
+              return '<div style="display:flex;justify-content:space-between;align-items:center;background:#f8fbff;border:1px solid #e0eaf5;border-left:4px solid ' + pc + ';border-radius:8px;padding:10px 14px;flex-wrap:wrap;gap:8px;">' +
+                '<div style="flex:1;min-width:200px;">' +
+                  '<div style="margin-bottom:3px;">' +
+                    '<strong style="color:var(--azul);">' + os.id + '</strong>' +
+                    (os.codigo && os.codigo !== '-' ? ' <span style="background:#eaf2fb;color:#0b4f8a;border-radius:8px;padding:1px 8px;font-size:0.73rem;font-weight:700;">' + os.codigo + '</span>' : '') +
+                    ' <span style="font-size:0.82rem;color:var(--texto);">&middot; ' + os.componente + '</span>' +
+                  '</div>' +
+                  '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">' +
+                    estadoBadge(os.estado) +
+                    '<span style="font-size:0.76rem;color:' + pc + ';font-weight:700;">' + prioIcon(os.prioridad) + ' ' + os.prioridad + '</span>' +
+                    (os.fechaProg && os.fechaProg !== '-' ? '<span style="font-size:0.75rem;color:#7a8fa6;">&#128197; ' + formatFecha(os.fechaProg) + '</span>' : '') +
+                    (os.direccion && os.direccion !== '-' ? '<span style="font-size:0.75rem;color:#7a8fa6;">&#128205; ' + os.direccion + '</span>' : '') +
+                  '</div>' +
+                '</div>' +
+                '<div style="display:flex;gap:6px;white-space:nowrap;">' +
+                  '<button class="btn-tarea-row" onclick="abrirTarea(' + idxReal + ')" style="font-size:0.78rem;">&#9998; Ver / Llenar</button>' +
+                  '<button class="btn-print-row" onclick="imprimirOS(' + idxReal + ')" style="font-size:0.78rem;">&#128196; PDF</button>' +
+                '</div>' +
               '</div>';
             }).join('') +
             '</div>' +
@@ -4013,15 +4122,69 @@
     document.getElementById('ejecModalOrden').textContent = item.ordenEjecucionId || '-';
     document.getElementById('ejecModalTecnico').textContent = (os && os.tecnico) ? os.tecnico : (item.tecnico || '-');
 
-    // Precargar datos existentes de la OS o del campo ejecucion del colateral
-    var datos = item.datosEjecucion || {};
-    document.getElementById('ejecModalActividad').value = datos.actividad || (os && os.actividad && os.actividad !== '-' ? os.actividad : '');
-    document.getElementById('ejecModalFecha').value = datos.fecha || (new Date().toISOString().split('T')[0]);
-    document.getElementById('ejecModalEstado').value = datos.estado || (os ? os.estado : 'Pendiente');
-    document.getElementById('ejecModalObs').value = datos.obs || (os && os.obs && os.obs !== '-' ? os.obs : '');
-    document.getElementById('ejecModalMateriales').value = datos.materiales || '';
+    // ── Datos de inspección de factibilidad ──────────────────────
+    var insp   = item.inspeccion || {};
+    var agua   = insp.agua   || {};
+    var desague= insp.desague|| {};
 
-    // Mostrar campo N° de Medidor solo si el componente es Conexión
+    // Construir texto de actividad desde inspección si no hay datos previos de ejecución
+    function val(v) { return (v && v !== '-') ? v : null; }
+
+    var actAgua = '';
+    var partes = [];
+    if (val(agua.asunto))         partes.push('Asunto AP: '        + agua.asunto);
+    if (val(agua.diametro))       partes.push('Diám. conexión AP: '+ agua.diametro);
+    if (val(agua.longitud))       partes.push('Long. red AP: '     + agua.longitud);
+    if (val(agua.profundidad))    partes.push('Prof. red AP: '     + agua.profundidad);
+    if (val(agua.diametroMatriz)) partes.push('Diám. matriz AP: '  + agua.diametroMatriz);
+    if (val(agua.tipoTerreno))    partes.push('Terreno AP: '       + agua.tipoTerreno);
+    if (partes.length) actAgua = 'AGUA POTABLE: ' + partes.join(' | ');
+
+    var actDes = '';
+    var partesD = [];
+    if (val(desague.asunto))          partesD.push('Asunto Alc: '         + desague.asunto);
+    if (val(desague.diametro))        partesD.push('Diám. conexión Alc: ' + desague.diametro);
+    if (val(desague.longitud))        partesD.push('Long. red Alc: '      + desague.longitud);
+    if (val(desague.profundidad))     partesD.push('Prof. red Alc: '      + desague.profundidad);
+    if (val(desague.diametroMatriz))  partesD.push('Diám. matriz Alc: '   + desague.diametroMatriz);
+    if (val(desague.distanciaCorte))  partesD.push('Dist. corte: '        + desague.distanciaCorte);
+    if (val(desague.tipoTerreno))     partesD.push('Terreno Alc: '        + desague.tipoTerreno);
+    if (partesD.length) actDes = 'ALCANTARILLADO: ' + partesD.join(' | ');
+
+    var actividadDesdeInsp = [actAgua, actDes].filter(Boolean).join('\n');
+
+    // Mostrar panel de resumen de inspección
+    var panelInsp = document.getElementById('ejecPanelInspeccion');
+    if (actividadDesdeInsp) {
+      panelInsp.style.display = 'block';
+      document.getElementById('ejecInspAgua').innerHTML   = actAgua   ? '<div style="margin-bottom:4px;"><strong style="color:#0b4f8a;">💧 Agua Potable:</strong> <span style="color:#1e2a3a;">' + agua.asunto + (val(agua.diametro) ? ' | Ø ' + agua.diametro : '') + (val(agua.longitud) ? ' | Long. ' + agua.longitud : '') + (val(agua.profundidad) ? ' | Prof. ' + agua.profundidad : '') + (val(agua.diametroMatriz) ? ' | Matriz Ø ' + agua.diametroMatriz : '') + '</span></div>' : '';
+      document.getElementById('ejecInspDesague').innerHTML= actDes    ? '<div style="margin-bottom:4px;"><strong style="color:#1a6fc4;">🚿 Alcantarillado:</strong> <span style="color:#1e2a3a;">' + desague.asunto + (val(desague.diametro) ? ' | Ø ' + desague.diametro : '') + (val(desague.longitud) ? ' | Long. ' + desague.longitud : '') + (val(desague.profundidad) ? ' | Prof. ' + desague.profundidad : '') + (val(desague.distanciaCorte) ? ' | Corte ' + desague.distanciaCorte : '') + (val(desague.diametroMatriz) ? ' | Matriz Ø ' + desague.diametroMatriz : '') + '</span></div>' : '';
+      document.getElementById('ejecInspObs').innerHTML   = val(insp.observacion) ? '<div><strong style="color:#5a7a9a;">Obs. Inspección:</strong> ' + insp.observacion + '</div>' : '';
+    } else {
+      panelInsp.style.display = 'none';
+    }
+
+    // ── Precargar campos del formulario ───────────────────────────
+    var datos = item.datosEjecucion || {};
+
+    // Actividad: si ya fue guardada, respetar; si no, usar datos de inspección
+    document.getElementById('ejecModalActividad').value =
+      datos.actividad && datos.actividad !== '-'
+        ? datos.actividad
+        : actividadDesdeInsp || (os && os.actividad && os.actividad !== '-' ? os.actividad : '');
+
+    // Observaciones: combinar obs de inspección si no hay datos de ejecución previos
+    var obsInsp = val(insp.observacion) ? 'Obs. inspección: ' + insp.observacion : '';
+    document.getElementById('ejecModalObs').value =
+      datos.obs && datos.obs !== '-'
+        ? datos.obs
+        : obsInsp || (os && os.obs && os.obs !== '-' ? os.obs : '');
+
+    document.getElementById('ejecModalFecha').value  = datos.fecha   || (new Date().toISOString().split('T')[0]);
+    document.getElementById('ejecModalEstado').value = datos.estado  || (os ? os.estado : 'Pendiente');
+    document.getElementById('ejecModalMateriales').value = datos.materiales && datos.materiales !== '-' ? datos.materiales : '';
+
+    // N° de Medidor — solo para Conexión
     var esConexion = os && os.componente && os.componente.toLowerCase().indexOf('conexion') >= 0;
     var campoMedidor = document.getElementById('campoEjecNroMedidor');
     campoMedidor.style.display = esConexion ? 'block' : 'none';
