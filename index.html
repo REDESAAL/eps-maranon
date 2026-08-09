@@ -1013,7 +1013,32 @@
         </div>
 
         <!-- Resumen visual de la O/S -->
-        <div id="osResumenCard" style="background:linear-gradient(135deg,#f0f5fb,#e8f2ff);border:1.5px solid #c8ddf0;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:0.82rem;"></div>
+        <div id="osResumenCard" style="background:linear-gradient(135deg,#f0f5fb,#e8f2ff);border:1.5px solid #c8ddf0;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:0.82rem;"></div>
+
+        <!-- Vista previa tipo tabla (igual a la tabla debajo del buscador) -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.68rem;font-weight:700;color:#0b4f8a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+            &#128203; Registro guardado en la tabla
+          </div>
+          <div style="overflow-x:auto;border-radius:8px;border:1.5px solid #c8ddf0;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.75rem;min-width:520px;">
+              <thead>
+                <tr style="background:#0b4f8a;color:white;">
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">N° CODIGO</th>
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">COMPONENTE</th>
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">FRECUENCIA</th>
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">PRIORIDAD</th>
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">TECNICO ASIGNADO</th>
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">FECHA PROGRAMADA</th>
+                  <th style="padding:7px 10px;text-align:left;white-space:nowrap;font-weight:600;letter-spacing:0.5px;">ESTADO</th>
+                </tr>
+              </thead>
+              <tbody id="osResumenTablaBody">
+                <tr><td colspan="7" style="text-align:center;padding:10px;color:#7a8fa6;">-</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Tecnico detectado + numero WhatsApp -->
         <div style="background:linear-gradient(135deg,#f0f9f4,#e6f7ed);border:1.5px solid #7ac99a;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
@@ -4599,6 +4624,26 @@
         '<span style="background:' + prioColor + ';color:white;font-weight:700;padding:2px 10px;border-radius:8px;font-size:0.78rem;">' + prioEmoji + ' ' + os.prioridad + '</span>' +
       '</div>';
     document.getElementById('osResumenCard').innerHTML = card;
+
+    // Llenar tabla de confirmación con los campos exactos de la tabla principal
+    var prioColors = { 'Urgente': '#c0392b', 'Alta': '#e8a000', 'Normal': '#1a8a4a', 'Baja': '#5a7a9a' };
+    var estadoClases = { 'Pendiente': 'background:#fff3cd;color:#856404;border:1px solid #ffc107;', 'En Proceso': 'background:#cff4fc;color:#055160;border:1px solid #0dcaf0;', 'Completado': 'background:#d1e7dd;color:#0a3622;border:1px solid #198754;' };
+    var pColor = prioColors[os.prioridad] || '#5a7a9a';
+    var eStyle = estadoClases[os.estado] || 'background:#eee;color:#333;';
+    var tablaBody = document.getElementById('osResumenTablaBody');
+    if (tablaBody) {
+      tablaBody.innerHTML =
+        '<tr style="background:#f5f9ff;">' +
+        '<td style="padding:8px 10px;font-weight:700;color:#0b4f8a;white-space:nowrap;">' + (os.id || '-') + '</td>' +
+        '<td style="padding:8px 10px;white-space:nowrap;">' + (os.componente || '-') + '</td>' +
+        '<td style="padding:8px 10px;white-space:nowrap;"><span style="background:#e8f2ff;color:#1a6fc4;border:1px solid #c8ddf0;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:10px;">' + (os.frecuencia || '-') + '</span></td>' +
+        '<td style="padding:8px 10px;white-space:nowrap;"><span style="background:' + pColor + ';color:white;font-weight:700;padding:2px 8px;border-radius:8px;font-size:0.72rem;">' + (os.prioridad || '-') + '</span></td>' +
+        '<td style="padding:8px 10px;white-space:nowrap;">' + (os.tecnico || '-') + '</td>' +
+        '<td style="padding:8px 10px;white-space:nowrap;">' + (os.fechaProg && os.fechaProg !== '-' ? formatFecha(os.fechaProg) : '-') + '</td>' +
+        '<td style="padding:8px 10px;white-space:nowrap;"><span style="' + eStyle + 'font-size:0.72rem;font-weight:700;padding:3px 8px;border-radius:8px;display:inline-block;">' + (os.estado || '-') + '</span></td>' +
+        '</tr>';
+    }
+
     document.getElementById('panelFormOS').style.display = 'none';
     document.getElementById('panelWAPost').style.display = 'block';
     document.getElementById('btnGuardar').style.display = 'none';
