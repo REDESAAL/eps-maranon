@@ -1189,9 +1189,25 @@
         <div class="os-field full"><label>Materiales / Recursos Utilizados (opcional)</label>
           <input type="text" id="ejecModalMateriales" placeholder="Ej: Tubo PVC 2&quot;, Codo 90°, Pegamento PVC...">
         </div>
-        <div class="os-field" id="campoEjecNroMedidor" style="display:none;">
-          <label>N&#176; de Medidor</label>
-          <input type="text" id="ejecModalNroMedidor" placeholder="Ej: 12345678">
+        <div class="os-grid">
+          <div class="os-field">
+            <label>N° Medidor</label>
+            <input type="text" id="ejecModalNroMedidor" placeholder="Ej: 12345678">
+          </div>
+          <div class="os-field">
+            <label>Marca</label>
+            <select id="ejecModalMarcaMedidor" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#fff;cursor:pointer;">
+              <option value="">-- Seleccione --</option>
+              <option value="ELSTER">ELSTER</option>
+              <option value="HIDROCONTA">HIDROCONTA</option>
+              <option value="ITRON">ITRON</option>
+              <option value="ZENNER">ZENNER</option>
+              <option value="MADDALENA">MADDALENA</option>
+              <option value="ARAD">ARAD</option>
+              <option value="SENSUS">SENSUS</option>
+              <option value="OTRA">OTRA</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -1205,88 +1221,91 @@
 <!-- MODAL MI CUENTA -->
 <!-- MODAL DERIVACION A EJECUCION -->
 <div class="modal-overlay" id="modalDerivacionEjecucion">
-  <div class="modal-box" style="max-width:520px;">
+  <div class="modal-box" style="max-width:520px;border-radius:12px;overflow:hidden;padding:0;">
 
-    <!-- Encabezado formal -->
-    <div style="background:var(--azul);padding:0;border-radius:12px 12px 0 0;overflow:hidden;">
-      <!-- Franja institucional superior -->
-      <div style="background:#0b3d6b;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="color:rgba(255,255,255,0.7);font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;">EPS Marañón S.A. — ODR</span>
-        <button class="modal-close" onclick="cerrarDerivacionEjecucion()" style="color:rgba(255,255,255,0.7);background:none;border:none;font-size:1.2rem;cursor:pointer;line-height:1;">&#10005;</button>
+    <!-- Encabezado institucional compacto -->
+    <div style="background:#0b3d6b;padding:10px 20px 0;position:relative;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="color:rgba(255,255,255,0.75);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;">EPS Marañón S.A. — ODR</span>
+        <button onclick="cerrarDerivacionEjecucion()" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;line-height:1;padding:0;">&#10005;</button>
       </div>
-      <!-- Título del documento -->
-      <div style="padding:16px 22px 18px;text-align:center;">
-        <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;">Documento de Derivación</div>
-        <div style="font-size:1.15rem;font-weight:800;color:white;letter-spacing:0.5px;">HOJA DE DERIVACIÓN A EJECUCIÓN</div>
-        <div id="derivNumeroDoc" style="margin-top:6px;display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 16px;font-size:0.78rem;color:rgba(255,255,255,0.9);font-weight:600;"></div>
+      <!-- Área blanca del título del documento -->
+      <div style="background:white;border-radius:10px 10px 0 0;padding:16px 22px 12px;text-align:center;">
+        <div style="font-size:0.65rem;color:#7a8fa6;letter-spacing:3px;text-transform:uppercase;margin-bottom:3px;">Documento de Derivación</div>
+        <div style="font-size:1.1rem;font-weight:800;color:#0b3d6b;letter-spacing:0.3px;">HOJA DE DERIVACIÓN A EJECUCIÓN</div>
+        <div id="derivNumeroDoc" style="margin-top:8px;display:inline-block;background:#eaf2fb;border:1px solid #b8d8f8;border-radius:20px;padding:3px 18px;font-size:0.78rem;color:#0b4f8a;font-weight:700;letter-spacing:0.5px;"></div>
       </div>
     </div>
 
-    <div class="modal-body" style="padding:0;">
+    <!-- Cuerpo blanco con secciones -->
+    <div style="background:white;padding:0 0 4px;">
 
-      <!-- Sección I: Datos del Expediente -->
-      <div style="border-bottom:1px solid #e8eef5;">
-        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
-          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">I. Datos del Expediente</span>
+      <!-- Sección I -->
+      <div style="border-bottom:1px solid #eef2f7;">
+        <div style="padding:8px 22px;background:#f7f9fc;border-bottom:1px solid #eef2f7;display:flex;align-items:center;gap:8px;">
+          <span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">I</span>
+          <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Datos del Expediente</span>
         </div>
-        <div id="derivExpedienteInfo" style="padding:14px 20px;font-size:0.83rem;"></div>
+        <div id="derivExpedienteInfo" style="padding:12px 22px;font-size:0.83rem;color:var(--texto);"></div>
       </div>
 
-      <!-- Sección II: Cadena de Derivación -->
-      <div style="border-bottom:1px solid #e8eef5;">
-        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
-          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">II. Cadena de Derivación del Personal Técnico</span>
+      <!-- Sección II -->
+      <div style="border-bottom:1px solid #eef2f7;">
+        <div style="padding:8px 22px;background:#f7f9fc;border-bottom:1px solid #eef2f7;display:flex;align-items:center;gap:8px;">
+          <span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">II</span>
+          <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Cadena de Derivación del Personal Técnico</span>
         </div>
-        <div style="padding:16px 20px;">
+        <div style="padding:16px 22px;">
 
           <!-- 1ra derivación -->
-          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-            <div style="min-width:28px;height:28px;background:#1a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:800;flex-shrink:0;margin-top:2px;">1°</div>
+          <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:6px;">
+            <div style="min-width:30px;height:30px;background:#1a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.7rem;font-weight:800;flex-shrink:0;">1°</div>
             <div style="flex:1;">
-              <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7a8fa6;margin-bottom:4px;">Técnico Inspector — Inspección de Factibilidad</div>
+              <div style="font-size:0.67rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7a8fa6;margin-bottom:5px;">Técnico Inspector — Inspección de Factibilidad</div>
               <div style="background:#f0fff4;border:1.5px solid #a8e6c0;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:10px;">
-                <span style="color:#1a7a4a;font-size:1.1rem;">&#10003;</span>
+                <span style="color:#1a7a4a;font-size:1rem;">&#10003;</span>
                 <div>
                   <div id="derivTecInspNombre" style="font-weight:700;color:#1a3a2a;font-size:0.88rem;"></div>
-                  <div style="font-size:0.73rem;color:#1a7a4a;margin-top:1px;">Inspección completada y derivada a Of. Comercial</div>
+                  <div style="font-size:0.72rem;color:#1a7a4a;margin-top:1px;">Inspección completada y derivada a Of. Comercial</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Flecha -->
-          <div style="display:flex;align-items:center;gap:8px;margin:0 0 14px 40px;">
-            <div style="width:2px;height:22px;background:linear-gradient(to bottom,#1a7a4a,#1a6fc4);border-radius:2px;"></div>
-            <span style="font-size:0.7rem;color:#7a8fa6;font-style:italic;">Derivado a ejecución por ODR</span>
+          <!-- Conector -->
+          <div style="display:flex;align-items:center;gap:8px;margin:4px 0 10px 44px;">
+            <div style="width:2px;height:18px;background:linear-gradient(to bottom,#1a7a4a,#0b3d6b);border-radius:2px;"></div>
+            <span style="font-size:0.7rem;color:#9ab0c4;font-style:italic;">Derivado a ejecución por ODR</span>
           </div>
 
           <!-- 2da derivación -->
-          <div style="display:flex;gap:12px;align-items:flex-start;">
-            <div style="min-width:28px;height:28px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:800;flex-shrink:0;margin-top:2px;">2°</div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="min-width:30px;height:30px;background:#0b3d6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.7rem;font-weight:800;flex-shrink:0;">2°</div>
             <div style="flex:1;">
-              <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0b4f8a;margin-bottom:4px;">Técnico / Operario Ejecutor <span style="color:var(--rojo);">*</span></div>
-              <select id="derivTecnicoEjecutor" style="width:100%;border:2px solid var(--azul);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#fff;cursor:pointer;box-sizing:border-box;">
+              <div style="font-size:0.67rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0b4f8a;margin-bottom:5px;">Técnico / Operario Ejecutor <span style="color:var(--rojo);">*</span></div>
+              <select id="derivTecnicoEjecutor" style="width:100%;border:2px solid #0b3d6b;border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto);background:#fff;cursor:pointer;box-sizing:border-box;">
                 <option value="">— Seleccione operario ejecutor —</option>
               </select>
-              <div style="font-size:0.72rem;color:#7a8fa6;margin-top:4px;">Recibirá la Orden de Trabajo en su módulo de pendientes.</div>
+              <div style="font-size:0.71rem;color:#9ab0c4;margin-top:4px;">Recibirá la Orden de Trabajo en su módulo de pendientes.</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Sección III: Programación -->
-      <div style="border-bottom:1px solid #e8eef5;">
-        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
-          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">III. Programación de Ejecución</span>
+      <!-- Sección III -->
+      <div style="border-bottom:1px solid #eef2f7;">
+        <div style="padding:8px 22px;background:#f7f9fc;border-bottom:1px solid #eef2f7;display:flex;align-items:center;gap:8px;">
+          <span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">III</span>
+          <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Programación de Ejecución</span>
         </div>
-        <div style="padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="padding:14px 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div>
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:5px;">Fecha Programada</label>
-            <input type="date" id="derivFechaEjecucion" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:7px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);box-sizing:border-box;">
+            <label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:5px;">Fecha Programada</label>
+            <input type="date" id="derivFechaEjecucion" style="width:100%;border:1.5px solid #d0dce8;border-radius:7px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:5px;">Prioridad</label>
-            <select id="derivPrioridad" style="width:100%;border:1.5px solid var(--azul-borde);border-radius:7px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);background:#fff;box-sizing:border-box;cursor:pointer;">
+            <label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7a8fa6;display:block;margin-bottom:5px;">Prioridad</label>
+            <select id="derivPrioridad" style="width:100%;border:1.5px solid #d0dce8;border-radius:7px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto);background:#fff;box-sizing:border-box;cursor:pointer;">
               <option value="Normal">Normal</option>
               <option value="Alta">Alta</option>
               <option value="Urgente">Urgente</option>
@@ -1295,22 +1314,23 @@
         </div>
       </div>
 
-      <!-- Sección IV: Instrucciones -->
+      <!-- Sección IV -->
       <div>
-        <div style="background:#f0f4f8;padding:7px 20px;border-bottom:1px solid #dbe9f8;">
-          <span style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#4a6a8a;">IV. Instrucciones / Observaciones al Ejecutor</span>
+        <div style="padding:8px 22px;background:#f7f9fc;border-bottom:1px solid #eef2f7;display:flex;align-items:center;gap:8px;">
+          <span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">IV</span>
+          <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Instrucciones / Observaciones al Ejecutor</span>
         </div>
-        <div style="padding:14px 20px;">
-          <textarea id="derivObservaciones" rows="3" placeholder="Indicaciones técnicas, materiales requeridos, acceso al predio, precauciones especiales..." style="width:100%;border:1.5px solid var(--azul-borde);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.84rem;resize:vertical;box-sizing:border-box;color:var(--texto);"></textarea>
+        <div style="padding:14px 22px;">
+          <textarea id="derivObservaciones" rows="3" placeholder="Indicaciones técnicas, materiales requeridos, acceso al predio, precauciones especiales..." style="width:100%;border:1.5px solid #d0dce8;border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.84rem;resize:vertical;box-sizing:border-box;color:var(--texto);"></textarea>
         </div>
       </div>
 
     </div>
 
-    <!-- Pie del modal -->
-    <div class="modal-footer" style="border-top:2px solid #dbe9f8;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;">
-      <button class="btn-cancel" onclick="cerrarDerivacionEjecucion()" style="font-size:0.85rem;">Cancelar</button>
-      <button onclick="confirmarDerivacionEjecucion()" style="background:var(--azul);color:white;border:none;border-radius:8px;padding:11px 24px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;letter-spacing:0.3px;">
+    <!-- Pie del documento -->
+    <div style="background:#f7f9fc;border-top:2px solid #dbe9f8;padding:12px 22px;display:flex;justify-content:space-between;align-items:center;">
+      <button onclick="cerrarDerivacionEjecucion()" style="background:white;border:1.5px solid #d0dce8;border-radius:8px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:#5a7a9a;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmarDerivacionEjecucion()" style="background:#0b3d6b;color:white;border:none;border-radius:8px;padding:10px 24px;font-family:'DM Sans',sans-serif;font-size:0.87rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;letter-spacing:0.3px;">
         &#128190; Guardar Ejecución
       </button>
     </div>
@@ -2295,21 +2315,28 @@
     if (!tbody) return;
     var buscarEl = document.getElementById('buscarOrdenesAgua');
     var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
-    var componentesAgua = (planAgua || []).map(function(p) { return p.componente.toLowerCase(); });
+    var componentesAgua = (planAgua || []).map(function(p) { return p.componente.toLowerCase().trim(); });
+    var componentesAlcant = (planAlcantarillado || []).map(function(p) { return p.componente.toLowerCase().trim(); });
+
     var ordenes = (historial || []).filter(function(os) {
       if (!os || !os.componente) return false;
-      // Filtrar por campo sistema (nuevo) o por coincidencia de componente con plan (retrocompatibilidad)
+      var comp = os.componente.toLowerCase().trim();
       var esAgua;
-      if (os.sistema) {
-        esAgua = os.sistema === 'agua';
-      } else if (componentesAgua.length > 0) {
-        esAgua = componentesAgua.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
+      if (os.sistema === 'agua') {
+        esAgua = true;
+      } else if (os.sistema === 'alcantarillado') {
+        esAgua = false;
       } else {
-        esAgua = true; // sin plan configurado, mostrar todo
+        // Sin campo sistema: buscar coincidencia exacta primero, luego parcial
+        var enAgua   = componentesAgua.some(function(c)   { return comp === c || comp.indexOf(c) >= 0 || c.indexOf(comp) >= 0; });
+        var enAlcant = componentesAlcant.some(function(c) { return comp === c || comp.indexOf(c) >= 0 || c.indexOf(comp) >= 0; });
+        // Si está en ambos, preferir agua; si en ninguno, mostrar en agua por defecto
+        esAgua = enAgua || (!enAgua && !enAlcant);
+        if (enAlcant && !enAgua) esAgua = false;
       }
       if (!esAgua) return false;
       if (busqueda) {
-        var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
+        var campos = [os.id||'', os.codigo||'', os.componente||'', os.tecnico||'', os.fechaProg||'', os.estado||'', os.frecuencia||'', os.prioridad||''].join(' ').toLowerCase();
         return campos.indexOf(busqueda) >= 0;
       }
       return true;
@@ -2349,21 +2376,25 @@
     if (!tbody) return;
     var buscarEl = document.getElementById('buscarOrdenesAlcant');
     var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
-    var componentesAlcant = (planAlcantarillado || []).map(function(p) { return p.componente.toLowerCase(); });
+    var componentesAgua   = (planAgua || []).map(function(p) { return p.componente.toLowerCase().trim(); });
+    var componentesAlcant = (planAlcantarillado || []).map(function(p) { return p.componente.toLowerCase().trim(); });
+
     var ordenes = (historial || []).filter(function(os) {
       if (!os || !os.componente) return false;
-      // Filtrar por campo sistema (nuevo) o por coincidencia de componente con plan (retrocompatibilidad)
+      var comp = os.componente.toLowerCase().trim();
       var esAlcant;
-      if (os.sistema) {
-        esAlcant = os.sistema === 'alcantarillado';
-      } else if (componentesAlcant.length > 0) {
-        esAlcant = componentesAlcant.some(function(c) { return os.componente.toLowerCase().indexOf(c) >= 0 || c.indexOf(os.componente.toLowerCase()) >= 0; });
+      if (os.sistema === 'alcantarillado') {
+        esAlcant = true;
+      } else if (os.sistema === 'agua') {
+        esAlcant = false;
       } else {
-        esAlcant = false; // sin plan y sin campo sistema, no mostrar en alcantarillado
+        var enAgua   = componentesAgua.some(function(c)   { return comp === c || comp.indexOf(c) >= 0 || c.indexOf(comp) >= 0; });
+        var enAlcant = componentesAlcant.some(function(c) { return comp === c || comp.indexOf(c) >= 0 || c.indexOf(comp) >= 0; });
+        esAlcant = enAlcant && !enAgua;
       }
       if (!esAlcant) return false;
       if (busqueda) {
-        var campos = [os.id || '', os.codigo || '', os.componente || '', os.tecnico || '', os.fechaProg || '', os.estado || '', os.frecuencia || '', os.prioridad || ''].join(' ').toLowerCase();
+        var campos = [os.id||'', os.codigo||'', os.componente||'', os.tecnico||'', os.fechaProg||'', os.estado||'', os.frecuencia||'', os.prioridad||''].join(' ').toLowerCase();
         return campos.indexOf(busqueda) >= 0;
       }
       return true;
@@ -4351,11 +4382,9 @@
     document.getElementById('ejecModalEstado').value = datos.estado  || (os ? os.estado : 'Pendiente');
     document.getElementById('ejecModalMateriales').value = datos.materiales && datos.materiales !== '-' ? datos.materiales : '';
 
-    // N° de Medidor — solo para Conexión
-    var esConexion = os && os.componente && os.componente.toLowerCase().indexOf('conexion') >= 0;
-    var campoMedidor = document.getElementById('campoEjecNroMedidor');
-    campoMedidor.style.display = esConexion ? 'block' : 'none';
-    document.getElementById('ejecModalNroMedidor').value = datos.nroMedidor || (os && os.nroMedidor && os.nroMedidor !== '-' ? os.nroMedidor : '');
+    // N° de Medidor y Marca — siempre visibles
+    document.getElementById('ejecModalNroMedidor').value   = datos.nroMedidor   || (os && os.nroMedidor   && os.nroMedidor   !== '-' ? os.nroMedidor   : '');
+    document.getElementById('ejecModalMarcaMedidor').value = datos.marcaMedidor || (os && os.marcaMedidor && os.marcaMedidor !== '-' ? os.marcaMedidor : '');
 
     document.getElementById('modalLlenarEjecucion').classList.add('active');
   }
@@ -4371,14 +4400,13 @@
     if (!item) return;
 
     var datos = {
-      actividad:  document.getElementById('ejecModalActividad').value.trim() || '-',
-      fecha:      document.getElementById('ejecModalFecha').value,
-      estado:     document.getElementById('ejecModalEstado').value,
-      obs:        document.getElementById('ejecModalObs').value.trim() || '-',
-      materiales: document.getElementById('ejecModalMateriales').value.trim() || '-',
-      nroMedidor: document.getElementById('campoEjecNroMedidor').style.display !== 'none'
-                    ? (document.getElementById('ejecModalNroMedidor').value.trim() || '-')
-                    : '-'
+      actividad:    document.getElementById('ejecModalActividad').value.trim() || '-',
+      fecha:        document.getElementById('ejecModalFecha').value,
+      estado:       document.getElementById('ejecModalEstado').value,
+      obs:          document.getElementById('ejecModalObs').value.trim() || '-',
+      materiales:   document.getElementById('ejecModalMateriales').value.trim() || '-',
+      nroMedidor:   document.getElementById('ejecModalNroMedidor').value.trim() || '-',
+      marcaMedidor: document.getElementById('ejecModalMarcaMedidor').value.trim() || '-'
     };
     item.datosEjecucion = datos;
 
@@ -4388,7 +4416,8 @@
       os.estado    = datos.estado;
       os.actividad = datos.actividad;
       os.obs       = datos.obs;
-      if (datos.nroMedidor !== '-') os.nroMedidor = datos.nroMedidor;
+      if (datos.nroMedidor   !== '-') os.nroMedidor   = datos.nroMedidor;
+      if (datos.marcaMedidor !== '-') os.marcaMedidor = datos.marcaMedidor;
       guardarStorage();
       renderHistorial();
     }
@@ -4468,7 +4497,8 @@
           fila('Prioridad', os.prioridad) +
           fila('Estado de la Orden', os.estado) +
           fila('Tecnico Responsable', os.tecnico) +
-          (datos.nroMedidor && datos.nroMedidor !== '-' ? fila('N\u00b0 de Medidor Instalado', datos.nroMedidor) : '')
+          (datos.nroMedidor   && datos.nroMedidor   !== '-' ? fila('N\u00b0 de Medidor Instalado', datos.nroMedidor)   : '') +
+          (datos.marcaMedidor && datos.marcaMedidor !== '-' ? fila('Marca del Medidor',          datos.marcaMedidor) : '')
         ) : fila('Orden', 'Sin orden de servicio vinculada')) +
       '</table>' +
 
@@ -4795,6 +4825,8 @@
           guardarStorage();
         }
         renderHistorial();
+        renderOrdenesAgua();
+        renderOrdenesAlcant();
         cerrarTarea();
         btn.textContent = 'Guardar Tarea';
         btn.disabled = false;
@@ -4816,6 +4848,8 @@
     } else {
       guardarStorage();
       renderHistorial();
+      renderOrdenesAgua();
+      renderOrdenesAlcant();
       cerrarTarea();
       alert('Tarea guardada correctamente para ' + historial[idx].id);
     }
