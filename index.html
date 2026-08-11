@@ -1186,12 +1186,28 @@
         </div>
       </div>
       <!-- Resumen de Inspección de Factibilidad (precarga) -->
-      <div id="ejecPanelInspeccion" style="display:none;background:#f0f7ff;border:1.5px solid #b8d8f8;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:0.81rem;">
-        <div style="font-size:0.72rem;font-weight:800;color:#0b4f8a;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">&#128270; Datos de Inspección de Factibilidad</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
-          <div id="ejecInspAgua" style="grid-column:1/-1;"></div>
-          <div id="ejecInspDesague" style="grid-column:1/-1;"></div>
-          <div id="ejecInspObs" style="grid-column:1/-1;margin-top:4px;"></div>
+      <div id="ejecPanelInspeccion" style="display:none;background:#f0f7ff;border:1.5px solid #b8d8f8;border-radius:10px;padding:0;margin-bottom:14px;font-size:0.81rem;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#0b4f8a,#1a6fc4);color:white;padding:9px 16px;display:flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Datos de la Inspección de Factibilidad</span>
+        </div>
+        <div style="padding:12px 16px;">
+          <!-- Agua Potable -->
+          <div id="ejecInspAguaWrap" style="margin-bottom:10px;">
+            <div style="font-size:0.7rem;font-weight:800;color:#0b4f8a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+              &#128167; Agua Potable
+            </div>
+            <div id="ejecInspAgua" style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:0.79rem;"></div>
+          </div>
+          <!-- Alcantarillado -->
+          <div id="ejecInspDesagueWrap" style="margin-bottom:8px;">
+            <div style="font-size:0.7rem;font-weight:800;color:#1a6fc4;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+              &#128695; Alcantarillado
+            </div>
+            <div id="ejecInspDesague" style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:0.79rem;"></div>
+          </div>
+          <!-- Obs -->
+          <div id="ejecInspObs" style="border-top:1px solid #d0e4f8;padding-top:8px;margin-top:4px;font-size:0.79rem;color:#3a5a7a;"></div>
         </div>
       </div>
       <div class="os-grid">
@@ -4378,11 +4394,47 @@
 
     // Mostrar panel de resumen de inspección
     var panelInsp = document.getElementById('ejecPanelInspeccion');
-    if (actividadDesdeInsp) {
+
+    function filaInsp(label, valor) {
+      if (!val(valor)) return '';
+      return '<div style="background:#f8fbff;border:1px solid #d8eaf8;border-radius:5px;padding:4px 8px;margin-bottom:2px;">' +
+        '<span style="font-size:0.7rem;font-weight:700;color:#5a8ab0;text-transform:uppercase;letter-spacing:0.4px;">' + label + '</span><br>' +
+        '<span style="color:#1e2a3a;font-weight:600;font-size:0.81rem;">' + valor + '</span>' +
+      '</div>';
+    }
+
+    var filasAgua =
+      filaInsp('Asunto', agua.asunto) +
+      filaInsp('Diám. Conexión', agua.diametro) +
+      filaInsp('Longitud Red', agua.longitud) +
+      filaInsp('Profundidad Red', agua.profundidad) +
+      filaInsp('Diám. Matriz', agua.diametroMatriz) +
+      filaInsp('Tipo de Terreno', agua.tipoTerreno) +
+      filaInsp('Corte Pavimento', agua.distPavimento) +
+      filaInsp('Corte Vereda', agua.corteVereda);
+
+    var filasDesague =
+      filaInsp('Asunto', desague.asunto) +
+      filaInsp('Diám. Conexión', desague.diametro) +
+      filaInsp('Longitud Red', desague.longitud) +
+      filaInsp('Profundidad Red', desague.profundidad) +
+      filaInsp('Diám. Matriz', desague.diametroMatriz) +
+      filaInsp('Tipo de Terreno', desague.tipoTerreno) +
+      filaInsp('Corte Pavimento', desague.distanciaCorte) +
+      filaInsp('Corte Vereda', desague.corteVereda);
+
+    var hayInspeccion = filasAgua || filasDesague || val(insp.observacion);
+    if (hayInspeccion) {
       panelInsp.style.display = 'block';
-      document.getElementById('ejecInspAgua').innerHTML   = actAgua   ? '<div style="margin-bottom:4px;"><strong style="color:#0b4f8a;">💧 Agua Potable:</strong> <span style="color:#1e2a3a;">' + agua.asunto + (val(agua.diametro) ? ' | Ø ' + agua.diametro : '') + (val(agua.longitud) ? ' | Long. ' + agua.longitud : '') + (val(agua.profundidad) ? ' | Prof. ' + agua.profundidad : '') + (val(agua.diametroMatriz) ? ' | Matriz Ø ' + agua.diametroMatriz : '') + '</span></div>' : '';
-      document.getElementById('ejecInspDesague').innerHTML= actDes    ? '<div style="margin-bottom:4px;"><strong style="color:#1a6fc4;">🚿 Alcantarillado:</strong> <span style="color:#1e2a3a;">' + desague.asunto + (val(desague.diametro) ? ' | Ø ' + desague.diametro : '') + (val(desague.longitud) ? ' | Long. ' + desague.longitud : '') + (val(desague.profundidad) ? ' | Prof. ' + desague.profundidad : '') + (val(desague.distanciaCorte) ? ' | Corte ' + desague.distanciaCorte : '') + (val(desague.diametroMatriz) ? ' | Matriz Ø ' + desague.diametroMatriz : '') + '</span></div>' : '';
-      document.getElementById('ejecInspObs').innerHTML   = val(insp.observacion) ? '<div><strong style="color:#5a7a9a;">Obs. Inspección:</strong> ' + insp.observacion + '</div>' : '';
+      var wrapAgua = document.getElementById('ejecInspAguaWrap');
+      var wrapDes  = document.getElementById('ejecInspDesagueWrap');
+      if (wrapAgua)  wrapAgua.style.display  = filasAgua   ? '' : 'none';
+      if (wrapDes)   wrapDes.style.display   = filasDesague ? '' : 'none';
+      document.getElementById('ejecInspAgua').innerHTML    = filasAgua   || '';
+      document.getElementById('ejecInspDesague').innerHTML = filasDesague || '';
+      document.getElementById('ejecInspObs').innerHTML     = val(insp.observacion)
+        ? '<strong style="color:#0b4f8a;">Obs. Inspección:</strong> ' + insp.observacion
+        : '';
     } else {
       panelInsp.style.display = 'none';
     }
@@ -6290,17 +6342,46 @@
     if (obsDerivacion) { resumen += '\nInstrucciones al ejecutor: ' + obsDerivacion; }
     if (insp.observacion && insp.observacion !== '-') { resumen += '\nObs. inspeccion: ' + insp.observacion; }
 
-    // Abrir modal OS con datos prellenados
-    abrirOS('Conexion Domiciliaria - ' + item.codigo, 'Ejecucion');
-    document.getElementById('osDireccion').value       = item.direccion !== '-' ? item.direccion : '';
-    document.getElementById('osCodigo').value          = item.codigo;
-    setSelectValue('osTecnico', tecEjecutor);
-    setSelectValue('osPrioridad', prioridad);
-    if (fechaProg) { document.getElementById('osFechaProg').value = fechaProg; }
-    document.getElementById('osActividad').value       = resumen;
+    // ── Crear OS automáticamente (sin abrir modal) ────────────────
+    var hoyFecha = new Date().toISOString().split('T')[0];
+    var nuevaOS = {
+      id:         null,
+      codigo:     item.codigo,
+      fecha:      hoyFecha,
+      fechaProg:  fechaProg || '-',
+      componente: 'Conexion Domiciliaria - ' + item.codigo,
+      frecuencia: 'Ejecucion',
+      sistema:    'agua',
+      direccion:  item.direccion !== '-' ? item.direccion : '-',
+      tecnico:    tecEjecutor,
+      prioridad:  prioridad,
+      estado:     'Pendiente',
+      actividad:  resumen,
+      obs:        obsDerivacion || '-'
+    };
 
-    item._pendienteVincularOS = true;
-    guardarColateralesStorage();
+    obtenerNumeroAtomico('os', osCounter, function(numero) {
+      nuevaOS.id = 'OS-' + String(numero).padStart(3, '0');
+      osCounter = numero + 1;
+      historial.push(nuevaOS);
+      guardarStorage();
+      renderHistorial();
+      renderOrdenTrabajo();
+      renderOrdenesAgua();
+      renderOrdenesAlcant();
+      renderPlanTabla('agua');
+      renderPlanTabla('alcantarillado');
+
+      // Vincular OS al colateral y navegar a Ejecución
+      item.ordenEjecucionId = nuevaOS.id;
+      guardarColateralesStorage();
+      renderColaterales();
+      renderEjecucion();
+
+      // Navegar al módulo Expediente → pestaña 2. Ejecución
+      mostrarSeccion('factibilidad');
+      cambiarTabExpediente('ejecucion');
+    });
   }
 
   function renderColaterales() {
