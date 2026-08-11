@@ -3899,7 +3899,10 @@
         var bgCard = esConclusivo ? '#f8fffa' : '#fff';
 
         var botonesAccion = esConclusivo
-          ? '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF Ejecucion</button>'
+          ? '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF Ejecucion</button>' +
+            (!item.facturacion
+              ? '<button class="btn-config-add" style="padding:6px 13px;font-size:0.78rem;" onclick="abrirFacturacion(' + colIdx + ')">&#128179; Pase a Facturacion</button>'
+              : '<span style="color:#1a7a4a;font-weight:800;font-size:0.78rem;background:#d1f0e0;padding:4px 10px;border-radius:8px;">&#10004; Facturado: ' + (item.facturacion.recibo || '') + '</span>')
           : '<button class="btn-tarea-row" style="padding:6px 13px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;font-size:0.78rem;" onclick="abrirLlenarEjecucion(' + colIdx + ')">&#9998; Llenar / Completar</button>' +
             '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF</button>';
 
@@ -4553,22 +4556,23 @@
     cerrarLlenarEjecucion();
 
     if (esConclusivo) {
-      // Navegar a Colaterales para ver el registro actualizado
-      mostrarSeccion('factibilidad');
-      cambiarTabExpediente('factibilidad');
+      // Navegar a Colaterales para ver el botón "Pase a Facturación" habilitado
+      mostrarSeccion('colaterales');
       // Toast de éxito
       setTimeout(function() {
         var toast = document.createElement('div');
-        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#1a7a4a,#27ae60);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.18);display:flex;align-items:center;gap:10px;max-width:340px;';
+        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#1a7a4a,#27ae60);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.18);display:flex;align-items:center;gap:10px;max-width:360px;';
         toast.innerHTML = '<span style="font-size:1.3rem;">&#10004;</span>' +
-          '<div><div style="font-size:0.9rem;font-weight:800;">Ejecución ' + estado + '</div>' +
-          '<div style="font-size:0.76rem;opacity:0.9;margin-top:2px;">Expediente ' + item.codigo + ' cerrado correctamente</div></div>';
+          '<div>' +
+            '<div style="font-size:0.9rem;font-weight:800;">Ejecucion ' + estado + '</div>' +
+            '<div style="font-size:0.76rem;opacity:0.9;margin-top:2px;">Expediente ' + item.codigo + ' — ya puede registrar la Facturacion</div>' +
+          '</div>';
         document.body.appendChild(toast);
         setTimeout(function() {
           toast.style.transition = 'opacity 0.5s';
           toast.style.opacity = '0';
           setTimeout(function() { toast.remove(); }, 600);
-        }, 3500);
+        }, 4000);
       }, 200);
     } else {
       // Toast de guardado simple
@@ -6292,6 +6296,10 @@
       alert('Debe pasar primero a Ejecucion antes de registrar la facturacion.');
       return;
     }
+    if (!item.ejecucionConcluida) {
+      alert('Debe completar (Completado / Cerrado / Concluido) la ejecucion del trabajo antes de pasar a Facturacion.');
+      return;
+    }
     _factIdxActual = idx;
     document.getElementById('factCodigoRef').textContent = item.codigo + ' - ' + item.nombre;
     document.getElementById('factOrdenRef').textContent = 'Orden de Ejecucion: ' + item.ordenEjecucionId;
@@ -6527,9 +6535,19 @@
 
       var celdaFacturacion;
       if (item.facturacion) {
-        celdaFacturacion = '<span style="color:#1a7a4a;font-weight:700;font-size:0.76rem;" title="' + formatFecha(item.facturacion.fecha) + '">&#10003; ' + (item.facturacion.recibo || 'Facturado') + '</span>';
+        celdaFacturacion =
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">' +
+            '<span style="color:#1a7a4a;font-weight:800;font-size:0.76rem;">&#10004; ' + (item.facturacion.recibo || 'Facturado') + '</span>' +
+            '<span style="color:#aaa;font-size:0.68rem;">' + formatFecha(item.facturacion.fecha) + '</span>' +
+          '</div>';
+      } else if (item.ejecucionConcluida) {
+        celdaFacturacion = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="abrirFacturacion(' + idx + ')">&#128179; Pase a Facturacion</button>';
       } else if (item.ordenEjecucionId) {
-        celdaFacturacion = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="abrirFacturacion(' + idx + ')">Pase a Facturacion</button>';
+        celdaFacturacion =
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">' +
+            '<span style="color:#c4d3e0;font-size:0.72rem;">Pendiente ejecucion</span>' +
+            '<span style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:6px;font-size:0.68rem;font-weight:700;padding:1px 7px;">En curso</span>' +
+          '</div>';
       } else {
         celdaFacturacion = '<span style="color:#c4d3e0;font-size:0.76rem;">Falta Ejecucion</span>';
       }
