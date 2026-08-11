@@ -1222,6 +1222,8 @@
             <option>Pendiente</option>
             <option>En Proceso</option>
             <option>Completado</option>
+            <option>Cerrado</option>
+            <option>Concluido</option>
           </select>
         </div>
         <div class="os-field full"><label>Observaciones / Resultado</label>
@@ -3869,20 +3871,57 @@
       return;
     }
 
-    cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
+    var estadosConclusivos = ['Completado', 'Cerrado', 'Concluido'];
+
+    function badgeEstadoEjec(estado, concluido) {
+      if (concluido && estadosConclusivos.indexOf(estado) >= 0) {
+        var colores = { 'Completado': ['#d1f0e0','#1a7a4a'], 'Cerrado': ['#f3eaff','#5a2d82'], 'Concluido': ['#e0f4fa','#0b5a7a'] };
+        var c = colores[estado] || ['#d1f0e0','#1a7a4a'];
+        return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + c[0] + ';color:' + c[1] + ';border:1.5px solid ' + c[1] + ';border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:800;">&#10004; ' + estado + '</span>';
+      }
+      var colorMap = { 'En Proceso': ['#fff3cd','#856404'], 'Pendiente': ['#fdf2f2','#c0392b'] };
+      var c2 = colorMap[estado] || ['#eee','#555'];
+      return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + c2[0] + ';color:' + c2[1] + ';border:1px solid ' + c2[1] + ';border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:700;">&#9679; ' + estado + '</span>';
+    }
+
+    cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">' +
       lista.map(function(item) {
+        var colIdx = colaterales.indexOf(item);
         var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
-        var estadoOS = os ? os.estado : 'Sin datos';
-        var colorEstado = estadoOS === 'Completado' ? '#1a7a4a' : estadoOS === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
-        return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
-          '<div>' +
-            '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
-            '<span style="font-size:0.78rem;color:#7a8fa6;">Orden: <strong>' + item.ordenEjecucionId + '</strong> &middot; Tecnico: ' + (item.tecnico || '-') + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estadoOS + '</strong></span>' +
+        var datos = item.datosEjecucion || {};
+        var estadoEjec = datos.estado || (os ? os.estado : 'Pendiente');
+        var concluido  = !!item.ejecucionConcluida;
+        var esConclusivo = concluido && estadosConclusivos.indexOf(estadoEjec) >= 0;
+
+        var borderColor = esConclusivo
+          ? (estadoEjec === 'Cerrado' ? '#5a2d82' : estadoEjec === 'Concluido' ? '#0b5a7a' : '#1a7a4a')
+          : (estadoEjec === 'En Proceso' ? '#e8a000' : '#c0392b');
+        var bgCard = esConclusivo ? '#f8fffa' : '#fff';
+
+        var botonesAccion = esConclusivo
+          ? '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF Ejecucion</button>'
+          : '<button class="btn-tarea-row" style="padding:6px 13px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;font-size:0.78rem;" onclick="abrirLlenarEjecucion(' + colIdx + ')">&#9998; Llenar / Completar</button>' +
+            '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF</button>';
+
+        return '<div style="background:' + bgCard + ';border:1px solid #dbe9f8;border-left:4px solid ' + borderColor + ';border-radius:10px;padding:13px 17px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
+          '<div style="flex:1;min-width:220px;">' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">' +
+              '<strong style="color:var(--azul);font-size:0.9rem;">' + item.codigo + '</strong>' +
+              badgeEstadoEjec(estadoEjec, concluido) +
+              '<span style="font-size:0.75rem;color:#7a8fa6;">' + item.ordenEjecucionId + '</span>' +
+              (item.fechaConcluido ? '<span style="font-size:0.72rem;color:#aaa;">&#128197; ' + formatFecha(item.fechaConcluido) + '</span>' : '') +
+            '</div>' +
+            '<div style="font-size:0.8rem;color:#3a5a7a;">' + item.nombre + '</div>' +
+            '<div style="font-size:0.74rem;color:#7a8fa6;margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">' +
+              '<span>&#128205; ' + (item.direccion || '-') + '</span>' +
+              '<span>&#128100; ' + (item.derivacion ? item.derivacion.tecnicoEjecutor : item.tecnico || '-') + '</span>' +
+              (datos.materiales && datos.materiales !== '-' ? '<span>&#128736; ' + datos.materiales + '</span>' : '') +
+            '</div>' +
+            (datos.obs && datos.obs !== '-' ? '<div style="font-size:0.76rem;color:#5a7a9a;margin-top:4px;font-style:italic;">&#128172; ' + datos.obs + '</div>' : '') +
           '</div>' +
-          (os ? '<button class="btn-tarea-row" style="padding:6px 12px;" onclick="abrirTarea(' + historial.indexOf(os) + ')">&#10003; Tarea</button> ' : '') +
-          (os ? '<button class="btn-print-row" onclick="imprimirOS(' + historial.indexOf(os) + ')">Ver PDF</button> ' : '') +
-          '<button class="btn-tarea-row" style="padding:6px 13px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;font-size:0.78rem;" onclick="abrirLlenarEjecucion(' + colaterales.indexOf(item) + ')">&#9998; Llenar</button> ' +
-          '<button class="btn-print-row" style="font-size:0.78rem;" onclick="imprimirEjecucion(' + colaterales.indexOf(item) + ')">&#128196; PDF</button>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
+            botonesAccion +
+          '</div>' +
         '</div>';
       }).join('') +
       '</div>';
@@ -4476,10 +4515,11 @@
     var item = colaterales[_ejecucionEditandoIdx];
     if (!item) return;
 
+    var estado = document.getElementById('ejecModalEstado').value;
     var datos = {
       actividad:    document.getElementById('ejecModalActividad').value.trim() || '-',
       fecha:        document.getElementById('ejecModalFecha').value,
-      estado:       document.getElementById('ejecModalEstado').value,
+      estado:       estado,
       obs:          document.getElementById('ejecModalObs').value.trim() || '-',
       materiales:   document.getElementById('ejecModalMateriales').value.trim() || '-',
       nroMedidor:   document.getElementById('ejecModalNroMedidor').value.trim() || '-',
@@ -4487,21 +4527,57 @@
     };
     item.datosEjecucion = datos;
 
-    // Sincronizar estado y N° de Medidor también en la OS vinculada
+    // Detectar si el estado es conclusivo
+    var estadosConclusivos = ['Completado', 'Cerrado', 'Concluido'];
+    var esConclusivo = estadosConclusivos.indexOf(estado) >= 0;
+    if (esConclusivo) {
+      item.ejecucionConcluida = true;
+      item.fechaConcluido     = datos.fecha || new Date().toISOString().split('T')[0];
+    }
+
+    // Sincronizar estado y datos en la OS vinculada
     var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
     if (os) {
-      os.estado    = datos.estado;
+      os.estado    = estado;
       os.actividad = datos.actividad;
       os.obs       = datos.obs;
       if (datos.nroMedidor   !== '-') os.nroMedidor   = datos.nroMedidor;
       if (datos.marcaMedidor !== '-') os.marcaMedidor = datos.marcaMedidor;
       guardarStorage();
       renderHistorial();
+      renderOrdenTrabajo();
     }
     guardarColateralesStorage();
     renderEjecucion();
+    renderColaterales();
     cerrarLlenarEjecucion();
-    alert('Datos de ejecucion guardados correctamente.');
+
+    if (esConclusivo) {
+      // Navegar a Colaterales para ver el registro actualizado
+      mostrarSeccion('factibilidad');
+      cambiarTabExpediente('factibilidad');
+      // Toast de éxito
+      setTimeout(function() {
+        var toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#1a7a4a,#27ae60);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.18);display:flex;align-items:center;gap:10px;max-width:340px;';
+        toast.innerHTML = '<span style="font-size:1.3rem;">&#10004;</span>' +
+          '<div><div style="font-size:0.9rem;font-weight:800;">Ejecución ' + estado + '</div>' +
+          '<div style="font-size:0.76rem;opacity:0.9;margin-top:2px;">Expediente ' + item.codigo + ' cerrado correctamente</div></div>';
+        document.body.appendChild(toast);
+        setTimeout(function() {
+          toast.style.transition = 'opacity 0.5s';
+          toast.style.opacity = '0';
+          setTimeout(function() { toast.remove(); }, 600);
+        }, 3500);
+      }, 200);
+    } else {
+      // Toast de guardado simple
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:#0b4f8a;color:white;padding:12px 20px;border-radius:10px;font-weight:600;font-size:0.85rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);';
+      toast.textContent = '✓ Datos de ejecución guardados';
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.style.transition='opacity 0.4s'; toast.style.opacity='0'; setTimeout(function(){toast.remove();},500); }, 2500);
+    }
   }
 
   function imprimirEjecucion(colIdx) {
@@ -6419,8 +6495,27 @@
       }
 
       var celdaEjecucion;
-      if (item.ordenEjecucionId) {
-        celdaEjecucion = '<span style="color:#1a7a4a;font-weight:700;font-size:0.78rem;">&#10003; ' + item.ordenEjecucionId + '</span>';
+      if (item.ordenEjecucionId && item.ejecucionConcluida) {
+        var estEjec = (item.datosEjecucion && item.datosEjecucion.estado) || 'Completado';
+        var colorEjec = estEjec === 'Cerrado' ? '#5a2d82' : estEjec === 'Concluido' ? '#0b5a7a' : '#1a7a4a';
+        var bgEjec    = estEjec === 'Cerrado' ? '#f3eaff' : estEjec === 'Concluido' ? '#e0f4fa' : '#d1f0e0';
+        celdaEjecucion =
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">' +
+            '<span style="background:' + bgEjec + ';color:' + colorEjec + ';border:1px solid ' + colorEjec + ';border-radius:8px;font-size:0.72rem;font-weight:800;padding:2px 9px;">&#10004; ' + estEjec + '</span>' +
+            '<span style="color:#7a9a8a;font-size:0.7rem;">' + item.ordenEjecucionId + '</span>' +
+            (item.fechaConcluido ? '<span style="color:#aaa;font-size:0.67rem;">' + formatFecha(item.fechaConcluido) + '</span>' : '') +
+            '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;margin-top:1px;" onclick="imprimirEjecucion(' + idx + ')" title="Imprimir PDF de ejecucion">&#128196; PDF</button>' +
+          '</div>';
+      } else if (item.ordenEjecucionId) {
+        var estPend = (item.datosEjecucion && item.datosEjecucion.estado) || 'Pendiente';
+        var colorPend = estPend === 'En Proceso' ? '#e8a000' : '#c0392b';
+        var bgPend    = estPend === 'En Proceso' ? '#fff3cd' : '#fdf2f2';
+        celdaEjecucion =
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">' +
+            '<span style="background:' + bgPend + ';color:' + colorPend + ';border:1px solid ' + colorPend + ';border-radius:8px;font-size:0.72rem;font-weight:700;padding:2px 9px;">&#9679; ' + estPend + '</span>' +
+            '<span style="color:#7a8fa6;font-size:0.7rem;">' + item.ordenEjecucionId + '</span>' +
+            '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;margin-top:1px;" onclick="abrirLlenarEjecucion(' + idx + ')" title="Completar ejecucion">&#9998; Llenar</button>' +
+          '</div>';
       } else if (item.oficinaComercial) {
         celdaEjecucion = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="pasarAEjecucion(' + idx + ')">Pase a Ejecucion</button>';
       } else {
