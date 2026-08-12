@@ -4661,32 +4661,118 @@
     renderColaterales();
     cerrarLlenarEjecucion();
 
+    // ── Capturar referencia al colateral antes del timeout ────────
+    var _itemCodigo  = item.codigo;
+    var _colIdxSnap  = _ejecucionEditandoIdx !== null ? _ejecucionEditandoIdx : colaterales.indexOf(item);
+
     if (esConclusivo) {
-      // Navegar a Colaterales para ver el botón "Pase a Facturación" habilitado
-      mostrarSeccion('colaterales');
-      // Toast de éxito
+
+      // Navegar a Expediente → pestaña 2. Ejecución para ver resultado
+      mostrarSeccion('factibilidad');
+      cambiarTabExpediente('ejecucion');
+
+      // Toast conclusivo con botones de acción
       setTimeout(function() {
         var toast = document.createElement('div');
-        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#1a7a4a,#27ae60);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.18);display:flex;align-items:center;gap:10px;max-width:360px;';
-        toast.innerHTML = '<span style="font-size:1.3rem;">&#10004;</span>' +
-          '<div>' +
-            '<div style="font-size:0.9rem;font-weight:800;">Ejecucion ' + estado + '</div>' +
-            '<div style="font-size:0.76rem;opacity:0.9;margin-top:2px;">Expediente ' + item.codigo + ' — ya puede registrar la Facturacion</div>' +
+        toast.style.cssText = [
+          'position:fixed;top:24px;right:24px;z-index:9999;',
+          'background:linear-gradient(135deg,#0a3622,#1a7a4a);',
+          'color:white;padding:16px 20px;border-radius:14px;',
+          'font-family:"DM Sans",sans-serif;',
+          'box-shadow:0 8px 30px rgba(0,0,0,0.22);',
+          'display:flex;flex-direction:column;gap:12px;max-width:340px;',
+          'animation:slideUp 0.3s ease;'
+        ].join('');
+
+        toast.innerHTML =
+          // Cabecera
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span style="font-size:1.6rem;">&#9989;</span>' +
+            '<div>' +
+              '<div style="font-size:0.92rem;font-weight:800;letter-spacing:0.2px;">Ejecución ' + estado + '</div>' +
+              '<div style="font-size:0.75rem;opacity:0.85;margin-top:2px;">Expediente <strong>' + _itemCodigo + '</strong> guardado en Firebase</div>' +
+            '</div>' +
+          '</div>' +
+          // Separador
+          '<div style="border-top:1px solid rgba(255,255,255,0.2);"></div>' +
+          // Botones
+          '<div style="display:flex;gap:8px;">' +
+            '<button id="toastBtnEjec" style="flex:1;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);color:white;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;">&#128196; Ver en Ejecución</button>' +
+            '<button id="toastBtnFact" style="flex:1;background:white;border:none;color:#0a3622;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-weight:800;cursor:pointer;font-family:inherit;">&#128179; Ir a Facturación</button>' +
           '</div>';
+
         document.body.appendChild(toast);
+
+        // Botón Ver en Ejecución
+        document.getElementById('toastBtnEjec').onclick = function() {
+          toast.remove();
+          mostrarSeccion('factibilidad');
+          cambiarTabExpediente('ejecucion');
+        };
+        // Botón Ir a Facturación
+        document.getElementById('toastBtnFact').onclick = function() {
+          toast.remove();
+          mostrarSeccion('colaterales');
+          setTimeout(function() { abrirFacturacion(_colIdxSnap); }, 250);
+        };
+
+        // Auto-cerrar a los 8 s
         setTimeout(function() {
-          toast.style.transition = 'opacity 0.5s';
-          toast.style.opacity = '0';
-          setTimeout(function() { toast.remove(); }, 600);
-        }, 4000);
-      }, 200);
+          if (toast.parentNode) {
+            toast.style.transition = 'opacity 0.5s';
+            toast.style.opacity = '0';
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 600);
+          }
+        }, 8000);
+      }, 250);
+
     } else {
-      // Toast de guardado simple
-      var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:#0b4f8a;color:white;padding:12px 20px;border-radius:10px;font-weight:600;font-size:0.85rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);';
-      toast.textContent = '✓ Datos de ejecución guardados';
-      document.body.appendChild(toast);
-      setTimeout(function() { toast.style.transition='opacity 0.4s'; toast.style.opacity='0'; setTimeout(function(){toast.remove();},500); }, 2500);
+
+      // Navegar a Expediente → pestaña 2. Ejecución para ver el estado actualizado
+      mostrarSeccion('factibilidad');
+      cambiarTabExpediente('ejecucion');
+
+      // Toast de guardado con confirmación visible
+      setTimeout(function() {
+        var toast = document.createElement('div');
+        toast.style.cssText = [
+          'position:fixed;top:24px;right:24px;z-index:9999;',
+          'background:linear-gradient(135deg,#0b3d6b,#1a6fc4);',
+          'color:white;padding:14px 20px;border-radius:12px;',
+          'font-family:"DM Sans",sans-serif;',
+          'box-shadow:0 6px 24px rgba(0,0,0,0.18);',
+          'display:flex;flex-direction:column;gap:10px;max-width:320px;',
+          'animation:slideUp 0.3s ease;'
+        ].join('');
+
+        toast.innerHTML =
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span style="font-size:1.4rem;">&#128190;</span>' +
+            '<div>' +
+              '<div style="font-size:0.88rem;font-weight:800;">Ejecución guardada</div>' +
+              '<div style="font-size:0.74rem;opacity:0.85;margin-top:2px;">Expediente <strong>' + _itemCodigo + '</strong> — Estado: <strong>' + estado + '</strong></div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;">' +
+            '<button id="toastBtnVerEjec" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);color:white;border-radius:8px;padding:7px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;">&#128065; Ver en módulo Ejecución</button>' +
+          '</div>';
+
+        document.body.appendChild(toast);
+
+        document.getElementById('toastBtnVerEjec').onclick = function() {
+          toast.remove();
+          mostrarSeccion('factibilidad');
+          cambiarTabExpediente('ejecucion');
+        };
+
+        setTimeout(function() {
+          if (toast.parentNode) {
+            toast.style.transition = 'opacity 0.5s';
+            toast.style.opacity = '0';
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 600);
+          }
+        }, 5000);
+      }, 250);
     }
   }
 
