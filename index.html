@@ -4087,7 +4087,12 @@
                 '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
                 '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
               '</div>' +
-              '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver / Editar Inspeccion' : 'Llenar Inspeccion') + '</button>' +
+              (item.estado === 'Completado' && !item.ordenEjecucionId
+                ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                    '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Llenar Inspeccion') + '</button>' +
+                    '<button class="btn-config-add" style="padding:8px 16px;font-size:0.8rem;" onclick="pasarAEjecucion(' + idxReal + ')">&#9658; Pase a Ejecucion</button>' +
+                  '</div>'
+                : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Llenar Inspeccion') + '</button>') +
             '</div>' +
             construirPipelineExpediente(item) +
           '</div>';
@@ -4112,9 +4117,16 @@
                 '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
                 '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
               '</div>' +
-              (item.inspeccion
-                ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
-                : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
+              (item.estado === 'Completado' && !item.ordenEjecucionId
+                ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                    (item.inspeccion
+                      ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
+                      : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
+                    '<button class="btn-config-add" style="padding:8px 16px;font-size:0.8rem;" onclick="pasarAEjecucion(' + idxReal + ')">&#9658; Pase a Ejecucion</button>' +
+                  '</div>'
+                : (item.inspeccion
+                    ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
+                    : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>')) +
             '</div>' +
             construirPipelineExpediente(item) +
           '</div>';
@@ -6875,6 +6887,7 @@
       guardarColateralesStorage();
       renderColaterales();
       renderEjecucion();
+      renderFactibilidadTecnico();
 
       // Toast de confirmación de guardado de la hoja de derivación
       setTimeout(function() {
