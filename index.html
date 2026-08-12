@@ -4711,6 +4711,194 @@
     return '<tr><td style="background:#eaf2fb;font-weight:700;color:#0b4f8a;padding:7px 12px;border:1px solid #d0e3f5;font-size:0.75rem;text-transform:uppercase;white-space:nowrap;width:130px">' + label + '</td><td style="padding:7px 12px;border:1px solid #d0e3f5;">' + val + '</td></tr>';
   }
 
+  // ============================================================
+  // IMPRIMIR HOJA DE DERIVACIÓN A EJECUCIÓN (desde columna Ejecucion)
+  // ============================================================
+  function imprimirHojaDerivacion(colIdx) {
+    var item = colaterales[colIdx];
+    if (!item) return;
+    // Compatibilidad: si no hay hojaDerivacion pero sí derivacion (registros anteriores al fix)
+    var hd = item.hojaDerivacion;
+    if (!hd && item.derivacion) {
+      var d = item.derivacion;
+      var hoyStr = d.fecha || new Date().toISOString().split('T')[0];
+      hd = {
+        numeroDoc:        'HD-' + hoyStr.replace(/-/g,'') + '-' + item.codigo,
+        fecha:            hoyStr,
+        tecnicoInspector: d.tecnicoInspector || item.tecnico || '-',
+        tecnicoEjecutor:  d.tecnicoEjecutor  || '-',
+        fechaProg:        d.fechaProg         || '-',
+        prioridad:        d.prioridad         || 'Normal',
+        obs:              d.obs               || '-',
+        ofc:              item.oficinaComercial ? item.oficinaComercial.asunto + ' — ' + formatFecha(item.oficinaComercial.fecha) : '-'
+      };
+    }
+    if (!hd) { alert('No se encontró la hoja de derivación guardada para este registro.'); return; }
+    var insp    = item.inspeccion || {};
+    var agua    = insp.agua    || {};
+    var desague = insp.desague || {};
+
+    var pa = document.getElementById('printArea');
+    pa.style.display = 'block';
+    pa.innerHTML =
+
+      '<div style="font-family:Arial,sans-serif;max-width:760px;margin:0 auto;padding:20px;">' +
+
+      // ── Encabezado institucional ──────────────────────────────
+      '<div style="background:#0b3d6b;color:white;padding:14px 22px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>' +
+          '<div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;opacity:0.75;">EPS Marañón S.A. — Oficina de Distribución y Recolección</div>' +
+          '<div style="font-size:1.15rem;font-weight:800;margin-top:4px;letter-spacing:0.5px;">HOJA DE DERIVACIÓN A EJECUCIÓN</div>' +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:6px 14px;font-size:0.8rem;font-weight:700;">' + hd.numeroDoc + '</div>' +
+          '<div style="font-size:0.7rem;opacity:0.75;margin-top:4px;">Fecha: ' + formatFecha(hd.fecha) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // ── Sección I: Datos del expediente ──────────────────────
+      '<div style="border:1px solid #d0dce8;border-top:none;">' +
+        '<div style="background:#f7f9fc;padding:6px 14px;border-bottom:1px solid #d0dce8;display:flex;align-items:center;gap:8px;">' +
+          '<span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">I</span>' +
+          '<span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Datos del Expediente</span>' +
+        '</div>' +
+        '<div style="padding:12px 16px;">' +
+          '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">' +
+            '<tr>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;width:22%;">N° Código</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + item.codigo + '</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;width:22%;">Solicitante</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + item.nombre + '</td>' +
+            '</tr>' +
+            '<tr>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;">Dirección</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;" colspan="3">' + item.direccion + '</td>' +
+            '</tr>' +
+            '<tr>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;">Sector</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + item.sector + '</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;">Mz. / Lt.</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">Mz. ' + item.manzana + ' — Lt. ' + item.lote + '</td>' +
+            '</tr>' +
+            '<tr>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;">N° Conexión</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + (item.conexion || '-') + '</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;">Of. Comercial</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + hd.ofc + '</td>' +
+            '</tr>' +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+
+      // ── Sección II: Cadena de derivación ─────────────────────
+      '<div style="border:1px solid #d0dce8;border-top:none;">' +
+        '<div style="background:#f7f9fc;padding:6px 14px;border-bottom:1px solid #d0dce8;display:flex;align-items:center;gap:8px;">' +
+          '<span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">II</span>' +
+          '<span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Cadena de Derivación del Personal Técnico</span>' +
+        '</div>' +
+        '<div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+          '<div style="background:#f0fff4;border:1.5px solid #a8e6c0;border-radius:8px;padding:10px 14px;">' +
+            '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#1a7a4a;margin-bottom:6px;">1ª Derivación — Técnico Inspector</div>' +
+            '<div style="font-weight:700;font-size:0.9rem;color:#1a3a2a;">' + hd.tecnicoInspector + '</div>' +
+            '<div style="font-size:0.72rem;color:#1a7a4a;margin-top:3px;">✓ Inspección de Factibilidad completada</div>' +
+          '</div>' +
+          '<div style="background:#eaf2fb;border:1.5px solid #b8d8f8;border-radius:8px;padding:10px 14px;">' +
+            '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0b3d6b;margin-bottom:6px;">2ª Derivación — Técnico / Operario Ejecutor</div>' +
+            '<div style="font-weight:700;font-size:0.9rem;color:#0b3d6b;">' + hd.tecnicoEjecutor + '</div>' +
+            '<div style="font-size:0.72rem;color:#0b4f8a;margin-top:3px;">➤ Asignado para ejecución de obra</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // ── Sección III: Datos técnicos ───────────────────────────
+      (agua.diametro || desague.diametro ? (
+      '<div style="border:1px solid #d0dce8;border-top:none;">' +
+        '<div style="background:#f7f9fc;padding:6px 14px;border-bottom:1px solid #d0dce8;display:flex;align-items:center;gap:8px;">' +
+          '<span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">III</span>' +
+          '<span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Datos Técnicos — Inspección de Factibilidad</span>' +
+        '</div>' +
+        '<div style="padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+          '<div>' +
+            '<div style="font-size:0.7rem;font-weight:800;color:#0b4f8a;margin-bottom:6px;text-transform:uppercase;">Agua Potable</div>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:0.78rem;">' +
+              '<tr><td style="padding:4px 8px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:600;color:#0b4f8a;">Diámetro</td><td style="padding:4px 8px;border:1px solid #e0eaf5;">' + (agua.diametro||'-') + '</td></tr>' +
+              '<tr><td style="padding:4px 8px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:600;color:#0b4f8a;">Long. red</td><td style="padding:4px 8px;border:1px solid #e0eaf5;">' + (agua.longitud||'-') + '</td></tr>' +
+              '<tr><td style="padding:4px 8px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:600;color:#0b4f8a;">Profundidad</td><td style="padding:4px 8px;border:1px solid #e0eaf5;">' + (agua.profundidad||'-') + '</td></tr>' +
+            '</table>' +
+          '</div>' +
+          '<div>' +
+            '<div style="font-size:0.7rem;font-weight:800;color:#5a2d82;margin-bottom:6px;text-transform:uppercase;">Desagüe</div>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:0.78rem;">' +
+              '<tr><td style="padding:4px 8px;border:1px solid #e0eaf5;background:#f3eaff;font-weight:600;color:#5a2d82;">Diámetro</td><td style="padding:4px 8px;border:1px solid #e0eaf5;">' + (desague.diametro||'-') + '</td></tr>' +
+              '<tr><td style="padding:4px 8px;border:1px solid #e0eaf5;background:#f3eaff;font-weight:600;color:#5a2d82;">Long. red</td><td style="padding:4px 8px;border:1px solid #e0eaf5;">' + (desague.longitud||'-') + '</td></tr>' +
+              '<tr><td style="padding:4px 8px;border:1px solid #e0eaf5;background:#f3eaff;font-weight:600;color:#5a2d82;">Profundidad</td><td style="padding:4px 8px;border:1px solid #e0eaf5;">' + (desague.profundidad||'-') + '</td></tr>' +
+            '</table>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+      ) : '') +
+
+      // ── Sección IV: Programación ──────────────────────────────
+      '<div style="border:1px solid #d0dce8;border-top:none;">' +
+        '<div style="background:#f7f9fc;padding:6px 14px;border-bottom:1px solid #d0dce8;display:flex;align-items:center;gap:8px;">' +
+          '<span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">IV</span>' +
+          '<span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Programación de Ejecución</span>' +
+        '</div>' +
+        '<div style="padding:12px 16px;">' +
+          '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">' +
+            '<tr>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;width:28%;">Fecha Programada</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + formatFecha(hd.fechaProg) + '</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;width:28%;">Prioridad</td>' +
+              '<td style="padding:5px 10px;border:1px solid #e0eaf5;">' + hd.prioridad + '</td>' +
+            '</tr>' +
+            (item.ordenEjecucionId ? '<tr><td style="padding:5px 10px;border:1px solid #e0eaf5;background:#eaf2fb;font-weight:700;color:#0b4f8a;">Orden de Trabajo</td><td style="padding:5px 10px;border:1px solid #e0eaf5;font-weight:700;color:#0b3d6b;" colspan="3">' + item.ordenEjecucionId + '</td></tr>' : '') +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+
+      // ── Sección V: Instrucciones ──────────────────────────────
+      '<div style="border:1px solid #d0dce8;border-top:none;">' +
+        '<div style="background:#f7f9fc;padding:6px 14px;border-bottom:1px solid #d0dce8;display:flex;align-items:center;gap:8px;">' +
+          '<span style="background:#0b3d6b;color:white;font-size:0.65rem;font-weight:800;border-radius:4px;padding:2px 7px;letter-spacing:1px;">V</span>' +
+          '<span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#4a6a8a;">Instrucciones / Observaciones al Ejecutor</span>' +
+        '</div>' +
+        '<div style="padding:12px 16px;font-size:0.84rem;min-height:48px;">' + (hd.obs && hd.obs !== '-' ? hd.obs : '<span style="color:#9ab0c4;font-style:italic;">Sin instrucciones adicionales</span>') + '</div>' +
+      '</div>' +
+
+      // ── Firmas ────────────────────────────────────────────────
+      '<div style="border:1px solid #d0dce8;border-top:none;padding:18px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">' +
+        '<div style="text-align:center;">' +
+          '<div style="border-top:1.5px solid #0b3d6b;margin-top:40px;padding-top:6px;">' +
+            '<div style="font-size:0.72rem;font-weight:700;color:#0b3d6b;">JEFE ODR / AUTORIZA</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="text-align:center;">' +
+          '<div style="border-top:1.5px solid #1a7a4a;margin-top:40px;padding-top:6px;">' +
+            '<div style="font-size:0.72rem;font-weight:700;color:#1a7a4a;">TÉC. INSPECTOR</div>' +
+            '<div style="font-size:0.7rem;color:#5a7a9a;margin-top:2px;">' + hd.tecnicoInspector + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="text-align:center;">' +
+          '<div style="border-top:1.5px solid #0b3d6b;margin-top:40px;padding-top:6px;">' +
+            '<div style="font-size:0.72rem;font-weight:700;color:#0b3d6b;">TÉC. / OP. EJECUTOR</div>' +
+            '<div style="font-size:0.7rem;color:#5a7a9a;margin-top:2px;">' + hd.tecnicoEjecutor + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // ── Pie ───────────────────────────────────────────────────
+      '<div style="background:#0b3d6b;color:rgba(255,255,255,0.7);padding:6px 16px;font-size:0.65rem;display:flex;justify-content:space-between;border-radius:0 0 8px 8px;">' +
+        '<span>EPS Marañón S.A. — ODR</span>' +
+        '<span>' + hd.numeroDoc + '</span>' +
+        '<span>Fecha impresión: ' + (new Date().toLocaleDateString('es-PE')) + '</span>' +
+      '</div>' +
+
+      '</div>';
+
+    setTimeout(function() { window.print(); pa.style.display = 'none'; }, 200);
+  }
+
   // Busca el celular guardado de un tecnico/operario por su nombre completo
   function buscarCelularTecnico(nombreTecnico) {
     var u = USUARIOS.filter(function(x) { return x.nombre === nombreTecnico; })[0];
@@ -6426,8 +6614,21 @@
     if (obsDerivacion) { resumen += '\nInstrucciones al ejecutor: ' + obsDerivacion; }
     if (insp.observacion && insp.observacion !== '-') { resumen += '\nObs. inspeccion: ' + insp.observacion; }
 
-    // ── Crear OS automáticamente (sin abrir modal) ────────────────
+    // ── Guardar datos de la Hoja de Derivación en el colateral ───────
     var hoyFecha = new Date().toISOString().split('T')[0];
+    var numDoc = 'HD-' + hoyFecha.replace(/-/g,'') + '-' + item.codigo;
+    item.hojaDerivacion = {
+      numeroDoc:       numDoc,
+      fecha:           hoyFecha,
+      tecnicoInspector: item.tecnico || '-',
+      tecnicoEjecutor:  tecEjecutor,
+      fechaProg:        fechaProg || '-',
+      prioridad:        prioridad,
+      obs:              obsDerivacion || '-',
+      ofc:              item.oficinaComercial ? item.oficinaComercial.asunto + ' — ' + formatFecha(item.oficinaComercial.fecha) : '-'
+    };
+
+    // ── Crear OS automáticamente (sin abrir modal) ────────────────
     var nuevaOS = {
       id:         null,
       codigo:     item.codigo,
@@ -6461,6 +6662,25 @@
       guardarColateralesStorage();
       renderColaterales();
       renderEjecucion();
+
+      // Toast de confirmación de guardado de la hoja de derivación
+      setTimeout(function() {
+        var toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#0b3d6b,#1a6fc4);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.20);display:flex;align-items:center;gap:12px;max-width:380px;';
+        toast.innerHTML =
+          '<span style="font-size:1.4rem;">&#128190;</span>' +
+          '<div>' +
+            '<div style="font-size:0.9rem;font-weight:800;">Hoja de Derivación guardada</div>' +
+            '<div style="font-size:0.76rem;opacity:0.9;margin-top:3px;">' + item.hojaDerivacion.numeroDoc + ' — OS: ' + nuevaOS.id + '</div>' +
+            '<div style="font-size:0.74rem;opacity:0.8;margin-top:1px;">Ejecutor: ' + tecEjecutor + '</div>' +
+          '</div>';
+        document.body.appendChild(toast);
+        setTimeout(function() {
+          toast.style.transition = 'opacity 0.5s';
+          toast.style.opacity = '0';
+          setTimeout(function() { toast.remove(); }, 600);
+        }, 4500);
+      }, 200);
 
       // Navegar al módulo Expediente → pestaña 2. Ejecución
       mostrarSeccion('factibilidad');
@@ -6512,7 +6732,10 @@
             '<span style="background:' + bgEjec + ';color:' + colorEjec + ';border:1px solid ' + colorEjec + ';border-radius:8px;font-size:0.72rem;font-weight:800;padding:2px 9px;">&#10004; ' + estEjec + '</span>' +
             '<span style="color:#7a9a8a;font-size:0.7rem;">' + item.ordenEjecucionId + '</span>' +
             (item.fechaConcluido ? '<span style="color:#aaa;font-size:0.67rem;">' + formatFecha(item.fechaConcluido) + '</span>' : '') +
-            '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;margin-top:1px;" onclick="imprimirEjecucion(' + idx + ')" title="Imprimir PDF de ejecucion">&#128196; PDF</button>' +
+            '<div style="display:flex;gap:3px;margin-top:2px;">' +
+              '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;" onclick="imprimirEjecucion(' + idx + ')" title="PDF Ejecucion">&#128196; PDF</button>' +
+              ((item.hojaDerivacion || item.derivacion) ? '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Imprimir Hoja de Derivacion">&#128203; Hoja</button>' : '') +
+            '</div>' +
           '</div>';
       } else if (item.ordenEjecucionId) {
         var estPend = (item.datosEjecucion && item.datosEjecucion.estado) || 'Pendiente';
@@ -6522,7 +6745,10 @@
           '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">' +
             '<span style="background:' + bgPend + ';color:' + colorPend + ';border:1px solid ' + colorPend + ';border-radius:8px;font-size:0.72rem;font-weight:700;padding:2px 9px;">&#9679; ' + estPend + '</span>' +
             '<span style="color:#7a8fa6;font-size:0.7rem;">' + item.ordenEjecucionId + '</span>' +
-            '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;margin-top:1px;" onclick="abrirLlenarEjecucion(' + idx + ')" title="Completar ejecucion">&#9998; Llenar</button>' +
+            '<div style="display:flex;gap:3px;margin-top:2px;">' +
+              '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;" onclick="abrirLlenarEjecucion(' + idx + ')" title="Completar ejecucion">&#9998; Llenar</button>' +
+              ((item.hojaDerivacion || item.derivacion) ? '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Imprimir Hoja de Derivacion">&#128203; Hoja</button>' : '') +
+            '</div>' +
           '</div>';
       } else if (item.oficinaComercial) {
         celdaEjecucion = '<button class="btn-config-add" style="padding:6px 10px;font-size:0.76rem;" onclick="pasarAEjecucion(' + idx + ')">Pase a Ejecucion</button>';
