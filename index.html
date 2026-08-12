@@ -4590,18 +4590,13 @@
     // ── Precargar campos del formulario ───────────────────────────
     var datos = item.datosEjecucion || {};
 
-    // Actividad: si ya fue guardada, respetar; si no, usar datos de inspección
+    // Actividad: solo lo que el usuario guardó; nunca precargar desde inspección
     document.getElementById('ejecModalActividad').value =
-      datos.actividad && datos.actividad !== '-'
-        ? datos.actividad
-        : actividadDesdeInsp || (os && os.actividad && os.actividad !== '-' ? os.actividad : '');
+      datos.actividad && datos.actividad !== '-' ? datos.actividad : '';
 
-    // Observaciones: combinar obs de inspección si no hay datos de ejecución previos
-    var obsInsp = val(insp.observacion) ? 'Obs. inspección: ' + insp.observacion : '';
+    // Observaciones: solo lo que el usuario guardó previamente
     document.getElementById('ejecModalObs').value =
-      datos.obs && datos.obs !== '-'
-        ? datos.obs
-        : obsInsp || (os && os.obs && os.obs !== '-' ? os.obs : '');
+      datos.obs && datos.obs !== '-' ? datos.obs : '';
 
     document.getElementById('ejecModalFecha').value  = datos.fecha   || (new Date().toISOString().split('T')[0]);
     document.getElementById('ejecModalEstado').value = datos.estado  || (os ? os.estado : 'Pendiente');
