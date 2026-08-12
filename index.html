@@ -4036,6 +4036,26 @@
       '</div>';
   }
 
+  function construirPipelineExpediente(item) {
+    var fases = [
+      { label: 'Factibilidad', done: !!(item.inspeccion), active: !(item.inspeccion) },
+      { label: 'Of. Comercial', done: !!(item.oficinaComercial), active: !!(item.inspeccion && item.estado === 'Completado' && !item.oficinaComercial) },
+      { label: 'Ejecucion', done: !!(item.ordenEjecucionId && item.ejecucionConcluida), active: !!(item.ordenEjecucionId && !item.ejecucionConcluida) },
+      { label: 'Facturacion', done: !!(item.facturacion), active: !!(item.ejecucionConcluida && !item.facturacion) }
+    ];
+    var html = '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:10px;">';
+    fases.forEach(function(f, i) {
+      var bg = f.done ? '#1a7a4a' : f.active ? '#0b4f8a' : '#e8eff7';
+      var txt = f.done ? 'white' : f.active ? 'white' : '#8a9ab0';
+      var bord = f.done ? '#1a7a4a' : f.active ? '#0b4f8a' : '#c8d8e8';
+      var icon = f.done ? '&#10004; ' : f.active ? '&#8250; ' : '';
+      html += '<span style="display:inline-flex;align-items:center;gap:3px;background:' + bg + ';color:' + txt + ';border:1px solid ' + bord + ';border-radius:20px;padding:2px 10px;font-size:0.68rem;font-weight:700;">' + icon + f.label + '</span>';
+      if (i < fases.length - 1) html += '<span style="color:#c0ccd8;font-size:0.7rem;padding:0 1px;">&#8594;</span>';
+    });
+    html += '</div>';
+    return html;
+  }
+
   function renderFactibilidadTecnico() {
     var info = document.getElementById('factibilidadInfo');
     var cont = document.getElementById('factibilidadContenido');
@@ -4061,12 +4081,15 @@
           var idxReal = colaterales.indexOf(item);
           var estado = item.estado || 'Pendiente';
           var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
-          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
-            '<div>' +
-              '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
-              '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">' +
+              '<div>' +
+                '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
+                '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+              '</div>' +
+              '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver / Editar Inspeccion' : 'Llenar Inspeccion') + '</button>' +
             '</div>' +
-            '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver / Editar Inspeccion' : 'Llenar Inspeccion') + '</button>' +
+            construirPipelineExpediente(item) +
           '</div>';
         }).join('') +
         '</div>';
@@ -4083,14 +4106,17 @@
           var idxReal = colaterales.indexOf(item);
           var estado = item.estado || 'Pendiente';
           var colorEstado = estado === 'Completado' ? '#1a7a4a' : estado === 'En Proceso' ? '#e8a000' : 'var(--rojo)';
-          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">' +
-            '<div>' +
-              '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
-              '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+          return '<div style="background:white;border:1px solid #dbe9f8;border-left:4px solid ' + colorEstado + ';border-radius:10px;padding:14px 18px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">' +
+              '<div>' +
+                '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
+                '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
+              '</div>' +
+              (item.inspeccion
+                ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
+                : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
             '</div>' +
-            (item.inspeccion
-              ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
-              : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
+            construirPipelineExpediente(item) +
           '</div>';
         }).join('') +
         '</div>';
