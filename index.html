@@ -3907,19 +3907,12 @@
         var bgCard = esConclusivo ? '#f8fffa' : '#fff';
 
         // ── Botones de acción ────────────────────────────────────
-        var btnHoja = (hd || deriv.tecnicoEjecutor)
-          ? '<button onclick="imprimirHojaDerivacion(' + colIdx + ')" style="background:#eaf2fb;color:#0b3d6b;border:1.5px solid #b8d8f8;border-radius:7px;padding:5px 11px;font-size:0.77rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">&#128203; Hoja Deriv.</button>'
-          : '';
-
         var botonesAccion = esConclusivo
-          ? btnHoja +
-            '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF Ejecucion</button>' +
+          ? '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF Ejecucion</button>' +
             (!item.facturacion
               ? '<button class="btn-config-add" style="padding:6px 13px;font-size:0.78rem;" onclick="abrirFacturacion(' + colIdx + ')">&#128179; Pase a Facturacion</button>'
               : '<span style="color:#1a7a4a;font-weight:800;font-size:0.78rem;background:#d1f0e0;padding:4px 10px;border-radius:8px;">&#10004; Facturado: ' + (item.facturacion.recibo || '') + '</span>')
-          : btnHoja +
-            '<button class="btn-tarea-row" style="padding:6px 13px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;font-size:0.78rem;" onclick="abrirLlenarEjecucion(' + colIdx + ')">&#9998; Llenar / Completar</button>' +
-            '<button class="btn-print-row" style="font-size:0.77rem;padding:5px 11px;" onclick="imprimirEjecucion(' + colIdx + ')">&#128196; PDF</button>';
+          : '<button class="btn-tarea-row" style="padding:6px 13px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;font-size:0.78rem;" onclick="abrirLlenarEjecucion(' + colIdx + ')">&#9998; Llenar</button>';
 
         // ── Panel de datos de inspección ─────────────────────────
         var tieneAgua    = agua.diametro    || agua.longitud    || agua.profundidad;
@@ -4031,8 +4024,7 @@
           '</div>' +
 
           // ── Panel de inspección (debajo) ─────────────────────────
-          panelInsp +
-          panelDeriv +
+
 
         '</div>';
       }).join('') +
@@ -4043,7 +4035,7 @@
     var fases = [
       { label: 'Factibilidad', done: !!(item.inspeccion), active: !(item.inspeccion) },
       { label: 'Of. Comercial', done: !!(item.oficinaComercial), active: !!(item.inspeccion && item.estado === 'Completado' && !item.oficinaComercial) },
-      { label: 'Ejecucion', done: !!(item.ejecucionConcluida), active: !!(!item.ejecucionConcluida && (item.derivadoAEjecucion || item.datosEjecucion || (item.estado === 'Completado' && item.oficinaComercial))) },
+      { label: 'Ejecucion', done: !!(item.ejecucionConcluida), active: !!(!item.ejecucionConcluida && (item.derivadoAEjecucion || item.hojaDerivacion || item.derivacion || item.datosEjecucion)) },
       { label: 'Facturacion', done: !!(item.facturacion), active: !!(item.ejecucionConcluida && !item.facturacion) }
     ];
     var html = '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:10px;">';
@@ -4090,12 +4082,7 @@
                 '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
                 '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
               '</div>' +
-              (item.estado === 'Completado' && !item.derivadoAEjecucion && !item.datosEjecucion && !item.ejecucionConcluida
-                ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                    '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Llenar Inspeccion') + '</button>' +
-                    '<button class="btn-config-add" style="padding:8px 16px;font-size:0.8rem;" onclick="pasarAEjecucion(' + idxReal + ')">&#9658; Pase a Ejecucion</button>' +
-                  '</div>'
-                : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Llenar Inspeccion') + '</button>') +
+              '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver / Editar Inspeccion' : 'Llenar Inspeccion') + '</button>' +
             '</div>' +
             construirPipelineExpediente(item) +
           '</div>';
@@ -4120,16 +4107,9 @@
                 '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
                 '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
               '</div>' +
-              (item.estado === 'Completado' && !item.derivadoAEjecucion && !item.datosEjecucion && !item.ejecucionConcluida
-                ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                    (item.inspeccion
-                      ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
-                      : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
-                    '<button class="btn-config-add" style="padding:8px 16px;font-size:0.8rem;" onclick="pasarAEjecucion(' + idxReal + ')">&#9658; Pase a Ejecucion</button>' +
-                  '</div>'
-                : (item.inspeccion
-                    ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
-                    : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>')) +
+              (item.inspeccion
+                ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
+                : '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">Sin inspeccion aun</button>') +
             '</div>' +
             construirPipelineExpediente(item) +
           '</div>';
@@ -4860,21 +4840,22 @@
         fila('Estado del Expediente', item.estado || '-') +
       '</table>' +
 
-      // II. DATOS DE LA ORDEN DE SERVICIO
-      seccion('II. Orden de Servicio Vinculada') +
+      // II. DATOS DE INSPECCION DE FACTIBILIDAD
+      seccion('II. Datos de Inspeccion de Factibilidad') +
       '<table style="width:100%;border-collapse:collapse;">' +
-        (os ? (
-          fila('N Orden', os.id) +
-          fila('Fecha de Emision', os.fecha ? (function(f){ var p=f.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; })(os.fecha) : '-') +
-          fila('Fecha Programada', os.fechaProg && os.fechaProg !== '-' ? (function(f){ var p=f.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; })(os.fechaProg) : '-') +
-          fila('Componente', os.componente) +
-          fila('Frecuencia', os.frecuencia) +
-          fila('Prioridad', os.prioridad) +
-          fila('Estado de la Orden', os.estado) +
-          fila('Tecnico Responsable', os.tecnico) +
-          (datos.nroMedidor   && datos.nroMedidor   !== '-' ? fila('N\u00b0 de Medidor Instalado', datos.nroMedidor)   : '') +
-          (datos.marcaMedidor && datos.marcaMedidor !== '-' ? fila('Marca del Medidor',          datos.marcaMedidor) : '')
-        ) : fila('Orden', 'Sin orden de servicio vinculada')) +
+        (insp && (agua.diametro || agua.longitud || agua.profundidad || desague.diametro || desague.longitud || desague.profundidad || insp.observacion) ? (
+          (agua.diametro    ? fila('Diametro Agua Potable',     agua.diametro)    : '') +
+          (agua.longitud    ? fila('Long. Red Agua',            agua.longitud)    : '') +
+          (agua.profundidad ? fila('Profundidad Agua',          agua.profundidad) : '') +
+          (desague.diametro    ? fila('Diametro Desague',       desague.diametro)    : '') +
+          (desague.longitud    ? fila('Long. Red Desague',      desague.longitud)    : '') +
+          (desague.profundidad ? fila('Profundidad Desague',    desague.profundidad) : '') +
+          (item.sector   && item.sector   !== '-' ? fila('Sector de Abastecimiento', item.sector)   : '') +
+          (item.manzana  && item.manzana  !== '-' ? fila('Manzana',                  item.manzana)  : '') +
+          (item.lote     && item.lote     !== '-' ? fila('Lote',                     item.lote)     : '') +
+          (item.conexion && item.conexion !== '-' ? fila('N° Conexion',         item.conexion) : '') +
+          (insp.observacion && insp.observacion !== '-' ? fila('Observacion Inspeccion', insp.observacion) : '')
+        ) : '<tr><td colspan="2" style="padding:8px 12px;font-style:italic;color:#aaa;font-size:0.83rem;">Sin datos de inspeccion registrados.</td></tr>') +
       '</table>' +
 
       // III. DESCRIPCION DEL TRABAJO
@@ -6929,33 +6910,24 @@
         var colorPend = estPend === 'En Proceso' ? '#e8a000' : '#0b4f8a';
         var bgPend    = estPend === 'En Proceso' ? '#fff8e1' : '#eaf2fb';
         celdaEjecucion =
-          '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:150px;">' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:130px;">' +
             '<span style="background:' + bgPend + ';color:' + colorPend + ';border:1px solid ' + colorPend + ';border-radius:8px;font-size:0.7rem;font-weight:700;padding:2px 9px;">&#9654; ' + estPend + '</span>' +
-            (item.hojaDerivacion ? '<span style="color:#0b4f8a;font-size:0.69rem;font-weight:700;">' + item.hojaDerivacion.numeroDoc + '</span>' : '') +
             (tecEjec
               ? '<div style="display:flex;align-items:center;gap:3px;background:#eaf2fb;border:1px solid #b8d8f8;border-radius:6px;padding:2px 7px;">' +
                   '<span style="font-size:0.8rem;">&#128100;</span>' +
                   '<span style="font-size:0.71rem;font-weight:700;color:#0b3d6b;">' + tecEjec + '</span>' +
                 '</div>'
               : '') +
-            (fechaProgEjec ? '<span style="color:#856404;font-size:0.67rem;background:#fff8e1;border:1px solid #ffe082;border-radius:5px;padding:1px 6px;">&#128197; ' + fechaProgEjec + '</span>' : '') +
-            (datosEjec.actividad && datosEjec.actividad !== '-'
-              ? '<span style="font-size:0.67rem;color:#4a5a6a;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + datosEjec.actividad + '">&#128221; ' + datosEjec.actividad.substring(0,40) + (datosEjec.actividad.length > 40 ? '...' : '') + '</span>'
-              : '') +
-            '<div style="display:flex;gap:3px;margin-top:3px;">' +
-              '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;" onclick="abrirLlenarEjecucion(' + idx + ')">&#9998; Llenar</button>' +
-            '</div>' +
           '</div>';
 
       } else if (item.estado === 'Completado' && item.oficinaComercial && item.datosEjecucion) {
         // ── CASO C: Tiene datos de ejecución pero aún sin OS (guardado directo desde Tab Ejecución) ──
         var estC   = datosEjec.estado || 'En Proceso';
         celdaEjecucion =
-          '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:150px;">' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:130px;">' +
             '<span style="background:#fff8e1;color:#e8a000;border:1px solid #e8a000;border-radius:8px;font-size:0.7rem;font-weight:700;padding:2px 9px;">&#9654; ' + estC + '</span>' +
             (tecEjec ? '<div style="display:flex;align-items:center;gap:3px;background:#eaf2fb;border:1px solid #b8d8f8;border-radius:6px;padding:2px 7px;">' +
               '<span style="font-size:0.8rem;">&#128100;</span><span style="font-size:0.71rem;font-weight:700;color:#0b3d6b;">' + tecEjec + '</span></div>' : '') +
-            '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;margin-top:2px;" onclick="abrirLlenarEjecucion(' + idx + ')">&#9998; Llenar</button>' +
           '</div>';
 
       } else if (item.oficinaComercial && !item.derivadoAEjecucion && !item.datosEjecucion) {
