@@ -4090,7 +4090,7 @@
                 '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + '<br>' +
                 '<span style="font-size:0.78rem;color:#7a8fa6;">' + item.direccion + ' &middot; Mz. ' + item.manzana + ' Lt. ' + item.lote + ' &middot; Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
               '</div>' +
-              (item.estado === 'Completado' && !item.ordenEjecucionId
+              (item.estado === 'Completado' && !item.derivadoAEjecucion && !item.datosEjecucion && !item.ejecucionConcluida
                 ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
                     '<button class="btn-tarea-row" style="padding:8px 16px;" onclick="abrirFactibilidad(' + idxReal + ')">' + (item.inspeccion ? 'Ver Inspeccion' : 'Llenar Inspeccion') + '</button>' +
                     '<button class="btn-config-add" style="padding:8px 16px;font-size:0.8rem;" onclick="pasarAEjecucion(' + idxReal + ')">&#9658; Pase a Ejecucion</button>' +
@@ -4120,7 +4120,7 @@
                 '<strong style="color:var(--azul);">' + item.codigo + '</strong> &middot; ' + item.nombre + ' &middot; Derivado a: <strong>' + item.tecnico + '</strong><br>' +
                 '<span style="font-size:0.78rem;color:#7a8fa6;">Estado: <strong style="color:' + colorEstado + ';">' + estado + '</strong></span>' +
               '</div>' +
-              (item.estado === 'Completado' && !item.ordenEjecucionId
+              (item.estado === 'Completado' && !item.derivadoAEjecucion && !item.datosEjecucion && !item.ejecucionConcluida
                 ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
                     (item.inspeccion
                       ? '<button class="btn-tarea-row" style="padding:8px 16px;background:#1a7a4a;color:#fff;border-color:#1a7a4a;" onclick="abrirFactibilidad(' + idxReal + ')">Ver Inspeccion</button>'
@@ -6920,7 +6920,6 @@
             (datosEjec.materiales && datosEjec.materiales !== '-' ? '<span style="font-size:0.67rem;color:#4a6a4a;background:#f0fff4;border:1px solid #a8e6c0;border-radius:4px;padding:1px 6px;">Mat: ' + datosEjec.materiales + '</span>' : '') +
             '<div style="display:flex;gap:3px;margin-top:2px;">' +
               '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;" onclick="imprimirEjecucion(' + idx + ')" title="PDF Ejecucion">&#128196; PDF</button>' +
-              ((item.hojaDerivacion || item.derivacion) ? '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 6px;background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Hoja Derivacion">&#128203;</button>' : '') +
             '</div>' +
           '</div>';
 
@@ -6944,8 +6943,7 @@
               ? '<span style="font-size:0.67rem;color:#4a5a6a;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + datosEjec.actividad + '">&#128221; ' + datosEjec.actividad.substring(0,40) + (datosEjec.actividad.length > 40 ? '...' : '') + '</span>'
               : '') +
             '<div style="display:flex;gap:3px;margin-top:3px;">' +
-              '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;" onclick="abrirLlenarEjecucion(' + idx + ')">&#9998; Editar</button>' +
-              ((item.hojaDerivacion || item.derivacion) ? '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 6px;background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Hoja Derivacion">&#128203;</button>' : '') +
+              '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;" onclick="abrirLlenarEjecucion(' + idx + ')">&#9998; Llenar</button>' +
             '</div>' +
           '</div>';
 
@@ -6957,10 +6955,10 @@
             '<span style="background:#fff8e1;color:#e8a000;border:1px solid #e8a000;border-radius:8px;font-size:0.7rem;font-weight:700;padding:2px 9px;">&#9654; ' + estC + '</span>' +
             (tecEjec ? '<div style="display:flex;align-items:center;gap:3px;background:#eaf2fb;border:1px solid #b8d8f8;border-radius:6px;padding:2px 7px;">' +
               '<span style="font-size:0.8rem;">&#128100;</span><span style="font-size:0.71rem;font-weight:700;color:#0b3d6b;">' + tecEjec + '</span></div>' : '') +
-            '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;margin-top:2px;" onclick="abrirLlenarEjecucion(' + idx + ')">&#9998; Editar</button>' +
+            '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;margin-top:2px;" onclick="abrirLlenarEjecucion(' + idx + ')">&#9998; Llenar</button>' +
           '</div>';
 
-      } else if (item.oficinaComercial) {
+      } else if (item.oficinaComercial && !item.derivadoAEjecucion && !item.datosEjecucion) {
         // ── CASO D: Lista para iniciar ejecución ──────────────────
         celdaEjecucion =
           '<button class="btn-config-add" style="padding:7px 12px;font-size:0.76rem;" onclick="pasarAEjecucion(' + idx + ')">' +
@@ -7008,7 +7006,13 @@
         '<td style="text-align:center;">' + celdaEjecucion + '</td>' +
         '<td style="text-align:center;">' + celdaFacturacion + '</td>' +
         '<td style="text-align:center;white-space:nowrap;">' +
-          '<button class="btn-config-edit" onclick="editarColateral(' + idx + ')" title="Editar">&#9998;</button>' +
+          '<button class="btn-config-edit" onclick="editarColateral(' + idx + ')" title="Editar registro">&#9998;</button>' +
+          ((item.hojaDerivacion || item.derivacion)
+            ? '<button class="btn-config-edit" style="background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Hoja de Derivacion">&#128203;</button>'
+            : '') +
+          (item.ejecucionConcluida
+            ? '<button class="btn-config-edit" style="background:#f0fff4;color:#1a7a4a;border-color:#a8e6c0;" onclick="imprimirEjecucion(' + idx + ')" title="PDF Ejecucion">&#128196;</button>'
+            : '') +
           '<button class="btn-config-del" onclick="eliminarColateral(' + idx + ')" title="Eliminar">&#128465;</button>' +
         '</td>' +
       '</tr>';
