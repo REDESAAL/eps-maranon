@@ -7008,13 +7008,20 @@
         var estPend = (item.datosEjecucion && item.datosEjecucion.estado) || 'Pendiente';
         var colorPend = estPend === 'En Proceso' ? '#e8a000' : '#c0392b';
         var bgPend    = estPend === 'En Proceso' ? '#fff3cd' : '#fdf2f2';
+        var tecEjec = (item.derivacion && item.derivacion.tecnicoEjecutor) || '';
+        var fechaProgEjec = (item.derivacion && item.derivacion.fechaProg) ? formatFecha(item.derivacion.fechaProg) : '';
         celdaEjecucion =
-          '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">' +
-            '<span style="background:' + bgPend + ';color:' + colorPend + ';border:1px solid ' + colorPend + ';border-radius:8px;font-size:0.72rem;font-weight:700;padding:2px 9px;">&#9679; ' + estPend + '</span>' +
-            '<span style="color:#7a8fa6;font-size:0.7rem;">' + item.ordenEjecucionId + '</span>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:140px;">' +
+            '<span style="background:' + bgPend + ';color:' + colorPend + ';border:1px solid ' + colorPend + ';border-radius:8px;font-size:0.7rem;font-weight:700;padding:2px 9px;">&#9679; ' + estPend + '</span>' +
+            '<span style="color:#0b4f8a;font-size:0.71rem;font-weight:700;">' + item.ordenEjecucionId + '</span>' +
+            (tecEjec ? '<div style="display:flex;align-items:center;gap:4px;background:#eaf2fb;border:1px solid #b8d8f8;border-radius:6px;padding:2px 8px;">' +
+              '<span style="font-size:0.9rem;">&#128100;</span>' +
+              '<span style="font-size:0.71rem;font-weight:700;color:#0b3d6b;">' + tecEjec + '</span>' +
+            '</div>' : '') +
+            (fechaProgEjec ? '<span style="color:#856404;font-size:0.68rem;background:#fff8e1;border:1px solid #ffe082;border-radius:5px;padding:1px 7px;">&#128197; Prog: ' + fechaProgEjec + '</span>' : '') +
             '<div style="display:flex;gap:3px;margin-top:2px;">' +
-              '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;" onclick="abrirLlenarEjecucion(' + idx + ')" title="Completar ejecucion">&#9998; Llenar</button>' +
-              ((item.hojaDerivacion || item.derivacion) ? '<button class="btn-config-edit" style="font-size:0.7rem;padding:2px 7px;background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Imprimir Hoja de Derivacion">&#128203; Hoja</button>' : '') +
+              '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 9px;background:#0b4f8a;color:#fff;border-color:#0b4f8a;" onclick="abrirLlenarEjecucion(' + idx + ')" title="Completar ejecucion">&#9998; Llenar</button>' +
+              ((item.hojaDerivacion || item.derivacion) ? '<button class="btn-config-edit" style="font-size:0.7rem;padding:3px 7px;background:#eaf2fb;color:#0b3d6b;border-color:#b8d8f8;" onclick="imprimirHojaDerivacion(' + idx + ')" title="Hoja de Derivacion">&#128203;</button>' : '') +
             '</div>' +
           '</div>';
       } else if (item.oficinaComercial) {
