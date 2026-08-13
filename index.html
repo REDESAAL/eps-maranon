@@ -3853,16 +3853,16 @@
     var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
 
     var lista = colaterales.filter(function(c) {
-      // Incluir si ya tiene OS generada O si está listo para ejecución (Completado + Of. Comercial)
+      // Mostrar si: derivado a ejecución, con datos de ejecución, o en proceso
+      var enEjecucion = !!(c.derivadoAEjecucion || c.datosEjecucion || c.ejecucionConcluida);
       var listoParaEjecucion = (c.estado === 'Completado' && c.oficinaComercial && !c.ejecucionConcluida);
-      var enEjecucion = !!c.ordenEjecucionId;
-      if (!listoParaEjecucion && !enEjecucion) return false;
+      if (!enEjecucion && !listoParaEjecucion) return false;
       if (currentUser.rol === 'tecnico') { return c.tecnico === currentUser.nombre || (c.derivacion && c.derivacion.tecnicoEjecutor === currentUser.nombre); }
       return true;
     });
     if (busqueda) {
       lista = lista.filter(function(c) {
-        var campos = [c.codigo, c.nombre, c.ordenEjecucionId, c.tecnico].join(' ').toLowerCase();
+        var campos = [c.codigo, c.nombre, c.tecnico, (c.hojaDerivacion && c.hojaDerivacion.numeroDoc) || '', (c.derivacion && c.derivacion.tecnicoEjecutor) || ''].join(' ').toLowerCase();
         return campos.indexOf(busqueda) >= 0;
       });
     }
@@ -3882,7 +3882,7 @@
         var c = colores[estado] || ['#d1f0e0','#1a7a4a'];
         return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + c[0] + ';color:' + c[1] + ';border:1.5px solid ' + c[1] + ';border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:800;">&#10004; ' + estado + '</span>';
       }
-      var colorMap = { 'En Proceso': ['#fff3cd','#856404'], 'Pendiente': ['#fdf2f2','#c0392b'], 'Listo para Ejecucion': ['#e0f0ff','#0b4f8a'] };
+      var colorMap = { 'En Proceso': ['#fff3cd','#856404'], 'Pendiente': ['#fdf2f2','#c0392b'], 'Listo para Ejecucion': ['#e0f0ff','#0b4f8a'], 'Derivado / Pendiente': ['#fff3e0','#e65100'] };
       var c2 = colorMap[estado] || ['#eee','#555'];
       return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + c2[0] + ';color:' + c2[1] + ';border:1px solid ' + c2[1] + ';border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:700;">&#9679; ' + estado + '</span>';
     }
@@ -3890,14 +3890,14 @@
     cont.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' +
       lista.map(function(item) {
         var colIdx = colaterales.indexOf(item);
-        var os      = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
+        var os      = null; // Sin OS — todo en el expediente
         var datos   = item.datosEjecucion || {};
         var insp    = item.inspeccion    || {};
         var agua    = insp.agua    || {};
         var desague = insp.desague || {};
         var deriv   = item.derivacion || {};
         var hd      = item.hojaDerivacion || null;
-        var estadoEjec   = datos.estado || (os ? os.estado : (!item.ordenEjecucionId ? 'Listo para Ejecucion' : 'Pendiente'));
+        var estadoEjec   = datos.estado || (item.derivadoAEjecucion ? 'Derivado / Pendiente' : 'Listo para Ejecucion');
         var concluido    = !!item.ejecucionConcluida;
         var esConclusivo = concluido && estadosConclusivos.indexOf(estadoEjec) >= 0;
 
@@ -4043,7 +4043,7 @@
     var fases = [
       { label: 'Factibilidad', done: !!(item.inspeccion), active: !(item.inspeccion) },
       { label: 'Of. Comercial', done: !!(item.oficinaComercial), active: !!(item.inspeccion && item.estado === 'Completado' && !item.oficinaComercial) },
-      { label: 'Ejecucion', done: !!(item.ejecucionConcluida), active: !!(!item.ejecucionConcluida && (item.ordenEjecucionId || (item.estado === 'Completado' && item.oficinaComercial))) },
+      { label: 'Ejecucion', done: !!(item.ejecucionConcluida), active: !!(!item.ejecucionConcluida && (item.derivadoAEjecucion || item.datosEjecucion || (item.estado === 'Completado' && item.oficinaComercial))) },
       { label: 'Facturacion', done: !!(item.facturacion), active: !!(item.ejecucionConcluida && !item.facturacion) }
     ];
     var html = '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:10px;">';
@@ -4533,7 +4533,7 @@
     document.getElementById('ejecucionModalCodigo').textContent = item.codigo || '-';
     document.getElementById('ejecModalNombre').textContent = item.nombre || '-';
     document.getElementById('ejecModalDireccion').textContent = item.direccion || '-';
-    document.getElementById('ejecModalOrden').textContent = item.ordenEjecucionId || '(Se generará al guardar)';
+    document.getElementById('ejecModalOrden').textContent = (item.hojaDerivacion && item.hojaDerivacion.numeroDoc) || 'Expediente ' + item.codigo;
     document.getElementById('ejecModalTecnico').textContent = (os && os.tecnico) ? os.tecnico : (item.tecnico || '-');
 
     // ── Panel de cadena de derivación ─────────────────────────────
@@ -4680,55 +4680,7 @@
       item.fechaConcluido     = datos.fecha || new Date().toISOString().split('T')[0];
     }
 
-    // Si no tiene OS aún, crear una automáticamente
-    if (!item.ordenEjecucionId) {
-      var hoyOS = new Date().toISOString().split('T')[0];
-      var nuevaOS = {
-        id:         null,
-        codigo:     item.codigo,
-        fecha:      hoyOS,
-        fechaProg:  datos.fecha || hoyOS,
-        componente: 'Conexion Domiciliaria - ' + item.codigo,
-        frecuencia: 'Ejecucion',
-        sistema:    'agua',
-        direccion:  item.direccion !== '-' ? item.direccion : '-',
-        tecnico:    (item.derivacion && item.derivacion.tecnicoEjecutor) || item.tecnico || '-',
-        prioridad:  (item.derivacion && item.derivacion.prioridad) || 'Normal',
-        estado:     estado,
-        actividad:  datos.actividad,
-        obs:        datos.obs
-      };
-      obtenerNumeroAtomico('os', osCounter, function(numero) {
-        nuevaOS.id = 'OS-' + String(numero).padStart(3, '0');
-        osCounter  = numero + 1;
-        historial.push(nuevaOS);
-        item.ordenEjecucionId = nuevaOS.id;
-        guardarStorage();
-        renderHistorial();
-        renderOrdenTrabajo();
-        renderOrdenesAgua();
-        renderOrdenesAlcant();
-        guardarColateralesStorage();
-        renderEjecucion();
-        renderColaterales();
-        renderFactibilidadTecnico();
-        cerrarLlenarEjecucion();
-      });
-      return; // la función continúa dentro del callback
-    }
-
-    // Sincronizar estado y datos en la OS vinculada existente
-    var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
-    if (os) {
-      os.estado    = estado;
-      os.actividad = datos.actividad;
-      os.obs       = datos.obs;
-      if (datos.nroMedidor   !== '-') os.nroMedidor   = datos.nroMedidor;
-      if (datos.marcaMedidor !== '-') os.marcaMedidor = datos.marcaMedidor;
-      guardarStorage();
-      renderHistorial();
-      renderOrdenTrabajo();
-    }
+    // Guardar directo en el colateral — sin OS
     guardarColateralesStorage();
     renderEjecucion();
     renderColaterales();
@@ -6866,26 +6818,12 @@
 
     cerrarDerivacionEjecucion();
 
-    // Construir resumen de actividad para la OS
-    var insp    = item.inspeccion || {};
-    var agua    = insp.agua    || {};
-    var desague = insp.desague || {};
-    var resumen = 'Ejecucion de conexion derivada de Factibilidad (Colateral ' + item.codigo + ').\n' +
-      'Sector: ' + item.sector + ' | Mz. ' + item.manzana + ' Lt. ' + item.lote + ' | N Conexion: ' + (item.conexion || '-') + '\n' +
-      'Oficina Comercial - Fecha: ' + formatFecha(item.oficinaComercial.fecha) + ', Asunto: ' + item.oficinaComercial.asunto + '\n' +
-      '1\u00aa Derivacion (Inspector): ' + (item.tecnico || '-') + '\n' +
-      '2\u00aa Derivacion (Ejecutor): ' + tecEjecutor + '\n' +
-      'Agua Potable - Diametro: ' + (agua.diametro || '-') + ', Long. red: ' + (agua.longitud || '-') + ', Prof.: ' + (agua.profundidad || '-') + '\n' +
-      'Desague - Diametro: ' + (desague.diametro || '-') + ', Long. red: ' + (desague.longitud || '-') + ', Prof.: ' + (desague.profundidad || '-');
-    if (obsDerivacion) { resumen += '\nInstrucciones al ejecutor: ' + obsDerivacion; }
-    if (insp.observacion && insp.observacion !== '-') { resumen += '\nObs. inspeccion: ' + insp.observacion; }
-
     // ── Guardar datos de la Hoja de Derivación en el colateral ───────
     var hoyFecha = new Date().toISOString().split('T')[0];
     var numDoc = 'HD-' + hoyFecha.replace(/-/g,'') + '-' + item.codigo;
     item.hojaDerivacion = {
-      numeroDoc:       numDoc,
-      fecha:           hoyFecha,
+      numeroDoc:        numDoc,
+      fecha:            hoyFecha,
       tecnicoInspector: item.tecnico || '-',
       tecnicoEjecutor:  tecEjecutor,
       fechaProg:        fechaProg || '-',
@@ -6894,65 +6832,36 @@
       ofc:              item.oficinaComercial ? item.oficinaComercial.asunto + ' — ' + formatFecha(item.oficinaComercial.fecha) : '-'
     };
 
-    // ── Crear OS automáticamente (sin abrir modal) ────────────────
-    var nuevaOS = {
-      id:         null,
-      codigo:     item.codigo,
-      fecha:      hoyFecha,
-      fechaProg:  fechaProg || '-',
-      componente: 'Conexion Domiciliaria - ' + item.codigo,
-      frecuencia: 'Ejecucion',
-      sistema:    'agua',
-      direccion:  item.direccion !== '-' ? item.direccion : '-',
-      tecnico:    tecEjecutor,
-      prioridad:  prioridad,
-      estado:     'Pendiente',
-      actividad:  resumen,
-      obs:        obsDerivacion || '-'
-    };
+    // ── Marcar expediente como "derivado a ejecución" (sin OS) ───────
+    item.derivadoAEjecucion = true;
 
-    obtenerNumeroAtomico('os', osCounter, function(numero) {
-      nuevaOS.id = 'OS-' + String(numero).padStart(3, '0');
-      osCounter = numero + 1;
-      historial.push(nuevaOS);
-      guardarStorage();
-      renderHistorial();
-      renderOrdenTrabajo();
-      renderOrdenesAgua();
-      renderOrdenesAlcant();
-      renderPlanTabla('agua');
-      renderPlanTabla('alcantarillado');
+    guardarColateralesStorage();
+    renderColaterales();
+    renderEjecucion();
+    renderFactibilidadTecnico();
 
-      // Vincular OS al colateral y navegar a Ejecución
-      item.ordenEjecucionId = nuevaOS.id;
-      guardarColateralesStorage();
-      renderColaterales();
-      renderEjecucion();
-      renderFactibilidadTecnico();
-
-      // Toast de confirmación de guardado de la hoja de derivación
+    // Toast de confirmación
+    setTimeout(function() {
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#0b3d6b,#1a6fc4);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.20);display:flex;align-items:center;gap:12px;max-width:380px;';
+      toast.innerHTML =
+        '<span style="font-size:1.4rem;">&#128203;</span>' +
+        '<div>' +
+          '<div style="font-size:0.9rem;font-weight:800;">Derivación a Ejecución registrada</div>' +
+          '<div style="font-size:0.76rem;opacity:0.9;margin-top:3px;">' + item.codigo + ' — ' + item.nombre + '</div>' +
+          '<div style="font-size:0.74rem;opacity:0.8;margin-top:1px;">Ejecutor: ' + tecEjecutor + '</div>' +
+        '</div>';
+      document.body.appendChild(toast);
       setTimeout(function() {
-        var toast = document.createElement('div');
-        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#0b3d6b,#1a6fc4);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.20);display:flex;align-items:center;gap:12px;max-width:380px;';
-        toast.innerHTML =
-          '<span style="font-size:1.4rem;">&#128190;</span>' +
-          '<div>' +
-            '<div style="font-size:0.9rem;font-weight:800;">Hoja de Derivación guardada</div>' +
-            '<div style="font-size:0.76rem;opacity:0.9;margin-top:3px;">' + item.hojaDerivacion.numeroDoc + ' — OS: ' + nuevaOS.id + '</div>' +
-            '<div style="font-size:0.74rem;opacity:0.8;margin-top:1px;">Ejecutor: ' + tecEjecutor + '</div>' +
-          '</div>';
-        document.body.appendChild(toast);
-        setTimeout(function() {
-          toast.style.transition = 'opacity 0.5s';
-          toast.style.opacity = '0';
-          setTimeout(function() { toast.remove(); }, 600);
-        }, 4500);
-      }, 200);
+        toast.style.transition = 'opacity 0.5s';
+        toast.style.opacity = '0';
+        setTimeout(function() { toast.remove(); }, 600);
+      }, 4500);
+    }, 200);
 
-      // Navegar al módulo Expediente → pestaña 2. Ejecución
-      mostrarSeccion('factibilidad');
-      cambiarTabExpediente('ejecucion');
-    });
+    // Navegar al módulo Expediente → pestaña 2. Ejecución
+    mostrarSeccion('factibilidad');
+    cambiarTabExpediente('ejecucion');
   }
 
   function renderColaterales() {
@@ -7002,7 +6911,7 @@
         celdaEjecucion =
           '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:150px;">' +
             '<span style="background:' + bgEjec + ';color:' + colorEjec + ';border:1px solid ' + colorEjec + ';border-radius:8px;font-size:0.72rem;font-weight:800;padding:2px 9px;">&#10004; ' + estEjec + '</span>' +
-            (item.ordenEjecucionId ? '<span style="color:#7a9a8a;font-size:0.69rem;font-weight:600;">' + item.ordenEjecucionId + '</span>' : '') +
+            (item.hojaDerivacion ? '<span style="color:#7a9a8a;font-size:0.69rem;font-weight:600;">' + item.hojaDerivacion.numeroDoc + '</span>' : '') +
             (tecEjec ? '<div style="display:flex;align-items:center;gap:3px;">' +
               '<span style="font-size:0.8rem;">&#128100;</span>' +
               '<span style="font-size:0.7rem;font-weight:700;color:#1a3a2a;">' + tecEjec + '</span>' +
@@ -7015,15 +6924,15 @@
             '</div>' +
           '</div>';
 
-      } else if (item.ordenEjecucionId) {
-        // ── CASO B: OS generada, trabajo en curso ─────────────────
+      } else if (item.derivadoAEjecucion || item.datosEjecucion) {
+        // ── CASO B: Derivado a ejecución, trabajo en curso ─────────────────
         var estPend   = datosEjec.estado || 'En Proceso';
         var colorPend = estPend === 'En Proceso' ? '#e8a000' : '#0b4f8a';
         var bgPend    = estPend === 'En Proceso' ? '#fff8e1' : '#eaf2fb';
         celdaEjecucion =
           '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:150px;">' +
             '<span style="background:' + bgPend + ';color:' + colorPend + ';border:1px solid ' + colorPend + ';border-radius:8px;font-size:0.7rem;font-weight:700;padding:2px 9px;">&#9654; ' + estPend + '</span>' +
-            '<span style="color:#0b4f8a;font-size:0.69rem;font-weight:700;">' + item.ordenEjecucionId + '</span>' +
+            (item.hojaDerivacion ? '<span style="color:#0b4f8a;font-size:0.69rem;font-weight:700;">' + item.hojaDerivacion.numeroDoc + '</span>' : '') +
             (tecEjec
               ? '<div style="display:flex;align-items:center;gap:3px;background:#eaf2fb;border:1px solid #b8d8f8;border-radius:6px;padding:2px 7px;">' +
                   '<span style="font-size:0.8rem;">&#128100;</span>' +
