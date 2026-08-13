@@ -3853,8 +3853,11 @@
     var busqueda = buscarEl ? buscarEl.value.trim().toLowerCase() : '';
 
     var lista = colaterales.filter(function(c) {
-      if (!c.ordenEjecucionId) return false;
-      if (currentUser.rol === 'tecnico') { return c.tecnico === currentUser.nombre; }
+      // Incluir si ya tiene OS generada O si está listo para ejecución (Completado + Of. Comercial)
+      var listoParaEjecucion = (c.estado === 'Completado' && c.oficinaComercial && !c.ejecucionConcluida);
+      var enEjecucion = !!c.ordenEjecucionId;
+      if (!listoParaEjecucion && !enEjecucion) return false;
+      if (currentUser.rol === 'tecnico') { return c.tecnico === currentUser.nombre || (c.derivacion && c.derivacion.tecnicoEjecutor === currentUser.nombre); }
       return true;
     });
     if (busqueda) {
@@ -3879,7 +3882,7 @@
         var c = colores[estado] || ['#d1f0e0','#1a7a4a'];
         return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + c[0] + ';color:' + c[1] + ';border:1.5px solid ' + c[1] + ';border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:800;">&#10004; ' + estado + '</span>';
       }
-      var colorMap = { 'En Proceso': ['#fff3cd','#856404'], 'Pendiente': ['#fdf2f2','#c0392b'] };
+      var colorMap = { 'En Proceso': ['#fff3cd','#856404'], 'Pendiente': ['#fdf2f2','#c0392b'], 'Listo para Ejecucion': ['#e0f0ff','#0b4f8a'] };
       var c2 = colorMap[estado] || ['#eee','#555'];
       return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + c2[0] + ';color:' + c2[1] + ';border:1px solid ' + c2[1] + ';border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:700;">&#9679; ' + estado + '</span>';
     }
@@ -3894,13 +3897,13 @@
         var desague = insp.desague || {};
         var deriv   = item.derivacion || {};
         var hd      = item.hojaDerivacion || null;
-        var estadoEjec   = datos.estado || (os ? os.estado : 'Pendiente');
+        var estadoEjec   = datos.estado || (os ? os.estado : (!item.ordenEjecucionId ? 'Listo para Ejecucion' : 'Pendiente'));
         var concluido    = !!item.ejecucionConcluida;
         var esConclusivo = concluido && estadosConclusivos.indexOf(estadoEjec) >= 0;
 
         var borderColor = esConclusivo
           ? (estadoEjec === 'Cerrado' ? '#5a2d82' : estadoEjec === 'Concluido' ? '#0b5a7a' : '#1a7a4a')
-          : (estadoEjec === 'En Proceso' ? '#e8a000' : '#c0392b');
+          : (estadoEjec === 'En Proceso' ? '#e8a000' : estadoEjec === 'Listo para Ejecucion' ? '#0b4f8a' : '#c0392b');
         var bgCard = esConclusivo ? '#f8fffa' : '#fff';
 
         // ── Botones de acción ────────────────────────────────────
@@ -4040,7 +4043,7 @@
     var fases = [
       { label: 'Factibilidad', done: !!(item.inspeccion), active: !(item.inspeccion) },
       { label: 'Of. Comercial', done: !!(item.oficinaComercial), active: !!(item.inspeccion && item.estado === 'Completado' && !item.oficinaComercial) },
-      { label: 'Ejecucion', done: !!(item.ordenEjecucionId && item.ejecucionConcluida), active: !!(item.ordenEjecucionId && !item.ejecucionConcluida) },
+      { label: 'Ejecucion', done: !!(item.ejecucionConcluida), active: !!(!item.ejecucionConcluida && (item.ordenEjecucionId || (item.estado === 'Completado' && item.oficinaComercial))) },
       { label: 'Facturacion', done: !!(item.facturacion), active: !!(item.ejecucionConcluida && !item.facturacion) }
     ];
     var html = '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:10px;">';
@@ -4530,7 +4533,7 @@
     document.getElementById('ejecucionModalCodigo').textContent = item.codigo || '-';
     document.getElementById('ejecModalNombre').textContent = item.nombre || '-';
     document.getElementById('ejecModalDireccion').textContent = item.direccion || '-';
-    document.getElementById('ejecModalOrden').textContent = item.ordenEjecucionId || '-';
+    document.getElementById('ejecModalOrden').textContent = item.ordenEjecucionId || '(Se generará al guardar)';
     document.getElementById('ejecModalTecnico').textContent = (os && os.tecnico) ? os.tecnico : (item.tecnico || '-');
 
     // ── Panel de cadena de derivación ─────────────────────────────
@@ -4677,7 +4680,44 @@
       item.fechaConcluido     = datos.fecha || new Date().toISOString().split('T')[0];
     }
 
-    // Sincronizar estado y datos en la OS vinculada
+    // Si no tiene OS aún, crear una automáticamente
+    if (!item.ordenEjecucionId) {
+      var hoyOS = new Date().toISOString().split('T')[0];
+      var nuevaOS = {
+        id:         null,
+        codigo:     item.codigo,
+        fecha:      hoyOS,
+        fechaProg:  datos.fecha || hoyOS,
+        componente: 'Conexion Domiciliaria - ' + item.codigo,
+        frecuencia: 'Ejecucion',
+        sistema:    'agua',
+        direccion:  item.direccion !== '-' ? item.direccion : '-',
+        tecnico:    (item.derivacion && item.derivacion.tecnicoEjecutor) || item.tecnico || '-',
+        prioridad:  (item.derivacion && item.derivacion.prioridad) || 'Normal',
+        estado:     estado,
+        actividad:  datos.actividad,
+        obs:        datos.obs
+      };
+      obtenerNumeroAtomico('os', osCounter, function(numero) {
+        nuevaOS.id = 'OS-' + String(numero).padStart(3, '0');
+        osCounter  = numero + 1;
+        historial.push(nuevaOS);
+        item.ordenEjecucionId = nuevaOS.id;
+        guardarStorage();
+        renderHistorial();
+        renderOrdenTrabajo();
+        renderOrdenesAgua();
+        renderOrdenesAlcant();
+        guardarColateralesStorage();
+        renderEjecucion();
+        renderColaterales();
+        renderFactibilidadTecnico();
+        cerrarLlenarEjecucion();
+      });
+      return; // la función continúa dentro del callback
+    }
+
+    // Sincronizar estado y datos en la OS vinculada existente
     var os = historial.filter(function(o) { return o.id === item.ordenEjecucionId; })[0];
     if (os) {
       os.estado    = estado;
@@ -4692,6 +4732,7 @@
     guardarColateralesStorage();
     renderEjecucion();
     renderColaterales();
+    renderFactibilidadTecnico();
     cerrarLlenarEjecucion();
 
     // ── Capturar referencia al colateral antes del timeout ────────
