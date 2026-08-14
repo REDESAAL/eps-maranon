@@ -650,9 +650,9 @@
 
   <div class="config-wrap" style="margin-bottom:28px;">
     <div class="config-col" style="text-align:center;">
-      <h4>1. Orden de Servicio</h4>
+      <h4>1. En Ejecucion</h4>
       <div id="segCantidadOS" style="font-size:2.4rem;font-weight:800;color:var(--azul);">0</div>
-      <div style="font-size:0.8rem;color:#7a8fa6;">ordenes registradas en total</div>
+      <div style="font-size:0.8rem;color:#7a8fa6;">expedientes derivados a ejecucion</div>
     </div>
     <div class="config-col" style="text-align:center;">
       <h4>2. Reporte Diario</h4>
@@ -679,11 +679,11 @@
     <!-- SECCION 1: Órdenes de Servicio -->
     <div id="segSeccionOS" style="margin-bottom:24px;">
       <div style="background:var(--azul);color:white;padding:7px 16px;border-radius:6px 6px 0 0;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
-        <span>&#128203;</span> Órdenes de Servicio <span id="segOSCount" style="background:rgba(255,255,255,0.22);padding:1px 10px;border-radius:10px;font-size:0.75rem;"></span>
+        <span>&#9654;</span> Expedientes en Ejecución <span id="segOSCount" style="background:rgba(255,255,255,0.22);padding:1px 10px;border-radius:10px;font-size:0.75rem;"></span>
       </div>
       <div class="table-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0;">
         <table id="tablaSegOS" style="min-width:860px;">
-          <thead><tr><th>N° Orden</th><th>Código</th><th>Componente</th><th>Fecha Emisión</th><th>Fecha Prog.</th><th>Prioridad</th><th>Estado</th><th style="text-align:center;">Acciones</th></tr></thead>
+          <thead><tr><th>N° Código</th><th>Solicitante</th><th>Dirección</th><th>F. Derivación</th><th>F. Programada</th><th>Prioridad</th><th>Estado Ejec.</th><th>Actividad</th></tr></thead>
           <tbody id="segDetalleBody"></tbody>
         </table>
       </div>
@@ -695,7 +695,7 @@
       </div>
       <div class="table-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0;">
         <table id="tablaSegInsp" style="min-width:860px;">
-          <thead><tr><th>N° Código</th><th>Solicitante</th><th>Dirección</th><th>Sector</th><th>Mz / Lt</th><th>Estado Insp.</th><th>Oficina Com.</th><th>Orden Ejec.</th></tr></thead>
+          <thead><tr><th>N° Código</th><th>Solicitante</th><th>Dirección</th><th>Sector</th><th>Mz / Lt</th><th>Estado Insp.</th><th>Oficina Com.</th><th>Estado Ejec.</th></tr></thead>
           <tbody id="segDetalleInspBody"></tbody>
         </table>
       </div>
@@ -3623,6 +3623,23 @@
           renderEjecucion();
         }
         cerrarOS();
+        // Toast edición
+        (function() {
+          var t = document.createElement('div');
+          t.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#1a5a2a,#2ecc71);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.20);display:flex;align-items:center;gap:12px;max-width:380px;';
+          t.innerHTML = '<span style="font-size:1.4rem;">&#9998;</span>' +
+            '<div>' +
+              '<div style="font-size:0.9rem;font-weight:800;">O/S actualizada correctamente</div>' +
+              '<div style="font-size:0.76rem;opacity:0.9;margin-top:3px;">' + os.id + ' — ' + os.componente + '</div>' +
+              '<div style="font-size:0.74rem;opacity:0.8;margin-top:1px;">Estado: ' + os.estado + '</div>' +
+            '</div>';
+          document.body.appendChild(t);
+          setTimeout(function() {
+            t.style.transition = 'opacity 0.5s';
+            t.style.opacity = '0';
+            setTimeout(function() { t.remove(); }, 600);
+          }, 4000);
+        })();
       } else {
         obtenerNumeroAtomico('os', osCounter, function(numero) {
           os.id = 'OS-' + String(numero).padStart(3, '0');
@@ -3643,7 +3660,24 @@
             renderColaterales();
             renderEjecucion();
           }
-          mostrarPanelWA();
+          cerrarOS();
+          // Toast de confirmación
+          (function() {
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;background:linear-gradient(135deg,#0b3d6b,#1a6fc4);color:white;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.88rem;box-shadow:0 6px 24px rgba(0,0,0,0.20);display:flex;align-items:center;gap:12px;max-width:380px;';
+            t.innerHTML = '<span style="font-size:1.4rem;">&#10004;</span>' +
+              '<div>' +
+                '<div style="font-size:0.9rem;font-weight:800;">O/S guardada correctamente</div>' +
+                '<div style="font-size:0.76rem;opacity:0.9;margin-top:3px;">' + os.id + ' — ' + os.componente + '</div>' +
+                '<div style="font-size:0.74rem;opacity:0.8;margin-top:1px;">Técnico: ' + os.tecnico + ' &nbsp;|&nbsp; Estado: ' + os.estado + '</div>' +
+              '</div>';
+            document.body.appendChild(t);
+            setTimeout(function() {
+              t.style.transition = 'opacity 0.5s';
+              t.style.opacity = '0';
+              setTimeout(function() { t.remove(); }, 600);
+            }, 4000);
+          })();
         });
       }
     };
@@ -6995,26 +7029,33 @@
   // MODULO VIII: SEGUIMIENTO OPERATIVO
   // ============================================================
   function renderSeguimiento() {
-    document.getElementById('segCantidadOS').textContent = historial.length;
+    // Contadores globales: OS = en ejecucion, RD = reportes, Insp = colaterales
+    var enEjecucion = colaterales.filter(function(c){ return c.derivadoAEjecucion || c.hojaDerivacion || c.datosEjecucion || c.ejecucionConcluida; }).length;
+    document.getElementById('segCantidadOS').textContent = enEjecucion;
     document.getElementById('segCantidadRD').textContent = reportesDiarios.length;
     document.getElementById('segCantidadCol').textContent = colaterales.length;
     document.getElementById('segDetalleWrap').style.display = 'none';
 
+    // Agrupar por técnico: inspecciones (tecnico inspector) + ejecutor (hojaDerivacion)
     var porTecnico = {};
-    historial.forEach(function(os) {
-      var nombre = os.tecnico || 'Sin asignar';
-      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0 };
-      porTecnico[nombre].ordenes++;
-    });
-    reportesDiarios.forEach(function(r) {
-      var nombre = r.nombre || 'Sin asignar';
-      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0 };
-      porTecnico[nombre].reportes++;
-    });
+    function agregar(nombre, campo) {
+      nombre = nombre || 'Sin asignar';
+      if (!porTecnico[nombre]) porTecnico[nombre] = { reportes: 0, inspecciones: 0, enEjecucion: 0 };
+      porTecnico[nombre][campo]++;
+    }
+    reportesDiarios.forEach(function(r) { agregar(r.nombre, 'reportes'); });
     colaterales.forEach(function(c) {
-      var nombre = (c.tecnico && c.tecnico !== '-') ? c.tecnico : 'Sin asignar';
-      if (!porTecnico[nombre]) porTecnico[nombre] = { ordenes: 0, reportes: 0, inspecciones: 0 };
-      porTecnico[nombre].inspecciones++;
+      var inspector = (c.tecnico && c.tecnico !== '-') ? c.tecnico : 'Sin asignar';
+      agregar(inspector, 'inspecciones');
+      // Técnico ejecutor también aparece
+      var ejecutor = c.derivacion && c.derivacion.tecnicoEjecutor ? c.derivacion.tecnicoEjecutor
+                   : c.hojaDerivacion && c.hojaDerivacion.tecnicoEjecutor ? c.hojaDerivacion.tecnicoEjecutor : null;
+      if (ejecutor && ejecutor !== inspector) {
+        if (!porTecnico[ejecutor]) porTecnico[ejecutor] = { reportes: 0, inspecciones: 0, enEjecucion: 0 };
+      }
+      if (c.derivadoAEjecucion || c.hojaDerivacion || c.datosEjecucion || c.ejecucionConcluida) {
+        if (ejecutor) agregar(ejecutor, 'enEjecucion');
+      }
     });
 
     var nombres = Object.keys(porTecnico).sort();
@@ -7026,9 +7067,9 @@
     cont.innerHTML = nombres.map(function(nombre) {
       var d = porTecnico[nombre];
       var totalTxt = [];
-      if (d.ordenes > 0) totalTxt.push(d.ordenes + ' O/S');
-      if (d.reportes > 0) totalTxt.push(d.reportes + ' Rep.');
+      if (d.reportes     > 0) totalTxt.push(d.reportes     + ' Rep.');
       if (d.inspecciones > 0) totalTxt.push(d.inspecciones + ' Insp.');
+      if (d.enEjecucion  > 0) totalTxt.push(d.enEjecucion  + ' Ejec.');
       return '<button class="badge-item" style="flex-direction:row;gap:8px;background:white;border:1px solid #dbe9f8;border-radius:24px;padding:10px 18px;cursor:pointer;" onclick="mostrarDetalleTecnico(\'' + nombre.replace(/'/g,"\\'") + '\')">' +
         '<span style="font-weight:700;color:var(--azul);font-size:0.85rem;">' + nombre + '</span>' +
         '<span style="background:#eaf2fb;color:#0b4f8a;border-radius:12px;padding:2px 10px;font-size:0.76rem;font-weight:700;">' + totalTxt.join(' &middot; ') + '</span>' +
@@ -7038,7 +7079,7 @@
 
   function mostrarDetalleTecnico(nombre) {
     // Filtrar datos del técnico
-    var ordenes     = historial.filter(function(os) { return (os.tecnico || 'Sin asignar') === nombre; });
+    var ordenes     = []; // Ya no se usan OS — ver ejecutados en sección 1
     var inspecciones= colaterales.filter(function(c) { return ((c.tecnico && c.tecnico !== '-') ? c.tecnico : 'Sin asignar') === nombre; });
     var reportes    = reportesDiarios.filter(function(r) { return (r.nombre || 'Sin asignar') === nombre; });
 
@@ -7047,7 +7088,7 @@
 
     // Resumen de contadores
     var resumenItems = [
-      { label: 'Órdenes de Servicio', val: ordenes.length,      color: 'var(--azul)',   icon: '&#128203;' },
+      { label: 'En Ejecucion',        val: ejecutados.length,    color: 'var(--azul)',   icon: '&#9654;' },
       { label: 'Inspecciones',        val: inspecciones.length,  color: '#1a6fc4',       icon: '&#128270;' },
       { label: 'Reportes Diarios',    val: reportes.length,      color: '#1a8a4a',       icon: '&#128196;' }
     ];
@@ -7058,28 +7099,35 @@
       '</div>';
     }).join('');
 
-    // ── SECCIÓN 1: Órdenes de Servicio ──────────────────────────
-    document.getElementById('segOSCount').textContent = ordenes.length;
+    // ── SECCIÓN 1: Expedientes en Ejecución ──────────────────────────
+    // Filtrar colaterales donde este técnico es el EJECUTOR
+    var ejecutados = colaterales.filter(function(c) {
+      var ejecutor = (c.derivacion && c.derivacion.tecnicoEjecutor)
+                  || (c.hojaDerivacion && c.hojaDerivacion.tecnicoEjecutor) || '';
+      return ejecutor === nombre && (c.derivadoAEjecucion || c.hojaDerivacion || c.datosEjecucion || c.ejecucionConcluida);
+    });
+    document.getElementById('segOSCount').textContent = ejecutados.length;
     var tbodyOS = document.getElementById('segDetalleBody');
-    if (ordenes.length === 0) {
-      tbodyOS.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:16px;font-size:0.85rem;">Sin órdenes de servicio registradas.</td></tr>';
+    if (ejecutados.length === 0) {
+      tbodyOS.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#7a8fa6;padding:16px;font-size:0.85rem;">Sin expedientes en ejecucion asignados.</td></tr>';
     } else {
-      tbodyOS.innerHTML = ordenes.map(function(os) {
-        var idxReal  = historial.indexOf(os);
-        var estadoKey = os.estado.replace(/\s/g,'');
-        var prioColor = os.prioridad === 'Urgente' ? 'var(--rojo)' : os.prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
+      tbodyOS.innerHTML = ejecutados.map(function(c) {
+        var estadoEjec = (c.datosEjecucion && c.datosEjecucion.estado) || (c.ejecucionConcluida ? 'Concluido' : 'En Proceso');
+        var colorEjec  = c.ejecucionConcluida ? '#1a7a4a' : '#e8a000';
+        var bgEjec     = c.ejecucionConcluida ? '#d1f0e0' : '#fff8e1';
+        var hd = c.hojaDerivacion || {};
+        var fechaProg = hd.fechaProg || (c.derivacion && c.derivacion.fechaProg) || '-';
+        var prioridad = hd.prioridad || (c.derivacion && c.derivacion.prioridad) || 'Normal';
+        var prioColor = prioridad === 'Urgente' ? 'var(--rojo)' : prioridad === 'Alta' ? '#e8a000' : '#1a7a4a';
         return '<tr>' +
-          '<td><strong style="color:var(--azul);">' + os.id + '</strong></td>' +
-          '<td>' + (os.codigo !== '-' ? os.codigo : '<span style="color:#bbb;">—</span>') + '</td>' +
-          '<td style="max-width:180px;white-space:normal;font-size:0.8rem;">' + os.componente + '</td>' +
-          '<td>' + formatFecha(os.fecha) + '</td>' +
-          '<td>' + (os.fechaProg && os.fechaProg !== '-' ? formatFecha(os.fechaProg) : '<span style="color:#bbb;">—</span>') + '</td>' +
-          '<td><span style="color:' + prioColor + ';font-weight:700;font-size:0.8rem;">' + os.prioridad + '</span></td>' +
-          '<td><span class="badge-estado badge-' + estadoKey + '">' + os.estado + '</span></td>' +
-          '<td style="text-align:center;white-space:nowrap;">' +
-            '<button class="btn-edit-row" style="margin-right:4px;" onclick="editarOS(' + idxReal + ')">&#9998; Editar</button>' +
-            '<button class="btn-print-row" onclick="imprimirOS(' + idxReal + ')">&#128196; PDF</button>' +
-          '</td>' +
+          '<td><strong style="color:var(--azul);">' + (c.codigo || '-') + '</strong></td>' +
+          '<td style="max-width:160px;white-space:normal;font-size:0.8rem;">' + (c.nombre || '-') + '</td>' +
+          '<td style="max-width:160px;white-space:normal;font-size:0.8rem;">' + (c.direccion || '-') + '</td>' +
+          '<td style="white-space:nowrap;">' + (hd.fecha ? formatFecha(hd.fecha) : '<span style="color:#bbb;">—</span>') + '</td>' +
+          '<td style="white-space:nowrap;">' + (fechaProg && fechaProg !== '-' ? formatFecha(fechaProg) : '<span style="color:#bbb;">—</span>') + '</td>' +
+          '<td><span style="color:' + prioColor + ';font-weight:700;font-size:0.78rem;">' + prioridad + '</span></td>' +
+          '<td><span style="background:' + bgEjec + ';color:' + colorEjec + ';border:1px solid ' + colorEjec + ';border-radius:8px;font-size:0.75rem;font-weight:700;padding:2px 8px;">' + estadoEjec + '</span></td>' +
+          '<td style="font-size:0.75rem;max-width:160px;white-space:normal;">' + ((c.datosEjecucion && c.datosEjecucion.actividad && c.datosEjecucion.actividad !== '-') ? c.datosEjecucion.actividad : '<span style="color:#bbb;">—</span>') + '</td>' +
         '</tr>';
       }).join('');
     }
@@ -7100,7 +7148,7 @@
           '<td>' + (c.manzana || '-') + ' / ' + (c.lote || '-') + '</td>' +
           '<td><span style="color:' + estadoColor + ';font-weight:700;font-size:0.78rem;">' + (c.estado || 'Pendiente') + '</span></td>' +
           '<td style="font-size:0.78rem;">' + (c.oficinaComercial ? '<span style="color:#1a7a4a;font-weight:700;">&#10003; Registrado</span>' : '<span style="color:#bbb;">—</span>') + '</td>' +
-          '<td style="font-size:0.78rem;">' + (c.ordenEjecucionId ? '<strong style="color:var(--azul);">' + c.ordenEjecucionId + '</strong>' : '<span style="color:#bbb;">—</span>') + '</td>' +
+          '<td style="font-size:0.78rem;">' + (c.ejecucionConcluida ? '<span style="color:#1a7a4a;font-weight:700;">&#10004; Concluido</span>' : (c.derivadoAEjecucion || c.hojaDerivacion ? '<span style="color:#e8a000;font-weight:700;">&#9654; En Proceso</span>' : '<span style="color:#bbb;">—</span>')) + '</td>' +
         '</tr>';
       }).join('');
     }
