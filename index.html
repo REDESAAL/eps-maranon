@@ -3380,6 +3380,7 @@
   var osCounter = 1;
   var editIndex = -1;
   var tareaIdx = -1;
+  var _origenOS = null; // 'colaterales' si la OS se abrió desde ese módulo
   window._archivosData = { inicio: [], fin: [] };
 
   function cargarHistorial() {
@@ -3412,6 +3413,7 @@
   }
 
   function abrirOS(componente, frecuencia, sistema, tecnicoPreseleccionado) {
+    _origenOS = null; // resetear origen al abrir nueva OS
     sistema = sistema || 'agua'; // default fallback
     var num = String(osCounter).padStart(3, '0');
     document.getElementById('osId').value = 'OS-' + num + ' (tentativo, se confirma al guardar)';
@@ -3621,6 +3623,7 @@
           guardarColateralesStorage();
           renderColaterales();
           renderEjecucion();
+          _origenOS = 'colaterales';
         }
         cerrarOS();
         mostrarConfirmOS(os);
@@ -3643,6 +3646,7 @@
             guardarColateralesStorage();
             renderColaterales();
             renderEjecucion();
+            _origenOS = 'colaterales';
           }
           cerrarOS();
           mostrarConfirmOS(os);
@@ -6842,9 +6846,8 @@
       }, 4500);
     }, 200);
 
-    // Navegar al módulo Expediente → pestaña 2. Ejecución
-    mostrarSeccion('factibilidad');
-    cambiarTabExpediente('ejecucion');
+    // Mantener en módulo Colaterales (no redirigir a otro módulo)
+    mostrarSeccion('colaterales');
   }
 
   function renderColaterales() {
@@ -7060,6 +7063,12 @@
   }
   function cerrarConfirmOS() {
     document.getElementById('modalConfirmOS').style.display = 'none';
+    if (_origenOS === 'colaterales') {
+      _origenOS = null;
+      mostrarSeccion('colaterales');
+    } else {
+      _origenOS = null;
+    }
   }
 
   function mostrarDetalleTecnico(nombre) {
